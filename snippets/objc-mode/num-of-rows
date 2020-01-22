@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: num-of-rows
+# key: num-of-rows
+# --
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    $0
+}

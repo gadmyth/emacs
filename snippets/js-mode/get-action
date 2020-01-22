@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: get-action
+# key: get-action
+# --
+get$0$1: {
+    method: 'GET',
+    url: getUrl('user/$1')
+}

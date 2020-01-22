@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: cstring-def
+# key: cstring-def
+# --
+static NSString $0* const ${1:name} = @"${2:value}";

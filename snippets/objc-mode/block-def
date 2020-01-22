@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: block-def
+# key: block-def
+# --
+typedef ${1:void}(^${2:name})($3);$0

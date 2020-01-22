@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: diag-ignore
+# key: diag-ignore
+# --
+#pragma clang diagnostic ignored "-W${1:command}"

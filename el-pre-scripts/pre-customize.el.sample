@@ -1,0 +1,20 @@
+;;; package --- pre-customize.el
+;;; Commentary:
+;;; Code:
+
+(require 'package)
+
+(setq package-archives nil)
+(add-to-list 'package-archives '("gnu" . "/opt/elpa/gnu/"))
+(add-to-list 'package-archives '("org" . "/opt/elpa/org/"))
+(add-to-list 'package-archives '("melpa" . "/opt/elpa/melpa/"))
+(add-to-list 'package-archives '("melpa-stable" . "/opt/elpa/melpa-stable/"))
+(add-to-list 'package-archives '("marmalade" . "/opt/elpa/marmalade/"))
+
+(defvar +tool-bar-mode+ t)
+(defvar +menu-bar-mode+ t)
+(defvar +blink-cursor-mode+ t)
+(defvar +scroll-bar-mode+ t)
+
+(provide 'pre-customize)
+;;; pre-customize.el ends here

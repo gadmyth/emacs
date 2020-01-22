@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: allocinit
+# key: allocinit
+# --
+[[${1:Class} alloc] init]$0

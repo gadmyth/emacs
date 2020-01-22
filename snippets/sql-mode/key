@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: key
+# key: key
+# --
+KEY \`${1:key-name}\` (\`${2:column-name}\`)$0

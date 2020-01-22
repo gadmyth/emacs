@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: public-constant
+# key: public-constant
+# --
+public static final ${1:String} ${2:CONSTANT} = $0;

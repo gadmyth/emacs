@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: assign-statement
+# key: assign-statement
+# --
+${1:type} ${2:name} = ${3:value};

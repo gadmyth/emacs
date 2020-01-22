@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: import-map
+# key: import-map
+# --
+import {
+    mapGetters,
+    mapActions
+} from 'vuex';

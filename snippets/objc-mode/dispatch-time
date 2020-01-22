@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: dispatch-time
+# key: dispatch-time
+# --
+dispatch_time_t ${1:time} = dispatch_time(${2:DISPATCH_TIME_NOW}, ${3:delta});$0

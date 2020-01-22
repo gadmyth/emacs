@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import1
+# key: imp-loc
+# --
+#import "$1"$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: color-info
+# key: color-info
+# --
+<i class="el-icon-information ${1:warning}-icon"></i>

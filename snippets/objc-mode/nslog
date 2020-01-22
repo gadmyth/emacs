@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: NSLog
+# key: ns-log
+# --
+NSLog(@"${1:%@}"${2:, ${3:param}});$0

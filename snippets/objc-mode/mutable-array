@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mutable-array
+# key: marray
+# --
+[NSMutableArray array];

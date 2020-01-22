@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: create-table
+# key: create-table
+# --
+CREATE TABLE IF NOT EXISTS \`${1:table-name}\` (
+      $0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

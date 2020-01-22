@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: gfunc-declare
+# key: gfunc-dec
+# --
++ (${1:void})${2:func};$0

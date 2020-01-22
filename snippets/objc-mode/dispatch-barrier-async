@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dispatch-barrier-async
+# key: dispatch-barrier-async
+# --
+dispatch_barrier_async(${1:queue}, ^{
+    $0
+});

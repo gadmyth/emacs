@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dispatch-async
+# key: dispatch-async
+# --
+dispatch_async(${1:dispatch_get_main_queue()}, ^{
+    ${2:code to be executed after a specified delay}
+});

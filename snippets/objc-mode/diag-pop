@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: diag-pop
+# key: diag-pop
+# --
+#pragma clang diagnostic pop

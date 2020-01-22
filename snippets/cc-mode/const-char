@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: const-char
+# key: c-c
+# --
+const char* $0

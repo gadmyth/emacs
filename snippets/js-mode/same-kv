@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: same-kv
+# key: same-kv
+# --
+$1: '$1',

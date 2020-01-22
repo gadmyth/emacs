@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: alloc-init
+# key: alloc-init
+# --
+static OSSpinLock ${1:lock} = OS_SPINLOCK_INIT;
+OSSpinLockLock(&$1);
+$0
+OSSpinLockUnlock(&$1);

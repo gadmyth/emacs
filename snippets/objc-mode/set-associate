@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: set-associate
+# key: set-assoc
+# --
+objc_setAssociatedObject(${1:self}, ${2:&key}, ${3:object}, OBJC_ASSOCIATION_${4:RETAIN_NONATOMIC});$0

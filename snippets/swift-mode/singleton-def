@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: singleton-def
+# key: singleton-def
+# --
+class func ${1:sharedInstance}() -> ${2:ClassName} {
+    struct ${3:Static} {
+        static var ${4:onceToken} : dispatch_once_t = 0
+        static var ${5:instance} : $2? = nil
+    }
+    dispatch_once(&$3.$4) {
+        $3.$5 = $2()$0
+    }
+    return $3.$5!
+}

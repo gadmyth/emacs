@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: init-demo
+# key: init-demo
+# --
+- (instancetype)init {
+    self = [super init];
+    if (!self) {
+        return nil;
+    }
+    $0
+    return self;
+}

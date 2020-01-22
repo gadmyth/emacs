@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: string-format
+# key: string-format
+# --
+[NSString stringWithFormat:@"${1:format}"$2]$0

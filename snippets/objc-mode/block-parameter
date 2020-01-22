@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: block-parameter
+# key: block-parameter
+# --
+$0(${1:void} (^)(${2:void}))${3:block}

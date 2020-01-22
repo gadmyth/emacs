@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: cls-add-inst-method
+# key: cls-add-inst-method
+# --
+SEL ${1:selector} = method_getName(${2:method});
+if (!class_getInstanceMethod(${3:cls}, $1)) {
+    IMP imp = method_getImplementation($2);
+    const char *types = method_getTypeEncoding($2);
+    if (!class_addMethod($3, $1, imp, types)) {
+        ${4:print_error_message;}$0
+    }
+}

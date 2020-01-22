@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: respondsToSelector
+# key: res-2-sel
+# --
+[${1:self} respondsToSelector:@selector(${2:sel})]

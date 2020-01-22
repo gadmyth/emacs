@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dispatch-apply
+# key: dispatch-apply
+# --
+dispatch_apply(${1:count}, ${2:queue}, ^(size_t index) {
+    $0
+});

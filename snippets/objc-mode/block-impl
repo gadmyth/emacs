@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: block-impl
+# key: block-impl
+# --
+^${1:void}${2:(${3:void}) }{
+    $0
+}

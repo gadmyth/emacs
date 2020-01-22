@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mk-rect
+# key: mk-rect
+# --
+CGRectMake(${1:x}, ${2:y}, ${3:width}, ${4:height})$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: get-service
+# key: get-service
+# --
+get$1 = (params) => {
+    return request.call(this, 'get$1', params);
+}$0

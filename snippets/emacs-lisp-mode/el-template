@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: library-template
+# key: el-template
+# --
+;;; package --- `(buffer-name)`
+;;; Commentary:
+;;; Code:
+
+$0
+
+(provide '`(replace-regexp-in-string "\.el" "" (buffer-name))`)
+;;; `(buffer-name)` ends here

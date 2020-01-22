@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: cell-for-row
+# key: cell-for-row
+# --
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    $0
+}

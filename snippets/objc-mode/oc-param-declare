@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: oc-param-declare
+# key: op-dec
+# --
+${1:signature}:(${2:NSString *})${3:param}$0

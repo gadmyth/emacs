@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mutable-dictionary
+# key: mdict
+# --
+[NSMutableDictionary dictionary];

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: define-protocol
+# key: define-protocol
+# --
+const char *${1:protocalName} = "$2";
+Protocol *protocol = objc_allocateProtocol($1);
+if (protocol) {
+    addGroupMethodsToProtocol(protocol, $3, YES);
+    addGroupMethodsToProtocol(protocol, $4, NO);
+    objc_registerProtocol(protocol);
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dot-src
+# key: dot-src
+# --
+#+BEGIN_SRC dot :file ${1:export-file-name}.png :cmdline -Kdot -Tpng
+$0
+#+END_SRC 

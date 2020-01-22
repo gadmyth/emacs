@@ -1,0 +1,9 @@
+;;; package --- customize-config.el
+;;; Commentary:
+;;; Code:
+
+(setq *linux-scale-amount* 0)
+(setq *linux-scale-amount* 0)
+
+(provide 'customize-config)
+;;; customize-config.el ends here

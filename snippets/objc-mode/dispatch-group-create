@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: dispatch-group-create
+# key: dispatch-group-create
+# --
+dispatch_group_t ${1:group} = dispatch_group_create();$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: mounted-method
+# key: mounted-method
+# --
+this.get$1({}).then(data => {
+    this.$1 = data.$1;
+})$0

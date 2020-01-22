@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: string-utf8
+# key: string-utf8
+# --
+[NSString stringWithUTF8String:${1:cstr}];$0

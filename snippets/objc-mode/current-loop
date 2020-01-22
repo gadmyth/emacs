@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: current-loop
+# key: current-loop
+# --
+[NSRunLoop currentRunLoop]

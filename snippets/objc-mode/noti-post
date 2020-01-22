@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: noti-post
+# key: noti-post
+# --
+[[NSNotificationCenter defaultCenter] postNotificationName:${1:name} object:${2:object} userInfo:${3:userInfo}];$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: func-brace
+# key: func-brace
+# --
+{
+    $0
+}

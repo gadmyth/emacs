@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: did-select-row
+# key: did-select-row
+# --
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    $0
+}

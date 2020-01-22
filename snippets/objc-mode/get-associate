@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: get-associate
+# key: get-assoc
+# --
+${1:id} ${2:obj} = objc_getAssociatedObject(${3:self}, ${4:&key});$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: diag-push
+# key: diag-push
+# --
+#pragma clang diagnostic push

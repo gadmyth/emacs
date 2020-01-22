@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: spring-try-return
+# key: spring-try-return
+# --
+try {
+    $0
+} catch (Exception e) {
+    GenericResponse<Void> response = new GenericResponse<>();
+    response.setErrorCode(${1:200});
+    response.setErrorMessage(${2:""});
+    return ResponseEntity.ok(response);
+}

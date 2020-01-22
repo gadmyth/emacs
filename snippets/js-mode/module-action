@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: module-action
+# key: module-action
+# --
+get${1:Method}({commit}, params) {
+    return new ${10:Module}Service(commit).get$1(params).then(responseData => {
+        commit('${20:dispatch_key}', responseData);
+        return responseData;
+    });
+},

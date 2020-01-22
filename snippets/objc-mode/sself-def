@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: sself-def
+# key: sself-def
+# --
+__strong typeof(wself) sself = wself;$0

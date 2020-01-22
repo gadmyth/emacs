@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import2
+# key: imp-frm
+# --
+#import <$1>$0

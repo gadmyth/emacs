@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: def-str
+# key: def-str
+# --
+DEFAULT ${1:""}$0

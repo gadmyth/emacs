@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: prop2-def
+# key: prop2-def
+# --
+@property(nonatomic) ${1:NSInteger} ${2:name};$0

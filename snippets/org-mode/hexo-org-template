@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: hexo-org-template
+# key: hexo-org-template
+# --
+#+TITLE: ${1:title}
+#+DATE: <`(org-current-timestamp)`>
+#+TAGS: $3
+#+LAYOUT: post
+#+CATEGORIES: $4
+$0

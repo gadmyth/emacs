@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: diag-ignore-selector
+# key: diag-ignore-selector
+# --
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+$0
+#pragma clang diagnostic pop

@@ -1,0 +1,14 @@
+# key: fmdb-queue-open
+# name: fmdb-queue-open
+# --
+NSString *${1:docPath} = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+NSString *${2:dbPath} = [$1 stringByAppendingPathComponent:${3:@"${4:user.db}"}];
+
+FMDatabaseQueue *${5:queue} = [FMDatabaseQueue databaseQueueWithPath:$2];
+if (!$5) {
+    return;
+}
+
+$0
+
+[$5 close];

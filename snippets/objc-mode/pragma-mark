@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: pragma-mark
+# key: prag-ma
+# --
+#pragma ${1:mark} - $0

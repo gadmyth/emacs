@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: dealloc-def
+# key: dealloc-def
+# --
+- (void)dealloc
+{
+    $0
+}

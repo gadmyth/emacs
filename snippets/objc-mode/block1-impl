@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: block1-impl
+# key: block1-impl
+# --
+^{
+    $0
+}

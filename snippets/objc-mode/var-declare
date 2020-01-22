@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: var-declare
+# key: var-dec
+# --
+${1:NSString*} ${2:var}${3: = ${4:value}};$0

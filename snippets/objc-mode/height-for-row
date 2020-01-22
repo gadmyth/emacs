@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: height-for-row
+# key: height-for-row
+# --
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    $0
+}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: param
+# key: param
+# --
+$0(${1:NSString *})${2:param}

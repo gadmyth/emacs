@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: alloc-init
+# key: alloc-init
+# --
+[[${1:Class} alloc] ${2:init}:${3:param}]$0
