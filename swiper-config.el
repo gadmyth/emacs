@@ -17,7 +17,15 @@
 (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
 (define-key swiper-map [escape] 'minibuffer-keyboard-quit)
 
-(global-set-key "\C-s" 'swiper)
+(defun swiper-with-symbol-at-point ()
+  "."
+  (interactive)
+  (let* ((sym (symbol-at-point))
+         (string-at-point (if (null sym) "" (symbol-name sym))))
+    (message "string-at-point is [%S]" string-at-point)
+    (swiper string-at-point)))
+
+(global-set-key "\C-s" 'swiper-with-symbol-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
