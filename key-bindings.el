@@ -16,7 +16,7 @@
 (global-set-key (kbd "<M-f3>") 'eyebrowse-last-window-config)
 
 (require 'ivy)
-(global-set-key (kbd "<f4>") 'ivy-switch-buffer)
+(global-set-key (kbd "<f4>") 'eyebrowse--ivy-switch-buffer)
 (global-set-key (kbd "<M-f4>") 'new-buffer)
 
 (global-set-key (kbd "<f5>") '(lambda () (interactive)
