@@ -4,6 +4,7 @@
 
 (require 'eyebrowse)
 (require 's)
+(require 'dash)
 
 (eyebrowse-mode t)
 
@@ -43,10 +44,12 @@
     (ivy-read ivy-prompt collections
               :preselect current-tag
               :action (lambda (element)
-                        (let ((slot (ivy-eyebrowse-config-slot element)))
-                          (eyebrowse-switch-to-window-config slot)
-                          (if buffer
-                              (select-window (get-buffer-window buffer))))))))
+                        (if (not (-contains? collections element))
+                            (message "eyebrowse config %S does not exist!" element)
+                          (let ((slot (ivy-eyebrowse-config-slot element)))
+                            (eyebrowse-switch-to-window-config slot)
+                            (if buffer
+                                (select-window (get-buffer-window buffer)))))))))
 
 (defun eyebrowse-create-window-config-with-tag (tag)
   "TAG."
