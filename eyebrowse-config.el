@@ -5,8 +5,16 @@
 (require 'eyebrowse)
 (require 's)
 (require 'dash)
+(require 'async-config)
 
 (eyebrowse-mode t)
+
+(defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
+(add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
+
+(add-hook 'emacs-startup-hook
+          #'(lambda () (call-after 1 (load-eyebrowse-config))))
+(add-hook 'kill-emacs-hook 'save-eyebrowse-config)
 
 (defun ivy-eyebrowse-config-string (slot tag)
   "SLOT, TAG."
@@ -52,12 +60,14 @@
                                 (select-window (get-buffer-window buffer)))))))))
 
 (defun eyebrowse-create-window-config-with-tag (tag)
-  "TAG."
+  "Create an eyebrowse window config with TAG."
   (interactive "sTag: ")
-  (eyebrowse-create-window-config)
-  (if (> (length tag) 0)
-      (let ((current-slot (eyebrowse--get 'current-slot)))
-        (eyebrowse-rename-window-config current-slot tag))))
+  (if (= (length tag) 0)
+      (message "tag is empty, can't create window config!")
+    (progn
+      (eyebrowse-create-window-config)
+      (let ((slot (eyebrowse--get 'current-slot)))
+        (eyebrowse-rename-window-config slot tag)))))
 
 (defun eyebrowse-list-actions ()
   "."
@@ -154,6 +164,28 @@ BUFFER may be a string or nil."
            (current-tag (nth 2 (assoc current-slot window-configs))))
     (eyebrowse--update-window-config-element
      (eyebrowse--current-window-config current-slot current-tag))))
+
+(defun load-eyebrowse-config ()
+  "Load eyebrowse workspace from file."
+  (interactive)
+  (if (not (file-exists-p +eyebrowse-file-name+))
+      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+)
+    (message "Loading eyebrowse config from file %S ..." +eyebrowse-file-name+)
+    (with-temp-buffer
+      (insert-file-contents +eyebrowse-file-name+)
+      (goto-char (point-min))
+      (let ((content (read (current-buffer))))
+        (eyebrowse--set 'window-configs content)
+        (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
+
+(defun save-eyebrowse-config ()
+  "Save eyebrowse workspace to file."
+  (interactive)
+  (message "Saving eyebrowse config to file %S ..." +eyebrowse-file-name+)
+  (eyebrowse-update-current-window-config)
+  (let ((content (format "%S" (eyebrowse--get 'window-configs))))
+    (with-temp-file +eyebrowse-file-name+
+      (insert content))))
 
 (provide 'eyebrowse-config)
 ;;; eyebrowse-config.el ends here
