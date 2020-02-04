@@ -6,6 +6,9 @@
 (defvar +scratch-file-name+ (expand-file-name "~/.emacs.scratch"))
 (add-to-list 'auto-coding-alist '("\\.scratch\\'" . utf-8))
 
+(add-hook 'emacs-startup-hook #'(lambda () (load-scratch-from-file t)))
+(add-hook 'kill-emacs-hook 'save-scratch-buffer)
+
 (defun load-scratch-from-file (&optional override)
   "Load scratch file to *scratch* buffer, if OVERRIDE is t, erase buffer first."
   (interactive)
