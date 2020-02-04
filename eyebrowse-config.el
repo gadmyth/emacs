@@ -8,6 +8,7 @@
 (require 'async-config)
 
 (eyebrowse-mode t)
+(eyebrowse-rename-window-config 1 "default")
 
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
