@@ -34,6 +34,7 @@
 
 ;;;###autoload 
 (defvar wcy-desktop-file-name "~/.wcy_desktop_save")
+(add-to-list 'auto-coding-alist '("\\.wcy_desktop_save\\'" . utf-8))
 (defvar wcy-desktop-key-map nil)
 (when (null wcy-desktop-key-map)
   (setq wcy-desktop-key-map (make-keymap))

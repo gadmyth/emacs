@@ -33,6 +33,8 @@
 (defvar +customized-dir-file-name+ "~/.customized-dir-save")
 (defvar +dired-al-mode-header+ "  drwx------.  0 user user     4096 Mar  0 00:00 ")
 (defvar *customized-dir* nil)
+(add-to-list 'auto-coding-alist '("\\.customized-dir-save\\'" . utf-8))
+
 (defun load-customized-dir ()
   "."
   (interactive)
