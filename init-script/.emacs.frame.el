@@ -1,7 +1,6 @@
 ;;; package --- .emacs.frame.el
 ;;; Commentary:
 ;;; Code:
-(defvar ts-init (current-time))
 
 ;; load path
 (add-to-list 'load-path (expand-file-name "~/emacs"))
@@ -18,6 +17,7 @@
 (install-packages-if-needed +required-packages+)
 
 ;; load configs
+(require 'loading-config)
 (require 'basic-config)
 (require 'utility)
 (require 'frames)
@@ -59,8 +59,8 @@
 (require 'sudo-edit)
 (require 'web-config)
 (require 'smart-compile-config)
-(require 'frames)
 (require 'python-config)
+(require 'scratch-config)
 
 (require-if-installed 'eredis (require 'redis-config))
 (require-if-installed 'smartparens (smartparens-global-mode))
@@ -84,7 +84,6 @@
 
 ;; maximize the frame
 (toggle-frame-maximized)
-(message "end : %.2f" (float-time (time-since ts-init)))
 
 (provide '.emacs.frame)
 ;;; .emacs.frame.el ends here
