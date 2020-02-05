@@ -13,7 +13,7 @@
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
 
-(add-hook 'emacs-startup-hook
+(add-hook 'window-setup-hook
           #'(lambda () (call-after 1 (load-eyebrowse-config))))
 (add-hook 'kill-emacs-hook 'save-eyebrowse-config)
 

@@ -1,3 +1,8 @@
+;;; package --- slime-config.el
+;;; Commentary:
+;;; Code:
+
+
 (when *load-slime*
   (require 'slime-autoloads)
   (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
@@ -10,3 +15,4 @@
 
 
 (provide 'slime-config)
+;;; slime-config.el ends here

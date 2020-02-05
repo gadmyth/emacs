@@ -1,3 +1,8 @@
+;;; package --- translate.el
+;;; Commentary:
+;;; Code:
+
+
 (require 'google-translate)
 (setq-default google-translate-enable-ido-completion t)
 (setq-default google-translate-default-source-language "en")
@@ -6,3 +11,4 @@
 (global-set-key (kbd "C-x c t") 'google-translate-at-point)
 
 (provide 'translate)
+;;; translate.el ends here

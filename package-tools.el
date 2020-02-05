@@ -27,8 +27,8 @@
        (if (not (package-installed-p p))
            (setq all-package-installed nil)))
      (when all-package-installed
-         (dolist (p ,packages)
-           (require-package p ,@body)))))
+       (dolist (p ,packages)
+         (require-package p ,@body)))))
 
 (defun require-library (library)
   "Require the Emacs Lisp source of LIBRARY."
@@ -44,10 +44,10 @@
     (progn
       (message "Should install-package: %S" package)
       (if (or (assoc package package-archive-contents) no-refresh)
-	  (package-install package)
-	(progn
-	  (package-refresh-contents)
-	  (install-package package min-version t))))))
+          (package-install package)
+        (progn
+          (package-refresh-contents)
+          (install-package package min-version t))))))
 
 (defun install-packages-if-needed (package-list)
   "Install packages if not existed, PACKAGE-LIST."

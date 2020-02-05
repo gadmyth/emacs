@@ -1,15 +1,16 @@
-(setq mark-holidays-in-calendar t)
-(setq christian-holidays nil)
-(setq hebrew-holidays nil)
-(setq hebrew-holidays-1 nil)
-(setq hebrew-holidays-2 nil)
-(setq hebrew-holidays-3 nil)
-(setq hebrew-holidays-4 nil)
-(setq islamic-holidays nil)
-(setq bahai-holidays nil)
+;;; package --- holiday-config.el
+;;; Commentary:
+;;; Code:
 
-(when (package-installed-p 'cal-china-x)
-  (require 'cal-china-x)
-  (setq calendar-chinese-all-holidays-flag t))
+(require 'calendar)
+
+(setq calendar-mark-holidays-flag t)
+
+(setq calendar-christian-all-holidays-flag nil
+      calendar-hebrew-all-holidays-flag nil
+      calendar-islamic-all-holidays-flag nil
+      calendar-bahai-all-holidays-flag nil
+      calendar-chinese-all-holidays-flag t)
 
 (provide 'holiday-config)
+;;; holiday-config.el ends here

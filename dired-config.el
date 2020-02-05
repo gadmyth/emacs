@@ -13,6 +13,7 @@
 (require 'dired++)
 
 (require 'dired-x)
+;; omit some files or directories under dired mode
 (setq-default dired-omit-files-p t)
 (add-to-list 'dired-omit-extensions ".DS_Store")
 

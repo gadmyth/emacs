@@ -13,9 +13,11 @@
                 (message "when-font-exist: %s" font-name)
                 ))))
 
-(when-font-exist "Ubuntu Mono" (when *use-ubuntu-font*
-                                 (custom-set-faces `(default ((t (:family ,font-name)))))
-                                 (set-face-attribute 'default nil :height 140)))
+(when-font-exist
+ "Ubuntu Mono"
+ (when *use-ubuntu-font*
+   (custom-set-faces `(default ((t (:family ,font-name)))))
+   (set-face-attribute 'default nil :height 140)))
 
 
 (provide 'fonts)
