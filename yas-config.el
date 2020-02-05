@@ -3,6 +3,9 @@
 ;;; Code:
 
 (require 'yasnippet)
+(require 'ivy)
+(require 'dash)
+
 (add-hook
  'yas-global-mode-hook
  (lambda ()
@@ -35,6 +38,43 @@
   (ivy-read "Choose yasnippet dir: " (remove-if-not (lambda (dir) (file-exists-p (format "%s/%s" dir major-mode))) (yas-snippet-dirs))
             :action (lambda (dir)
                       (dired (format "%s/%s" dir major-mode)))))
+
+(defun yasnippet-all-defined-modes ()
+  "."
+  (let ((modes))
+    (dolist (dir (yas-snippet-dirs))
+      (let ((files (directory-files dir)))
+        (dolist (file-name files)
+          (let ((whole-path-file (expand-file-name file-name dir)))
+            (when (and
+                   (not (string-equal "." file-name))
+                   (not (string-equal ".." file-name))
+                   (file-directory-p whole-path-file)
+                   (not (-contains-p modes file-name)))
+              (push file-name modes))))))
+    modes))
+
+(yasnippet-all-defined-modes)
+
+(defun expand-snippet-for-mode ()
+  "List snippets defined for mode, and expand the selected snippet, default mode is major mode."
+  (interactive)
+  (ivy-read
+   "target mode for snippet: " (reverse (yasnippet-all-defined-modes))
+   :preselect (symbol-name major-mode) :action
+   (lambda (mode-name)
+     (let* ((yas-buffer-local-condition 'always)
+            (mode (intern mode-name))
+            (templates (yas--all-templates (yas--get-snippet-tables mode)))
+            (template (and templates
+                           (or (yas--prompt-for-template
+                                templates
+                                "Choose a snippet template to edit: ")
+                               (car templates))))
+            (name (yas--template-name template))
+            (snippet (yas-lookup-snippet name mode)))
+       (if snippet (yas-expand-snippet snippet)
+         (message "No snippets tables active!"))))))
 
 (defun yas-create-snippet-with-region (name key)
   "NAME, KEY."
