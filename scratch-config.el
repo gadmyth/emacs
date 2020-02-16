@@ -109,7 +109,7 @@
          (message "buffer <*scratch*> does not exist!"))
         ;; check the buffer size
         ((not (scratch-buffer-size-changed-p))
-         (message "**** ignore to save *scatch* buffer, buffer size not changed [%s] ****" now))
+         (message "**** ignore to save *scatch* buffer, buffer size not changed [%s], last changed time is [%s] ****" now *scratch-last-saved-time*))
         (t
          (setq *last-scratch-buffer-size* (scratch-buffer-size))
          (setq *scratch-autosave-status* 'saving)
