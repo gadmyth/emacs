@@ -47,7 +47,9 @@
              (set-suitable-frame-size-inner (selected-frame)))))
       (set-suitable-frame-size-inner frame))))
 
+(global-set-key (kbd "C-x 2") (lambda () (interactive) (select-window (split-window-below))))
 (global-set-key (kbd "C-x 3") (lambda () (interactive) (select-window (split-window-right))))
+
 (if (boundp 'tool-bar-mode) (tool-bar-mode +tool-bar-mode+))
 (if (boundp 'menu-bar-mode) (menu-bar-mode +menu-bar-mode+))
 (if (boundp 'blink-cursor-mode) (blink-cursor-mode +blink-cursor-mode+))
