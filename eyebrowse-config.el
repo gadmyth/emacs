@@ -75,10 +75,10 @@
    (lambda (element)
      (if (not (-contains? collections element))
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
-       (let ((slot (ivy-eyebrowse-config-slot element)))
-         (eyebrowse-switch-to-window-config slot)
-         (when buffer
-           (select-buffer-window-safely buffer)))))))
+       (let* ((slot (ivy-eyebrowse-config-slot element))
+              (window-configs (eyebrowse--get 'window-configs))
+              (config (assq slot window-configs)))
+         (select-buffer-window-safely-at-config buffer config))))))
 
 (defun eyebrowse-list-window-configs-with-action (window-configs &optional buffer action)
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
@@ -98,13 +98,24 @@
               :preselect current-tag
               :action action)))
 
+(defun select-buffer-window-safely-at-config (buffer &optional config)
+  "Switch to window CONFIG, and select BUFFER."
+  (let* ((locked-config (eyebrowse-get-lock-buffer-config buffer))
+         (target-config (or config locked-config))
+         (target-slot (car target-config))
+         (locked-slot (car locked-config)))
+    (if target-slot
+        (eyebrowse-switch-to-window-config target-slot))
+    (cond (buffer
+           (eyebrowse-message "select buffer %S at config %S, locked config: %S" buffer target-slot locked-slot)
+           (select-buffer-window-safely buffer))
+          (target-slot
+           (eyebrowse-message "switch to config %S" target-slot)))))
+
 (defun select-buffer-window-safely (buffer &optional name)
   "If BUFFER's window is live, select it, otherwise switch to it or a new buffer named NAME."
   (cond
    (buffer
-    (let* ((config (eyebrowse-get-lock-buffer-config buffer))
-         (slot (car config)))
-      (message "switch other buffer %S, locked config slot: %S" buffer slot))
     (if-let ((window (get-buffer-window buffer)))
         (select-window window)
       (switch-to-buffer
@@ -116,12 +127,8 @@
 (defun eyebrowse-switch-other-buffer ()
   "Switch to other buffer, and switch to the window config binding to the buffer first if necessary."
   (interactive)
-  (let* ((buffer (other-buffer))
-         (config (eyebrowse-get-lock-buffer-config buffer))
-         (slot (car config)))
-    (if slot
-      (eyebrowse-switch-to-window-config slot))
-    (select-buffer-window-safely buffer)))
+  (let* ((buffer (other-buffer)))
+    (select-buffer-window-safely-at-config buffer)))
 
 (defun eyebrowse-create-window-config-with-tag (tag)
   "Create an eyebrowse window config with TAG."
@@ -167,10 +174,12 @@
 
 (defun eyebrowse-get-lock-buffer-config (buffer)
   "Get the eyebrowse config that binding to the BUFFER."
-  (with-current-buffer buffer
-    (if (boundp '*eyebrowse-locked-config*)
-        *eyebrowse-locked-config*
-      nil)))
+  (if buffer
+      (with-current-buffer buffer
+        (if (boundp '*eyebrowse-locked-config*)
+            *eyebrowse-locked-config*
+          nil))
+    nil))
 
 (defun eyebrowse-lock-with-config (buffer config)
   "Lock the BUFFER that binding to the current eyebrowse CONFIG."
@@ -221,22 +230,15 @@ Copied from ivy-switch-buffer, and modified."
                    (inhibit-message t))
                (ivy-set-view-recur (cadr view))))
             ((eyebrowse-get-lock-buffer-config buffer)
-             (let* ((config (eyebrowse-get-lock-buffer-config buffer))
-                    (slot (car config)))
-               (eyebrowse-message "selected buffer: %S, locked config slot: %S" buffer slot)
-               (eyebrowse-switch-to-window-config slot)
-               (select-buffer-window-safely buffer)))
+             (select-buffer-window-safely-at-config buffer))
             (t
              (eyebrowse-message "selected buffer: %S" buffer)
              (let ((configs (eyebrowse--filter-window-config buffer t)))
                (cond
                 ((zerop (length configs))
-                 (select-buffer-window-safely buffer))
+                 (select-buffer-window-safely-at-config buffer))
                 ((equal 1 (length configs))
-                 (let* ((config (car configs))
-                        (slot (nth 0 config)))
-                   (eyebrowse-switch-to-window-config slot)
-                   (select-buffer-window-safely buffer)))
+                 (select-buffer-window-safely-at-config buffer (car configs)))
                 (t
                  (eyebrowse-list-window-configs configs buffer)))))))))
 
