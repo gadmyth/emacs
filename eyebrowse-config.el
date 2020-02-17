@@ -184,7 +184,8 @@
 (defun eyebrowse-lock-with-config (buffer config)
   "Lock the BUFFER that binding to the current eyebrowse CONFIG."
   (with-current-buffer buffer
-    (setq-local *eyebrowse-locked-config* config)))
+    (setq-local *eyebrowse-locked-config* config)
+    (select-buffer-window-safely-at-config buffer)))
 
 (defun eyebrowse-lock-buffer-config ()
   "Lock the current buffer that binding to the current eyebrowse config."
