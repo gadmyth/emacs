@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: class-constructor
+# key: class-constuct
+# --
+public `(replace-regexp-in-string "\.java" "" (buffer-name))`($1) {
+    $0
+}
