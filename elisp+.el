@@ -1,8 +1,6 @@
-;;; package --- lisping-snippet.el
+;;; package --- elisp+.el
 ;;; Commentary:
 ;;; Code:
-
-(require 'yasnippet)
 
 (defun eval-and-replace ()
   "Replace the preceding sexp with its value."
@@ -23,18 +21,8 @@
     (error (message "Invalid expression")
            (insert (current-kill 0)))))
 
-(defun expand-template (template-key)
-  "TEMPLATE-KEY: ."
-  (interactive "syasnippet's template: ")
-  (yas--expand-or-prompt-for-template
-   (cl-mapcan (lambda (table)
-                (yas--fetch table template-key))
-              (yas--get-snippet-tables))))
-
-
 (global-set-key (kbd "C-c e r") 'eval-and-replace)
 (global-set-key (kbd "C-c e d") 'eval-and-delete)
 
-
-(provide 'lisping-snippet)
-;;; lisping-snippet.el ends here
+(provide 'elisp+)
+;;; elisp+.el ends here

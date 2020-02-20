@@ -35,26 +35,30 @@
 ;;;###autoload 
 (defvar wcy-desktop-file-name "~/.wcy_desktop_save")
 (add-to-list 'auto-coding-alist '("\\.wcy_desktop_save\\'" . utf-8))
+
 (defvar wcy-desktop-key-map nil)
+
 (when (null wcy-desktop-key-map)
   (setq wcy-desktop-key-map (make-keymap))
   (define-key wcy-desktop-key-map (kbd "C-x") ctl-x-map)
   (fillarray (cadr wcy-desktop-key-map) 'wcy-desktop-load-file))
+
 (defun  wcy-desktop-on-kill-emacs ()
-  "save the buffer list, this should be part of kill-emacs-hook"
+  "Save the buffer list, this should be part of `kill-emacs-hook."
   (with-temp-file wcy-desktop-file-name
     (print
      (mapcar #'(lambda(b) (with-current-buffer b
 			    (cons default-directory buffer-file-name)))
 	     (remove-if-not 'buffer-file-name (buffer-list)))
      (current-buffer))))
+
 (defun  wcy-desktop-init ()
-  "this function install the wcy-desktop. put
-it (wcy-desktop-init) in your ~/.emacs "
+  "This function install the wcy-desktop.  Put it (wcy-desktop-init) in your ~/.emacs."
   (add-hook 'kill-emacs-hook 'wcy-desktop-on-kill-emacs)
   (wcy-desktop-open-last-opened-files))
+
 (defun  wcy-desktop-open-last-opened-files ()
-  "open files which are still open in last session."
+  "Open files which are still open in last session."
   (when (file-readable-p wcy-desktop-file-name)
     (with-temp-buffer
       (insert-file-contents wcy-desktop-file-name)
@@ -76,8 +80,9 @@ it (wcy-desktop-init) in your ~/.emacs "
                       buffer-read-only t
                       mode-name  "not loaded yet")
                 (set-buffer-modified-p nil)))))))))
+
 (defun  wcy-desktop-load-file (&optional buffer)
-  "load file by reverting buffer"
+  "Load file by reverting BUFFER."
   (interactive)
   (setq buffer (or buffer (current-buffer)))
   (with-current-buffer buffer
@@ -88,11 +93,12 @@ it (wcy-desktop-init) in your ~/.emacs "
         (fundamental-mode)))))
 
 (defun wcy-desktop-load-all-files ()
-  "load all files"
+  "Load all files."
   (interactive)
   (mapcar #'(lambda(b) (with-current-buffer b
                          (when (local-variable-p 'wcy-desktop-is-buffer-loaded)
                            (revert-buffer nil t nil))))
           (remove-if-not 'buffer-file-name (buffer-list))))
+
 (provide 'wcy-desktop)
 ;;; wcy-desktop.el ends here

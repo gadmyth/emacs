@@ -16,5 +16,10 @@
 (defvar +blink-cursor-mode+ t)
 (defvar +scroll-bar-mode+ t)
 
+(setq *mac-scale-amount* 0
+      *linux-scale-amount* 0)
+
+(setq *load-slime* nil)
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here

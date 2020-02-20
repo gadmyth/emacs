@@ -8,6 +8,8 @@
 (defvar *max-frame-width* 0)
 (defvar *max-frame-height* 0)
 
+(setq frame-title-format "%f")
+
 (defadvice toggle-frame-maximized (before mark-frame-maxsize activate)
   "AFTER: , ACTIVATE: ."
   (message "toggle-frame-maximized advice")

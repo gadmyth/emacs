@@ -3,7 +3,7 @@
 ;;; Code:
 
 (require 'counsel)
-(require 'source-jump)
+(require 'source-code-jump)
 (require 'cl)
 
 (defun java-goto-class (class &optional finish-block noselect)
@@ -42,8 +42,8 @@
   (interactive)
   (let* ((class-name (file-name-base (buffer-name)))
          (regexp (format "^public class\\|interface %s.*$" class-name)))
-    (sj-action-with-regexp regexp nil "No class here."
-                           (apply-partially #'sj-goto-line-or-select "Line content: "))))
+    (scj-action-with-regexp regexp nil "No class here."
+                           (apply-partially #'scj-goto-line-or-select "Line content: "))))
 
 (defconst +java-method-format+ "^.*? \\(public\\|private\\) .*\\(%s\\)(.*)[^()]*{\s*$")
 
@@ -52,8 +52,8 @@
   (interactive)
   (let ((regexp (format +java-method-format+ (or method ".*"))))
     (message "java-goto-method: %s" regexp)
-    (sj-action-with-regexp regexp nil "No methods here."
-                           (apply-partially #'sj-goto-line-or-select "The method: "))))
+    (scj-action-with-regexp regexp nil "No methods here."
+                           (apply-partially #'scj-goto-line-or-select "The method: "))))
 
 (defun java-goto-method-at-point ()
   "."
@@ -65,7 +65,7 @@
   "."
   (interactive)
   (let ((regexp (format +java-method-format+ ".*")))
-    (sj-goto-last-with-regexp regexp  "The method name: " "No method here.")))
+    (scj-goto-last-with-regexp regexp  "The method name: " "No method here.")))
 
 (defun java-jump-to-definition (variable)
   "VARIABLE."
@@ -89,7 +89,7 @@
   (let ((method (word-at-point))
         (current-point (point)))
     (strip-text-properties method)
-    (sj-save-excursion
+    (scj-save-excursion
      (re-search-backward "\\." nil t)
      (backward-word)
      (let* ((class (word-at-point))
@@ -121,7 +121,7 @@
                      #'(lambda (buffer)
                          (let ((regexp (format +java-method-format+ "[^\s]*")))
                            (message "regexp: %s, class: %s, buffer: %S" regexp class buffer)
-                           (sj-action-with-regexp regexp nil "No methods here."
+                           (scj-action-with-regexp regexp nil "No methods here."
                                                   (lambda-of-ivy-read
                                                    "The methods: "
                                                    (let* ((candidate-string (car candidate))
@@ -145,7 +145,7 @@
   "CONSTANT."
   (interactive "sConstant: ")
   (let ((regexp (format +java-constant-regexp-format+ constant constant)))
-    (sj-goto-last-with-regexp regexp "The constant's name: " "No constant here.")))
+    (scj-goto-last-with-regexp regexp "The constant's name: " "No constant here.")))
 
 (defun java-goto-constant-at-point ()
   "."
@@ -158,7 +158,7 @@
   (interactive "sConstant: ")
   (let ((regexp (format +java-constant-regexp-format+ constant constant))
         (current-point (point)))
-    (sj-show-last-with-regexp regexp "The constant's name: " "No constant here."
+    (scj-show-last-with-regexp regexp "The constant's name: " "No constant here."
                               #'(lambda ()
                                   (goto-char current-point)))))
 
@@ -173,7 +173,7 @@
   (interactive)
   (let ((constant (word-at-point))
         (current-point (point)))
-    (sj-save-excursion
+    (scj-save-excursion
      (re-search-backward "\\." nil t)
      (backward-word)
      (let* ((class (word-at-point))
@@ -191,7 +191,7 @@
   (interactive)
   (let ((constant (word-at-point))
         (current-point (point)))
-    (sj-save-excursion
+    (scj-save-excursion
      (re-search-backward "\\." nil t)
      (backward-word)
      (let* ((class (word-at-point))
@@ -212,12 +212,12 @@
 (defun java-goto-property ()
   "."
   (interactive)
-  (sj-goto-with-regexp +java-property-regexp+ "The property name: " "No property here."))
+  (scj-goto-with-regexp +java-property-regexp+ "The property name: " "No property here."))
 
 (defun java-goto-last-property ()
   "."
   (interactive)
-  (sj-goto-last-with-regexp +java-property-regexp+ "The property name: " "No property here."))
+  (scj-goto-last-with-regexp +java-property-regexp+ "The property name: " "No property here."))
 
 (defun java-create-property (prop-name type)
   "PROP-NAME, TYPE."
@@ -270,15 +270,15 @@
   "METHOD."
   (interactive "sMethod: ")
   (let ((regexp (format "^.*? %s(.*)[^()]*{\s*$" method)))
-    (sj-action-with-regexp regexp nil "No methods here."
-                           (apply-partially #'sj-goto-line-or-select "The method: "))))
+    (scj-action-with-regexp regexp nil "No methods here."
+                           (apply-partially #'scj-goto-line-or-select "The method: "))))
 
 (defun spring-jump-to-mapper-xml-method ()
   "."
   (interactive)
   (let ((method (word-at-point))
         (current-point (point)))
-    (sj-save-excursion
+    (scj-save-excursion
      (re-search-backward "\\." nil t)
      (backward-word)
      (let* ((class (word-at-point))
@@ -290,7 +290,7 @@
        (if class
            (spring-goto-mapper-xml-file class
                                         #'(lambda ()
-                                            (sj-goto-last-with-regexp method "The method: " "No method here."))))))))
+                                            (scj-goto-last-with-regexp method "The method: " "No method here."))))))))
 
 (defun spring-git-grep (regexp initial-word)
   "REGEXP, INITIAL-WORD."
@@ -340,8 +340,8 @@
   "."
   (interactive)
   (let ((regexp "^[^#][^=]+=[^=]+$"))
-    (sj-action-with-regexp regexp nil "No line content here."
-                           (apply-partially #'sj-goto-line-or-select "Line content: "))))
+    (scj-action-with-regexp regexp nil "No line content here."
+                           (apply-partially #'scj-goto-line-or-select "Line content: "))))
 
 
 (defun git-ls-files (regexp)
@@ -388,7 +388,7 @@
         (let ((buffer (find-file-noselect api-file))
               (regexp "^\s*\\(public\\|private\\) .*=.*$"))
           (message "api-file: %s, %s" api-file buffer)
-          (sj-action-with-regexp regexp nil "No constant here."
+          (scj-action-with-regexp regexp nil "No constant here."
                                  #'(lambda (collections)
                                      (ivy-read "The constant: " (reverse collections) :action
                                                #'(lambda (candidate)

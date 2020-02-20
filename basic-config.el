@@ -8,6 +8,11 @@
 (put 'set-goal-column 'disabled nil)
 (global-unset-key (kbd "C-SPC"))
 
+(setq inhibit-startup-message t)
+
+;; when kill emacs, should be confirmed by hand
+(setq confirm-kill-emacs 'yes-or-no-p)
+
 (require 'warnings)
 (setq display-warning-minimum-level :emergency)
 

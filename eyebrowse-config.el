@@ -37,12 +37,19 @@
          (config (assq slot configs)))
     config))
 
+
 (defun ivy-eyebrowse-current-config-string ()
   "."
-  (let* ((current-config (eyebrowse-get-current-config))
-         (slot (car current-config))
-         (tag (nth 2 current-config)))
-    (ivy-eyebrowse-config-string slot tag)))
+  (let ((current-config (eyebrowse-get-current-config)))
+    (ivy-eyebrowse-get-config-string current-config)))
+
+(defun ivy-eyebrowse-get-config-string (config)
+  "Get CONFIG string."
+  (if (not config)
+      nil
+    (let* ((slot (car config))
+             (tag (nth 2 config)))
+        (ivy-eyebrowse-config-string slot tag))))
 
 (defun ivy-eyebrowse-config-string (slot tag)
   "SLOT, TAG."
@@ -82,7 +89,7 @@
 
 (defun eyebrowse-list-window-configs-with-action (window-configs &optional buffer action)
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
-  (let* ((current-config (assq (eyebrowse--get 'current-slot) window-configs))
+  (let* ((current-config (eyebrowse-get-current-config))
          (current-tag (nth 2 current-config))
          (ivy-prompt (format "Select eyebrowse action (%s): " current-tag))
          (collections))
@@ -101,16 +108,18 @@
 (defun select-buffer-window-safely-at-config (buffer &optional config)
   "Switch to window CONFIG, and select BUFFER."
   (let* ((locked-config (eyebrowse-get-lock-buffer-config buffer))
+         (locked-slot (car locked-config))
          (target-config (or config locked-config))
+         (locked-conf-string (ivy-eyebrowse-get-config-string locked-config))
          (target-slot (car target-config))
-         (locked-slot (car locked-config)))
+         (target-conf-string (ivy-eyebrowse-get-config-string target-config)))
     (if target-slot
         (eyebrowse-switch-to-window-config target-slot))
     (cond (buffer
-           (eyebrowse-message "select buffer %S at config %S, locked config: %S" buffer target-slot locked-slot)
+           (message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
            (select-buffer-window-safely buffer))
           (target-slot
-           (eyebrowse-message "switch to config %S" target-slot)))))
+           (message "switch to config %s" target-conf-string)))))
 
 (defun select-buffer-window-safely (buffer &optional name)
   "If BUFFER's window is live, select it, otherwise switch to it or a new buffer named NAME."

@@ -5,6 +5,7 @@
 (require 'async-config)
 
 (setq gc-cons-threshold (* 50 1000 1000))
+(setq garbage-collection-messages t)
 
 (add-hook
  'emacs-startup-hook

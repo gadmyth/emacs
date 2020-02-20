@@ -3,7 +3,7 @@
 ;;; Code:
 
 (require 'ivy)
-(require 'source-jump)
+(require 'source-code-jump)
 
 (defun read-xcasset-directory (root-directory imageset-handler)
   "ROOT-DIRECTORY is the root directory of the Assets.xcassets dir, IMAGESET-HANDLER is a lambda or function with a imageset dir parameter."
@@ -52,12 +52,12 @@
 (defun objc-goto-import ()
   "."
   (interactive)
-  (sj-goto-with-regexp "^#import .*$" "The import: " "No import here."))
+  (scj-goto-with-regexp "^#import .*$" "The import: " "No import here."))
 
 (defun objc-goto-last-import ()
   "."
   (interactive)
-  (sj-goto-last-with-regexp "^#import .*$" "The import: " "No import here."))
+  (scj-goto-last-with-regexp "^#import .*$" "The import: " "No import here."))
 
 (defun insert-import (header-string)
   "HEADER-STRING."
@@ -70,27 +70,27 @@
 (defun objc-goto-method ()
   "."
   (interactive)
-  (sj-goto-with-regexp "^- (.*).*$" "The method: " "No methods here."))
+  (scj-goto-with-regexp "^- (.*).*$" "The method: " "No methods here."))
 
 (defun objc-goto-class ()
   "."
   (interactive)
-  (sj-goto-with-regexp "^@interface.*$" "The interface: " "No interface here."))
+  (scj-goto-with-regexp "^@interface.*$" "The interface: " "No interface here."))
 
 (defun objc-goto-implementation ()
   "."
   (interactive)
-  (sj-goto-with-regexp "^@implementation.*$" "The implementation: " "No implementation here."))
+  (scj-goto-with-regexp "^@implementation.*$" "The implementation: " "No implementation here."))
 
 (defun objc-goto-property ()
   "."
   (interactive)
-  (sj-goto-with-regexp "^@property.*$" "The properties: " "No porperties here."))
+  (scj-goto-with-regexp "^@property.*$" "The properties: " "No porperties here."))
 
 (defun objc-goto-last-property ()
   "."
   (interactive)
-  (sj-goto-last-with-regexp "^@property.*$" "The properties: " "No porperties here."))
+  (scj-goto-last-with-regexp "^@property.*$" "The properties: " "No porperties here."))
 
 (defun objc-prepare-insert-property ()
   "."

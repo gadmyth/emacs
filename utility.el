@@ -7,16 +7,6 @@
 
 (eval-when-compile (require 'cl))
 
-(defun switch-proxy (enable)
-  "ENABLE's value is t or nil."
-  (interactive "Senable? ")
-  (let ((proxy
-		 (if enable
-			 "127.0.0.1:8087"
-		   nil)))
-	(setenv "http_proxy"  proxy)
-	(setenv "https_proxy" proxy)))
-
 (defvar *find-grep-dired--dir* "~")
 
 (defun find2-grep-dired (dir regexp)

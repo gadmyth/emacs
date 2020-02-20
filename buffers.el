@@ -2,6 +2,17 @@
 ;;; Commentary:
 ;;; Code:
 
+(defvar *mac-scale-amount* 0)
+(defvar *linux-scale-amount* 0)
+
+(global-linum-mode 0)
+(global-visual-line-mode t)
+(global-auto-revert-mode t)
+
+(show-paren-mode 1)
+(setq column-number-mode t)
+(setq line-number-mode t)
+(setq size-indication-mode t)
 
 (defun new-buffer (name)
   "NAME: ."

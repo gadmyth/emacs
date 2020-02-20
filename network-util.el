@@ -10,5 +10,15 @@
          (result (shell-command-to-string shell-command-string)))
     (message result)))
 
+(defun switch-proxy (enable)
+  "ENABLE's value is t or nil."
+  (interactive "Senable? ")
+  (let ((proxy
+		 (if enable
+			 "127.0.0.1:8087"
+		   nil)))
+	(setenv "http_proxy"  proxy)
+	(setenv "https_proxy" proxy)))
+
 (provide 'network-util)
 ;;; network-util.el ends here
