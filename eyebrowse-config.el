@@ -12,6 +12,7 @@
 
 (defvar *eyebrowse-debug* nil)
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
+(defvar *eyebrowse-default-configs* nil)
 
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
 
@@ -154,6 +155,8 @@
   (interactive)
   (eyebrowse-list-with-actions
    (list (list "set tag" #'eyebrowse-rename-window-config)
+         (list "set as default config" #'eyebrowse-set-as-default-config)
+         (list "restore default config" #'eyebrowse-restore-default-config)
          (list "create config" #'eyebrowse-create-window-config-with-tag)
          (list "close config" #'eyebrowse-close-window-config))))
 
@@ -289,6 +292,34 @@ Copied from ivy-switch-buffer, and modified."
            (current-tag (nth 2 (assoc current-slot window-configs))))
     (eyebrowse--update-window-config-element
      (eyebrowse--current-window-config current-slot current-tag))))
+
+(defun eyebrowse-set-as-default-config ()
+  "."
+  (interactive)
+  (eyebrowse-update-current-window-config)
+  (let* ((config (eyebrowse-get-current-config))
+         (slot (car config))
+         (default-config (assq slot *eyebrowse-default-configs*)))
+    (if (not default-config)
+        (push config *eyebrowse-default-configs*)
+      (setf (cadr (assq slot *eyebrowse-default-configs*)) (cadr config)))))
+
+(defun eyebrowse-restore-default-config ()
+  "."
+  (interactive)
+  (let* ((slot (eyebrowse--get 'current-slot))
+         (default-config (assq slot *eyebrowse-default-configs*)))
+    (if default-config
+        (eyebrowse-load-certain-config default-config)
+      (message "no default config to restore config %S" slot))))
+
+(defun eyebrowse-load-certain-config (config)
+  "Restore the window config from the certain CONFIG.
+COPY from eyebrowse--load-window-config."
+  (let ((ignore-window-parameters t)
+        (window-config (cadr config)))
+    (eyebrowse--fixup-window-config window-config)
+    (window-state-put window-config (frame-root-window) 'safe)))
 
 (defun load-eyebrowse-config ()
   "Load eyebrowse workspace from file."
