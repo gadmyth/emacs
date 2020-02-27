@@ -45,7 +45,7 @@
     (scj-action-with-regexp regexp nil "No class here."
                            (apply-partially #'scj-goto-line-or-select "Line content: "))))
 
-(defconst +java-method-format+ "^.*? \\(public\\|private\\) .*\\(%s\\)(.*)[^()]*{\s*$")
+(defconst +java-method-format+ "^.*?\\(public\\|private\\) .*\\(%s\\)(.*)[^()]*{\s*$")
 
 (defun java-goto-method (&optional method)
   "METHOD."
