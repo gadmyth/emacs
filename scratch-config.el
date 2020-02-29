@@ -99,6 +99,7 @@
   "Save *scatch* buffer to file."
   (interactive)
   (let ((now (format-time-string "%Y-%m-%d %a %H:%M" (current-time)))
+        (last-saved-time *scratch-last-saved-time*)
         (buffer (get-buffer "*scratch*")))
     (cond
      ((scratch-autosave-saving-p)
@@ -119,7 +120,7 @@
                (insert content))))
          (setq *scratch-last-saved-time* now)
          (scratch-reset-autosave-status)
-         (message "**** *scratch* buffer saved to file %s [%s] ****" +default-scratch-file-name+ now)))))
+         (message "**** *scratch* buffer saved to file %s [%s], lasted saved time: [%s] ****" +default-scratch-file-name+ now last-saved-time)))))
 
 (add-hook 'emacs-startup-hook #'(lambda ()
                                   (load-scratch-from-file t)
