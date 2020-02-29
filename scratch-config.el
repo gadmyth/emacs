@@ -86,11 +86,11 @@
 
 (defun start-scratch-autosave-process ()
   "."
-  (message "**** starting *scratch-autosave-process* [%s] ****" (process-status *scratch-autosave-process*))
+  (message "**** starting *scratch-autosave-process* [%s] ****" (scratch-process-status))
   (call-after
    600
    ;+scratch-autosave-interval+
-   (message "*scratch-autosave-process* status: %S" (process-status *scratch-autosave-process*))
+   (message "*scratch-autosave-process* status: %S" (scratch-process-status))
    (save-scratch-buffer)
    ;; start process
    (start-scratch-autosave-scheduler)))
