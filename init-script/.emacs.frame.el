@@ -78,11 +78,14 @@
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))
 (switch-proxy nil)
 
-;; load must files at last
+;; load must files
 (load-must-files)
 
-;; load script files at last
+;; load script files
 (load-extend-script-files)
+
+;; load script files at last
+(load-post-script-files)
 
 ;; maximize the frame
 (toggle-frame-maximized)
