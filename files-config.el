@@ -2,6 +2,11 @@
 ;;; Commentary:
 ;;; Code:
 
+(defun revert-buffer-with-default-coding-system ()
+  "."
+  (let ((coding-system-for-read 'utf-8-unix))
+    (revert-buffer t t t)))
+
 (add-hook 'find-file-hook
           (lambda ()
             (revert-buffer-with-default-coding-system)
@@ -18,12 +23,6 @@
 (add-hook 'after-init-hook 'global-flycheck-mode)
 
 (setq backup-directory-alist (quote (("." . "~/.backups"))))
-
-(defun revert-buffer-with-default-coding-system ()
-  "."
-  (let ((coding-system-for-read default-buffer-file-coding-system))
-    (revert-buffer t t t)))
-
 
 (provide 'files-config)
 ;;; files-config.el ends here
