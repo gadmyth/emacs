@@ -4,13 +4,13 @@
 
 (require 'frame)
 (require 'async)
+(require 'eyebrowse-config)
 
 (defvar *max-frame-width* 0)
 (defvar *max-frame-height* 0)
 
 (setq frame-title-format
       '(:eval
-        (require 'eyebrowse-config)
         (let* ((buffer (current-buffer))
                (buffer-name (buffer-name buffer))
                (file-name (buffer-file-name buffer))
