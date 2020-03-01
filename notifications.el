@@ -10,7 +10,7 @@
   (async-start
    `(lambda () (sleep-for ,time) ,time)
    `(lambda (arg)
-     (with-output-to-temp-buffer "notification"
+     (with-output-to-temp-buffer "*notification*"
        (print ,message)
        (print (format-time-string "%Y-%m-%d %a %H:%M" (current-time)))))))
 
