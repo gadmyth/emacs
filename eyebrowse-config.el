@@ -17,9 +17,14 @@
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
 
 (add-hook 'window-setup-hook
-          #'(lambda () (call-after 1 (load-eyebrowse-config))))
-
-(add-hook 'kill-emacs-hook 'save-eyebrowse-config)
+          #'(lambda ()
+              (call-after
+               1
+               ;; load eyebrowse config from file after 1 second
+               (when (load-eyebrowse-config)
+                 ;; add the save function if loading success from file,
+                 ;; or it will be dangerous to overwrite the config to file.
+                 (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))))
 
 (defmacro eyebrowse-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
@@ -324,15 +329,21 @@ COPY from eyebrowse--load-window-config."
 (defun load-eyebrowse-config ()
   "Load eyebrowse workspace from file."
   (interactive)
-  (if (not (file-exists-p +eyebrowse-file-name+))
-      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+)
-    (message "Loading eyebrowse config from file %S ..." +eyebrowse-file-name+)
-    (with-temp-buffer
-      (insert-file-contents +eyebrowse-file-name+)
-      (goto-char (point-min))
-      (let ((content (read (current-buffer))))
-        (eyebrowse--set 'window-configs content)
-        (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
+  (let ((loading-success-p))
+    (cond
+     ((not (file-exists-p +eyebrowse-file-name+))
+      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+))
+     (t
+      (message "Loading eyebrowse config from file %S ..." +eyebrowse-file-name+)
+      (with-temp-buffer
+        (insert-file-contents +eyebrowse-file-name+)
+        (goto-char (point-min))
+        (let ((content (read (current-buffer))))
+          (eyebrowse--set 'window-configs content)
+          (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))
+      (setq loading-success-p t)))
+    ;; return the loading result
+    loading-success-p))
 
 (defun save-eyebrowse-config ()
   "Save eyebrowse workspace to file."
