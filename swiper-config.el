@@ -22,7 +22,7 @@
   (interactive)
   (let* ((sym (symbol-at-point))
          (string-at-point (if (null sym) "" (symbol-name sym))))
-    (message "string-at-point is [%S]" string-at-point)
+    (message "string-at-point is [%s]" string-at-point)
     (swiper string-at-point)))
 
 (global-set-key "\C-s" 'swiper-with-symbol-at-point)
