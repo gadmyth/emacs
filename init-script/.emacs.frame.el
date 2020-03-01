@@ -31,7 +31,7 @@
 (require 'irc-config)
 (require 'tab-config)
 (require 'clipboard)
-(require 'codings)
+;(require 'codings)
 (require 'codec)
 (require 'dates)
 (require 'abbrev-config)
