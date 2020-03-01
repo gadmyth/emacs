@@ -8,7 +8,15 @@
 (defvar *max-frame-width* 0)
 (defvar *max-frame-height* 0)
 
-(setq frame-title-format "%f")
+(setq frame-title-format
+      '(:eval
+        (require 'eyebrowse-config)
+        (let* ((buffer (current-buffer))
+               (buffer-name (buffer-name buffer))
+               (file-name (buffer-file-name buffer))
+               (eb-conf-str (ivy-eyebrowse-current-config-string)))
+          ;; show file name first, if nil show buffer name; and also show the current eyebrowse config
+          (format "%s - [%s]" (or file-name buffer-name) eb-conf-str))))
 
 (defadvice toggle-frame-maximized (before mark-frame-maxsize activate)
   "AFTER: , ACTIVATE: ."
