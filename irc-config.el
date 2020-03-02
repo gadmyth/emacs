@@ -122,7 +122,7 @@ With PARSED message and PROC."
     (goto-char (point-max))
     (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
            (content (format "%s [%s]:\n%s\n\n" sender now msg))
-           (time-start (s-index-of "[" content))
+           (time-start (- (s-index-of now content) 1))
            (time-end (+ time-start (length now) 2))
            (msg-start (+ time-end 2))
            (msg-end (+ msg-start (length msg))))
@@ -138,9 +138,10 @@ With PARSED message and PROC."
   ;; show window
   (display-buffer *erc-aggregate-buffer*))
 
-(defvar erc-aggregate-map
-  (let ((map (make-keymap)))
-    (define-key map [follow-link] 'erk-link-face)
+(defvar erc-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent message-mode-map text-mode-map)
+    (define-key map "q" 'quit-window)
     map))
 
 (define-derived-mode erc-aggregate-mode text-mode "ErcA"
