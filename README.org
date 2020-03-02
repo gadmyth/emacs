@@ -1,0 +1,29 @@
+#+TITLE: README
+#+DATE: <2020-03-02 Mon 23:51>
+#+TAGS: 
+#+LAYOUT: post
+#+CATEGORIES: 
+
+* About the "Emacs" repository
+This repo is an emacs configurations collection.
+** How to install
+You can clone the repo to some directory you like:
+#+BEGIN_SRC bash
+cd ~/<directory-you-like>
+git clone https://github.com/gadmyth/emacs.git
+#+END_SRC
+
+Now you should config the .emacs file. You can make a symbolic link to the .emacs in the emacs.git repo, or you create a .emacs file, and write elisp script to load the .emacs in the emacs.git:
+#+BEGIN_SRC bash
+# way one: make a symbolic link
+cd ${HOME}
+ln -sf ~/<directory-you-like>/emacs/init-script/.emacs
+
+# way two: write loading script into a new ~/.emacs
+cd ${HOME}
+rm -rf .emacs
+cat >> .emacs << EOF
+(load-file (expand-file-name "~/<directory-you-like>/emacs/init-script/.emacs"))
+EOF
+#+END_SRC
+
