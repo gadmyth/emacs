@@ -69,7 +69,8 @@ With PARSED message and PROC."
 
 (defun erc-parse-wechat-share-msg (sender msg)
   "Parse and store wechat multi share MSG and SENDER."
-  (when (string-prefix-p "[应用分享]" msg)
+  (cond
+   ((string-prefix-p "[应用分享]" msg)
     (let ((table *wechat-multi-message-table*)
           (title-key (concat sender "_title"))
           (desc-key (concat sender "_description"))
@@ -89,17 +90,19 @@ With PARSED message and PROC."
                   (gethash desc-key table)
                   (gethash app-key table)
                   (gethash link-key table))
-             (setq msg(format "[%s]\n%s\n%s"
-                              (gethash title-key table)
-                              (gethash desc-key table)
-                              (gethash link-key table)))
+             (setq msg (format "[%s]\n%s\n%s"
+                               (gethash title-key table)
+                               (gethash desc-key table)
+                               (gethash link-key table)))
              (remhash title-key table)
              (remhash desc-key table)
              (remhash app-key table)
              (remhash link-key table)
              msg)
             (t
-             nil)))))
+             nil))))
+   ;; msg is not a wechat share msg
+   (t msg)))
 
 (defun* erc-update-aggregate-buffer (sender msg)
   "Append SENDER and MSG to the *erc-aggregate-buffer*."
