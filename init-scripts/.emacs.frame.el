@@ -3,7 +3,7 @@
 ;;; Code:
 
 ;; load path
-(add-to-list 'load-path +emacs-context-directory+)
+(add-to-list 'load-path (expand-file-name "basic-scripts" +emacs-context-directory+))
 (add-to-list 'load-path (expand-file-name "el-pre-scripts" +emacs-context-directory+))
 (add-to-list 'load-path (expand-file-name "el-extends" +emacs-context-directory+))
 (add-to-list 'load-path (expand-file-name "el-post-scripts" +emacs-context-directory+))

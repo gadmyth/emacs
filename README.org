@@ -17,13 +17,13 @@ Now you should config the .emacs file. You can make a symbolic link to the .emac
 #+BEGIN_SRC bash
 # way one: make a symbolic link
 cd ${HOME}
-ln -sf ~/<directory-you-like>/emacs/init-script/.emacs
+ln -sf ~/<directory-you-like>/emacs/init-scripts/.emacs
 
 # way two: write loading script into a new ~/.emacs
 cd ${HOME}
 rm -rf .emacs
 cat >> .emacs << EOF
-(load-file (expand-file-name "~/<directory-you-like>/emacs/init-script/.emacs"))
+(load-file (expand-file-name "~/<directory-you-like>/emacs/init-scripts/.emacs"))
 EOF
 #+END_SRC
 

@@ -4,6 +4,17 @@
 
 (require 'erc)
 (require 's)
+(require 'text-mode)
+
+(define-derived-mode erc-aggregate-mode text-mode "ErcA"
+  ;; The mode for *erc-aggregate-buffer*.
+  )
+
+(defvar erc-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent 'text-mode-map)
+    (define-key map "q" 'quit-window)
+    map))
 
 (defvar erc-nick nil)
 (defvar erc-hide-list '("JOIN" "QUIT" "PART" "NICK" "MODE"))
@@ -137,16 +148,6 @@ With PARSED message and PROC."
       (insert content)))
   ;; show window
   (display-buffer *erc-aggregate-buffer*))
-
-(defvar erc-aggregate-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent message-mode-map text-mode-map)
-    (define-key map "q" 'quit-window)
-    map))
-
-(define-derived-mode erc-aggregate-mode text-mode "ErcA"
-  ;; The mode for *erc-aggregate-buffer*.
-  )
 
 (provide 'irc-config)
 ;;; irc-config.el ends here
