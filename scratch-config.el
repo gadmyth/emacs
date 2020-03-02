@@ -77,7 +77,8 @@
      ;; check the file exists or not
      ((not (file-exists-p +default-scratch-file-name+))
       (message "Can't load %s file, for it does not exist!" +default-scratch-file-name+)
-      nil)
+      ;; set loading to success at the very beginning
+      (setq loading-success-p t))
      (t
       (let ((buffer (get-buffer-create "*scratch*")))
         ;; lock the status to loading

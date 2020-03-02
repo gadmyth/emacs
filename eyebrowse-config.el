@@ -332,7 +332,9 @@ COPY from eyebrowse--load-window-config."
   (let ((loading-success-p))
     (cond
      ((not (file-exists-p +eyebrowse-file-name+))
-      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+))
+      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+)
+      ;; set loading-success-p to t, for the reason of it's at the very beginnig
+      (setq loading-success-p t))
      (t
       (message "Loading eyebrowse config from file %S ..." +eyebrowse-file-name+)
       (with-temp-buffer
