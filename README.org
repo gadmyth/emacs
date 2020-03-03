@@ -1,12 +1,7 @@
-#+TITLE: README
-#+DATE: <2020-03-02 Mon 23:51>
-#+TAGS: 
-#+LAYOUT: post
-#+CATEGORIES: 
-
-* About the "Emacs" repository
+* README
+** About the "Emacs" repository
 This repo is an emacs configurations collection.
-** How to install
+*** How to install
 You can clone the repo to some directory you like:
 #+BEGIN_SRC bash
 cd ~/<directory-you-like>
@@ -27,3 +22,16 @@ cat >> .emacs << EOF
 EOF
 #+END_SRC
 
+** Loading Order
+*** directories
+There're four main directories in this repo, init-scripts, el-pre-scripts, basic-scripts, el-extends, el-post-scripts.
+
+The init-scripts directory include 4 init scripts. .emacs define the \+emacs-context-directory\+ equals to "~/<parent dir>/emacs/", and load the emacs.init.el file, this init file load the .emacs.frame.el under non-terminal environment.
+*** .emacs.frame.el
+This is the main config file under GUI environment. It put the basic-scripts, el-pre-scripts, el-extends, el-post-scripts first into the load-path.
+
+The script-extends package define the functions to load all files under the certain directory. The loading order is first load all elisp files under el-pre-scripts dir, and then require the \+required-packages\+ defined in the packages.el. These packages are all original packages can be downloaded from package-archives sources. 
+
+Then load the config packages under basic-scripts dir optionally. Then load the must files, the must files should be defined in the elisp scripts under the el-pre-scripts dir.
+
+Then load all the extend elisp scripts under the el-extends dir, load all the script files under the el-post-scripts dir.
