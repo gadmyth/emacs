@@ -53,6 +53,7 @@
 (require 'el-server-extend)
 (require 'servers)
 (require 'eyebrowse-config)
+(require 'goto-last-point+)
 (require 'f-zone-key-bindings)
 (require 'holiday-config)
 (require 'dired-config)

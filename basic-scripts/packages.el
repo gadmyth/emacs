@@ -46,6 +46,7 @@
         'multi-term
         'flycheck
         'eyebrowse
+        'goto-last-point
         ;'vkill
         ))
 
