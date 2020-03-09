@@ -12,7 +12,7 @@
 
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent 'text-mode-map)
+    (set-keymap-parent erc-aggregate-mode-map text-mode-map)
     (define-key map "q" 'quit-window)
     map))
 
