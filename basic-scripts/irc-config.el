@@ -145,7 +145,8 @@ With PARSED message and PROC."
       (when-let ((index (string-match "http" msg)))
         (erc-put-text-property  (+ msg-start index) msg-end
                                 'font-lock-face 'erc-link-face content))
-      (insert content)))
+      (insert content)
+      (set-window-point (get-buffer-window *erc-aggregate-buffer*) (point-max))))
   ;; show window
   (display-buffer *erc-aggregate-buffer*))
 
