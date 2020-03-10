@@ -5,6 +5,7 @@
 (require 'frame)
 (require 'async)
 (require 'eyebrowse-config)
+(require 'window-numbering)
 
 (defvar *max-frame-width* 0)
 (defvar *max-frame-height* 0)
@@ -66,34 +67,47 @@
 (if (boundp 'scroll-bar-mode) (scroll-bar-mode +scroll-bar-mode+))
 (put 'scroll-left 'disabled nil)
 
-
 (defun swap-to-main-window ()
   "."
   (interactive)
+  (swap-window (frame-first-window)))
+
+(defun swap-window (window)
+  "Swap the current window with WINDOW."
+  (interactive)
   (when (>= (count-windows) 2)
-	(let* ((first-window (frame-first-window))
-		   (first-buffer (window-buffer first-window))
-		   (current-window (get-buffer-window))
-		   (current-buffer (window-buffer current-window))
-		   (first-start (window-start first-window))
-		   (current-start (window-start current-window)))
-	  (set-window-buffer first-window current-buffer)
-	  (set-window-buffer current-window first-buffer)
-	  (set-window-start first-window current-start)
-	  (set-window-start current-window first-start)
-	  (select-window first-window))))
+    (let* ((first-buffer (window-buffer window))
+           (current-window (get-buffer-window))
+           (current-buffer (window-buffer current-window))
+           (first-start (window-start window))
+           (current-start (window-start current-window)))
+      (set-window-buffer window current-buffer)
+      (set-window-buffer current-window first-buffer)
+      (set-window-start window current-start)
+      (set-window-start current-window first-start)
+      (select-window window))))
 
 (defun goto-main-window ()
   "."
   (interactive)
   (select-window (frame-first-window)))
 
+(defun swap-window-at-index (index)
+  "Swap the current window the window at INDEX.
+Copied some codes from window-numbering.el."
+  (interactive "nPlease choose a window number: ")
+  (let* ((windows (car (gethash (selected-frame) window-numbering-table)))
+         (window (and (>= index 0) (< index 10) (aref windows index))))
+    (when window
+      (swap-window window))))
+
 (defun goto-next-window()
   "."
   (interactive)
   (other-window +1))
 
-(global-set-key (kbd "C-c C-m") 'goto-main-window)
+(global-set-key (kbd "C-c m") 'goto-main-window)
+(global-set-key (kbd "C-c C-s") 'swap-window-at-index)
 (global-set-key (kbd "C-c RET") 'swap-to-main-window)
 (global-set-key (kbd "C-c C-n") 'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
