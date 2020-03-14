@@ -5,7 +5,6 @@
 (require 'eyebrowse)
 (require 's)
 (require 'dash)
-(require 'async-config)
 
 (eyebrowse-mode t)
 (eyebrowse-rename-window-config 1 "default")
@@ -18,13 +17,14 @@
 
 (add-hook 'window-setup-hook
           #'(lambda ()
-              (call-after
-               1
-               ;; load eyebrowse config from file after 1 second
-               (when (load-eyebrowse-config)
-                 ;; add the save function if loading success from file,
-                 ;; or it will be dangerous to overwrite the config to file.
-                 (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))))
+              (run-with-timer
+               1 nil
+               (lambda ()
+                 ;; load eyebrowse config from file after 1 second
+                 (when (load-eyebrowse-config)
+                   ;; add the save function if loading success from file,
+                   ;; or it will be dangerous to overwrite the config to file.
+                   (add-hook 'kill-emacs-hook #'save-eyebrowse-config))))))
 
 (defmacro eyebrowse-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
