@@ -106,8 +106,25 @@ Copied some codes from window-numbering.el."
   (interactive)
   (other-window +1))
 
+(defun swap-window-in-current-frame ()
+  "."
+  (interactive)
+  (let* ((current-window (get-buffer-window (current-buffer)))
+         (windows (delq current-window (window-list)))
+         (cands (mapcar (lambda (window)
+                          (cons (buffer-name (window-buffer window)) window))
+                        windows))
+         (preselect (caar cands)))
+    (ivy-read
+     "Select the buffer to swap: " cands
+     :preselect preselect
+     :action
+     (lambda (cand)
+       (if (listp cand)
+           (swap-window (cdr cand)))))))
+
 (global-set-key (kbd "C-c m") 'goto-main-window)
-(global-set-key (kbd "C-c C-s") 'swap-window-at-index)
+(global-set-key (kbd "C-c C-s") 'swap-window-in-current-frame)
 (global-set-key (kbd "C-c RET") 'swap-to-main-window)
 (global-set-key (kbd "C-c C-n") 'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
