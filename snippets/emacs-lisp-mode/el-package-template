@@ -12,7 +12,7 @@
 ;; Package-Requires:$8
 ;; Keywords: ${9:$1}
 ;; Homepage: ${10:https://www.github.com/gadmyth/emacs}
-;; URL: ${11:https://www.github.com/gadmyth/emacs}
+;; URL: ${11:https://www.github.com/gadmyth/emacs/blob/master/}
 
 ;; This file is NOT part of GNU Emacs.
 
