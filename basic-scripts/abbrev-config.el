@@ -2,64 +2,40 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'abbrev)
+
 (setq default-abbrev-mode t)
 (setq save-abbrevs t)
 
-(require 'yasnippet)
-(defadvice yas-expand (around expand-abbrev-when-word-p)
-  (interactive)
-  (let ((word (thing-at-point 'word t)))
-    (when word
-      (expand-abbrev)))
-  ad-do-it)
-(ad-activate 'yas-expand)
+(defun add-abbrev-hook (major-mode-name abbrev-alist)
+  "When a MAJOR-MODE-NAME is loaded, define the abbrevs with ABBREV-ALIST in the major mode hook."
+  (let* ((hook-name (format "%s-hook" major-mode-name))
+         (hook-sym (intern hook-name)))
+    (add-hook hook-sym
+              (lambda()
+                (progn (mapc (lambda (pair)
+                               (define-abbrev objc-mode-abbrev-table (car pair) (cdr pair)))
+                             abbrev-alist))))))
 
-;; for objc-mode
-(add-hook
- 'objc-mode-hook
- (lambda ()
-   (progn
-     (mapc
-      (lambda (pair)
-        (define-abbrev objc-mode-abbrev-table (car pair) (cdr pair)))
-      '(("cd" . "class-def")
-        ("ced" . "class-ext-def")
-        ("ci" . "class-impl")
-        ("ced" . "class-ext-def")
-        ("cei" . "class-ext-impl")
-        ("pd" . "prop-def")
-        ("p2d" . "prop2-def")
-        ("pbd" . "prop-block-def")
-        ("ai" . "allocinit")
-        ("initd" . "init-demo")
-        ("cd" . "class-def")
-        ("fd" . "func-def")
-        ("fd2" . "func2-def")
-        ("gfd" . "gfunc-def")
-        ("bd" . "block-declare")
-        ("bi" . "block-impl")
-        ("b1i" . "block1-impl")
-        ("bp" . "block-parameter")
-        ("ifb" . "if-block")
-        ("ieb" . "ifelse-block")
-        ("fore" . "for-enum")
-        ("fb" . "func-brace")
-        ("sb" . "sync-block")
-        ("pm" . "pragma-mark")
-        ("ass" . "assign-statement")
-        ("sng" . "singleton-def")
-        ("marray" . "[NSMutableArray array]")
-        )))))
+(defvar *abbrev-default-directory* (expand-file-name "abbrevs" +emacs-context-directory+))
 
-(add-hook
- 'swift-mode-hook
- (lambda ()
-   (mapc
-    (lambda (pair)
-      (define-abbrev swift-mode-abbrev-table (car pair) (cdr pair)))
-    '(("pi" . "π")
-      ("sng" . "singleton-def")
-      ))))
+(add-to-list 'auto-coding-alist '("\\.abbrev\\'" . utf-8))
+;; TODO: add major-mode config for xxx-mode.abbrev file
+
+(defun load-abbrevs ()
+  "."
+  (mapc (lambda (file-full-path)
+          (let* ((relative-path (file-name-nondirectory file-full-path))
+                 (mode-name (file-name-sans-extension relative-path)))
+            (with-temp-buffer
+              (insert-file-contents +eyebrowse-file-name+)
+              (goto-char (point-min))
+              (let* ((content (read (current-buffer)))
+                     (alist content))
+                (add-abbrev-hook mode-name alist)))))
+        (directory-files *abbrev-default-directory* t ".*?\\.abbrev$")))
+
+(load-abbrevs)
 
 (setq save-abbrevs nil)
 

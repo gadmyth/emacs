@@ -5,6 +5,16 @@
 (require 'yasnippet)
 (require 'ivy)
 (require 'dash)
+(require 'abbrev)
+
+(defadvice yas-expand (around expand-abbrev-when-word-p)
+  (interactive)
+  (let ((word (thing-at-point 'word t)))
+    (when word
+      (expand-abbrev)))
+  ad-do-it)
+
+(ad-activate 'yas-expand)
 
 (add-hook
  'yas-global-mode-hook
