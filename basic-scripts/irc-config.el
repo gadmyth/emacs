@@ -133,12 +133,13 @@ With PARSED message and PROC."
     (goto-char (point-max))
     (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
            (content (format "%s [%s]:\n%s\n\n" sender now msg))
+           (new-msg-start (point-max))
            (time-start (- (s-index-of now content) 1))
            (time-end (+ time-start (length now) 2))
            (msg-start (+ time-end 2))
            (msg-end (+ msg-start (length msg))))
-      (erc-put-text-property 0 (length sender)
-                             'font-lock-face 'erc-nick-default-face content)
+      ;(erc-put-text-property 0 (length sender)
+      ;                       'font-lock-face 'erc-nick-default-face content)
       (erc-put-text-property time-start time-end
                              'font-lock-face 'erc-notice-face content)
       ;; font lock the link
@@ -146,9 +147,22 @@ With PARSED message and PROC."
         (erc-put-text-property  (+ msg-start index) msg-end
                                 'font-lock-face 'erc-link-face content))
       (insert content)
+      (erc-button-add-button new-msg-start (+ new-msg-start (length sender))
+                             #'erc-button-nick-callback
+                             nil (list sender))
       (set-window-point (get-buffer-window *erc-aggregate-buffer*) (point-max))))
   ;; show window
   (display-buffer *erc-aggregate-buffer*))
+
+(defun erc-button-nick-callback (data)
+  "When click the nick name erc-button, response with the DATA."
+  (let* ((group-start (s-index-of "@" data))
+         (channel (and group-start (concat "#" (substring data (1+ group-start))))))
+    (let* ((buffer (get-buffer channel))
+           (window (get-buffer-window buffer)))
+      (display-buffer buffer)
+      (if (and window (window-live-p window))
+          (select-window window)))))
 
 (provide 'irc-config)
 ;;; irc-config.el ends here
