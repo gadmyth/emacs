@@ -52,25 +52,52 @@
   (let ((str (delete-and-extract-region beg end)))
     (insert (md5 str))))
 
-(defun base64-encode-string-of-multibyte (string)
-  "Base64 encode the multibyte STRING."
-  (base64-encode-string (encode-coding-string string 'utf-8)))
+(defun make-base64-url-safe (base64-string)
+  "Make BASE64-STRING url safe."
+  (let ((str base64-string))
+    (setq str (replace-regexp-in-string "\\+" "-" str))
+    (setq str (replace-regexp-in-string "/" "_" str))
+    (setq str (replace-regexp-in-string "=" "" str))
+    str))
 
-(defun base64-encode-region-of-multibyte (beg end)
-  "Base64 encode multibyte string with region from BEG to END."
-  (interactive "r")
-  (let ((content (delete-and-extract-region beg end)))
-    (insert (base64-encode-string-of-multibyte content))))
+(defun make-base64-normal (base64-string)
+  "Make BASE64-STRING normal."
+  (let* ((str base64-string)
+         (remain-len (% (length str) 4))
+         (padding-number (if (zerop remain-len)
+                             0 (- 4 remain-len))))
+    (setq str (replace-regexp-in-string "-" "+" str))
+    (setq str (replace-regexp-in-string "_" "/" str))
+    (if (> padding-number 0)
+        (setq str (concat str (make-string padding-number ?=))))
+    str))
+
+(defun base64-encode-string-of-multibyte (string &optional line-break)
+  "Base64 encode the multibyte STRING, LINE-BREAK mean weather the encoded string has link-break."
+  (base64-encode-string (encode-coding-string string 'utf-8) (not line-break)))
 
 (defun base64-decode-string-as-multibyte (string)
   "Base64 encode the multibyte STRING."
   (decode-coding-string (base64-decode-string string) 'utf-8))
 
+(defun base64-encode-region-of-multibyte (beg end)
+  "Base64 encode multibyte string with region from BEG to END."
+  (interactive "r")
+  (when (use-region-p)
+    (let* ((line-break (yes-or-no-p "Encode string has line break?"))
+           (origin (delete-and-extract-region beg end))
+           (normal (base64-encode-string-of-multibyte origin line-break))
+           (content (if (yes-or-no-p "Encode with safe mode?")
+                        (make-base64-url-safe normal) normal)))
+      (insert content))))
+
 (defun base64-decode-region-as-multibyte (beg end)
   "Base64 decode the base64 STRING of region from BEG to END, to multibyte string."
   (interactive "r")
-  (let ((content (delete-and-extract-region beg end)))
-    (insert (base64-decode-string-as-multibyte content))))
+  (let* ((url-safe (delete-and-extract-region beg end))
+         (normal (make-base64-normal url-safe))
+         (content (base64-decode-string-as-multibyte normal)))
+    (insert content)))
 
 (defun encode-file-as-base64-uri (file)
   "FILE is the png or jpeg to encode."
