@@ -35,6 +35,11 @@
     (message ct)
     ct))
 
+(defun insert-current-time ()
+  "."
+  (interactive)
+  (insert (timestamp-to-string (current-timestamp))))
+
 
 (provide 'dates)
 ;;; dates.el ends here
