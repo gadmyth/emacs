@@ -16,11 +16,12 @@
                (buffer-name (buffer-name buffer))
                (file-name (buffer-file-name buffer))
                (locked-conf (and (boundp '*eyebrowse-locked-config*)
-                                     (ivy-eyebrowse-get-config-string *eyebrowse-locked-config*)))
-               (eb-conf (ivy-eyebrowse-current-config-string)))
+                                 (ivy-eyebrowse-get-config-string *eyebrowse-locked-config*)))
+               (eb-conf (ivy-eyebrowse-current-config-string))
+               (last-conf (ivy-eyebrowse-get-config-string (eyebrowse-get-last-config))))
           ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
-          (format "%s - [%s, %s]" (or file-name buffer-name)
-                  locked-conf eb-conf))))
+          (format "%s - [%s, %s, %s]" (or file-name buffer-name)
+                  locked-conf eb-conf last-conf))))
 
 (defadvice toggle-frame-maximized (before mark-frame-maxsize activate)
   "AFTER: , ACTIVATE: ."
