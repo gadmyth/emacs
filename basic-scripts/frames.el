@@ -4,7 +4,7 @@
 
 (require 'frame)
 (require 'async)
-(require 'eyebrowse-config)
+(require 'eyebrowse+)
 (require 'window-numbering)
 
 (defvar *max-frame-width* 0)
@@ -15,9 +15,12 @@
         (let* ((buffer (current-buffer))
                (buffer-name (buffer-name buffer))
                (file-name (buffer-file-name buffer))
-               (eb-conf-str (ivy-eyebrowse-current-config-string)))
-          ;; show file name first, if nil show buffer name; and also show the current eyebrowse config
-          (format "%s - [%s]" (or file-name buffer-name) eb-conf-str))))
+               (locked-conf (and (boundp '*eyebrowse-locked-config*)
+                                     (ivy-eyebrowse-get-config-string *eyebrowse-locked-config*)))
+               (eb-conf (ivy-eyebrowse-current-config-string)))
+          ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
+          (format "%s - [%s, %s]" (or file-name buffer-name)
+                  locked-conf eb-conf))))
 
 (defadvice toggle-frame-maximized (before mark-frame-maxsize activate)
   "AFTER: , ACTIVATE: ."
