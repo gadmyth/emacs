@@ -66,6 +66,12 @@
          (config (eyebrowse-get-config-with-slot slot)))
     config))
 
+(defun eyebrowse-get-last-config ()
+  "."
+  (let* ((slot (eyebrowse--get 'last-slot))
+         (config (eyebrowse-get-config-with-slot slot)))
+    config))
+
 (defun eyebrowse-get-config-with-slot (slot)
   "SLOT: ."
   (let* ((configs (eyebrowse--get 'window-configs))
