@@ -7,7 +7,8 @@
 (windmove-default-keybindings)
 (window-numbering-mode 1)
 
-(setq winner-mode t)
+(require 'winner)
+(winner-mode 1)
 
 (defun quit-help-window ()
   "."
