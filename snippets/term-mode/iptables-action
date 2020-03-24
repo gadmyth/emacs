@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: iptables-action
+# key: ipt-act
+# --
+sudo iptables -I INPUT -p ${5:tcp} --dport ${10:80} -j ${15:ACCEPT}

@@ -1,0 +1,6 @@
+# key: if-file
+# name: if-file
+# --
+if [ -f ${1:file} ]; then
+    $0
+fi

@@ -1,0 +1,6 @@
+# key: if-not-file
+# name: if-not-file
+# --
+if [ ! -f ${1:file} ]; then
+    $0
+fi

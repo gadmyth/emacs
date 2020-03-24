@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: upstream-conf
+# key: upstream-conf
+# --
+upstream ${1:upstream_name} {
+    server ${2:ip}:${3:port};
+    keepalive ${10:16};
+}
