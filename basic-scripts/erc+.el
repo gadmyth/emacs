@@ -145,9 +145,8 @@ With PARSED message and PROC."
 (defun* erc-update-aggregate-buffer (short-sender target msg)
   "Append SENDER and MSG to the *erc-aggregate-buffer*."
   (let ((sender (erc-sender-with-group short-sender target))
-        erc-msg-link erc-link-start
-        msg-file-path
-        msg-picture-p)
+        erc-msg-link erc-link-start erc-link-end
+        msg-file-path msg-picture-p)
     (if-let ((wechat-msg (erc-parse-wechat-share-msg sender msg)))
         (setq msg wechat-msg)
       (return-from erc-update-aggregate-buffer))
@@ -168,6 +167,14 @@ With PARSED message and PROC."
       ;; set the major mode
       (with-current-buffer *erc-aggregate-buffer*
         (erc-aggregate-mode)))
+
+    ;; parse the link
+    (when-let ((index (string-match "\\(https?://[^\s]*\\)" msg)))
+      (setq erc-link-start index)
+      (setq erc-msg-link (substring msg (match-beginning 1) (match-end 1)))
+      (setq msg (replace-regexp-in-string erc-msg-link "链接" msg))
+      (setq erc-link-end (+ erc-link-start 2)))
+         
     ;; append msg
     (with-current-buffer *erc-aggregate-buffer*
       (erc-save-excursion
@@ -179,15 +186,14 @@ With PARSED message and PROC."
               (time-end (+ time-start (length now) 2))
               (msg-start (+ time-end 2))
               (msg-end (+ msg-start (length msg))))
+         ;; propertize the time part
          (erc-put-text-property time-start time-end
                                 'font-lock-face 'erc-notice-face content)
-         ;; font lock the link
-         (when-let ((index (string-match "\\(https?://[^\s]*\\)" msg)))
-           (setq erc-link-start index)
-           (setq erc-msg-link (substring msg (match-beginning 1) (match-end 1))))
+         
          (insert content)
          ;; insert nick button
-         (erc-button-add-button new-msg-start (+ new-msg-start (length sender))
+         (erc-button-add-button new-msg-start
+                                (+ new-msg-start (length sender))
                                 #'erc-button-nick-callback
                                 nil (list (cons short-sender target)))
          ;; insert file or picture
@@ -196,15 +202,16 @@ With PARSED message and PROC."
                   (insert-image (create-image msg-file-path nil nil))
                   (insert "\n"))
                  (t
-                  (erc-button-add-button (+ new-msg-start msg-start) (+ new-msg-start msg-end)
+                  (erc-button-add-button (+ new-msg-start msg-start)
+                                         (+ new-msg-start msg-end)
                                          #'erc-button-file-callback
                                          nil (list msg-file-path)))))
          ;; insert link button
          (when erc-msg-link
-           (erc-button-add-button (+ new-msg-start msg-start erc-link-start) (+ new-msg-start erc-link-start msg-end)
+           (erc-button-add-button (+ new-msg-start msg-start erc-link-start)
+                                  (+ new-msg-start msg-start erc-link-end)
                                   #'erc-button-link-callback
-                                  nil (list erc-msg-link))
-           (setq erc-msg-link nil))
+                                  nil (list erc-msg-link)))
          (set-window-point (get-buffer-window *erc-aggregate-buffer*) (point-max)))))
     ;; show window
     (when erc-aggregate-refresh
