@@ -28,7 +28,7 @@
           (let* ((relative-path (file-name-nondirectory file-full-path))
                  (mode-name (file-name-sans-extension relative-path)))
             (with-temp-buffer
-              (insert-file-contents +eyebrowse-file-name+)
+              (insert-file-contents file-full-path)
               (goto-char (point-min))
               (let* ((content (read (current-buffer)))
                      (alist content))
