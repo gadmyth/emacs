@@ -8,5 +8,8 @@
 (setq-default default-tab-width 4)
 (setq-default tab-width 4)
 
+(require 'nxml-mode)
+(setq nxml-child-indent 4)
+
 (provide 'tab-config)
 ;;; tab-config.el ends here
