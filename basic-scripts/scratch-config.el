@@ -8,7 +8,7 @@
 
 (defvar *last-scratch-buffer-size* -1)
 
-(defvar *scratch-autosave-process* nil)
+(defvar *scratch-autosave-timer* nil)
 
 (defconst +scratch-autosave-interval+ (* 10 60))
 
@@ -17,17 +17,6 @@
 (defvar *scratch-last-saved-time* nil)
 
 (add-to-list 'auto-coding-alist '("\\.scratch\\'" . utf-8))
-
-(defun scratch-process-status ()
-  "."
-  (let* ((process *scratch-autosave-process*)
-         (status (if process (process-status process) nil)))
-    status))
-
-(defun scratch-process-running-p ()
-  "."
-  (let ((status (scratch-process-status)))
-    (eq status 'run)))
 
 (defun scratch-autosave-saving-p ()
   "."
@@ -98,23 +87,14 @@
 
 (defun start-scratch-autosave-scheduler ()
   "Start a scheduler to auto save scratch buffer."
-  (if (scratch-process-running-p)
-      (message "*scratch-autosave-process* <%s, %S> started, don't start again!"
-               (process-name *scratch-autosave-process*)
-               (process-id *scratch-autosave-process*))
+  (if *scratch-autosave-timer*
+      (message "*scratch-autosave-timer* started, don't start again!")
     (scratch-reset-autosave-status)
-    (setq *scratch-autosave-process* (start-scratch-autosave-process))))
-
-(defun start-scratch-autosave-process ()
-  "."
-  (message "**** starting *scratch-autosave-process* [%s] ****" (scratch-process-status))
-  (call-after
-   600
-   ;+scratch-autosave-interval+
-   (message "*scratch-autosave-process* status: %S" (scratch-process-status))
-   (save-scratch-buffer)
-   ;; start next scheduler after saving
-   (start-scratch-autosave-scheduler)))
+    (message "Now start the *scratch-autosave-timer*")
+    (setq *scratch-autosave-timer*
+          (run-with-timer
+           +scratch-autosave-interval+
+           +scratch-autosave-interval+ #'save-scratch-buffer))))
 
 (defun save-scratch-buffer ()
   "Save *scatch* buffer to file."
