@@ -157,10 +157,10 @@
     (if target-slot
         (eyebrowse-switch-to-window-config target-slot))
     (cond (buffer
-           (message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
+           (eyebrowse-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
            (select-buffer-window-safely buffer))
           (target-slot
-           (message "switch to config %s" target-conf-string)))))
+           (eyebrowse-message "switch to config %s" target-conf-string)))))
 
 (defun select-buffer-window-safely (buffer &optional name)
   "If BUFFER's window is live, select it, otherwise switch to it or a new buffer named NAME."
