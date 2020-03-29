@@ -63,7 +63,7 @@
 (require 'web-config)
 (require 'smart-compile-config)
 (require 'python-config)
-(require 'scratch-config)
+(require 'scratch+)
 (require 'notifications)
 
 (require-if-installed 'eredis (require 'redis-config))

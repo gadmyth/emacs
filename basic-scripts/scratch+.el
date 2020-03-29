@@ -1,8 +1,38 @@
-;;; package --- scratch-config.el
+;;; scratch+.el --- Package.  -*- lexical-binding: nil; -*-
+
+;; Copyright (C) 2020 gadmyth
+
+;; Author: scratch+.el <gadmyth@gmail.com}>
+;; Version: 1.0
+;; Package-Version: 20200329.001
+;; Package-Requires:
+;; Keywords: scratch, auto save
+;; Homepage: https://www.github.com/gadmyth/emacs
+;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/scratch+.el
+
+;; This file is NOT part of GNU Emacs.
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Source code
+;;
+;; scratch+'s code can be found here:
+;;   https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/scratch+.el
+
 ;;; Commentary:
 ;;; Code:
 
-(require 'async-config)
 
 (defvar +default-scratch-file-name+ (expand-file-name "~/.emacs.scratch"))
 
@@ -140,5 +170,5 @@
                   ;; start a scheduler to save buffer to file
                   (start-scratch-autosave-scheduler))))
 
-(provide 'scratch-config)
-;;; scratch-config.el ends here
+(provide 'scratch+)
+;;; scratch+.el ends here
