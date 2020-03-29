@@ -17,7 +17,7 @@
 (global-set-key (kbd "<C-f2>") 'eyebrowse-last-window-config)
 
 ;; eyebrowse buffer config
-(global-set-key (kbd "<f3>") 'eyebrowse--ivy-switch-buffer)
+(global-set-key (kbd "<f3>") 'eyebrowse-switch-buffer)
 (global-set-key (kbd "<M-f3>") 'eyebrowse-modify-buffer-config)
 (global-set-key (kbd "<C-f3>") 'eyebrowse-switch-other-buffer)
 

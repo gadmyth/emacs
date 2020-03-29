@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0
+;; Version: 1.0.1
 ;; Package-Version: 20200317.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
@@ -78,21 +78,20 @@
          (config (assq slot configs)))
     config))
 
-
-(defun ivy-eyebrowse-current-config-string ()
+(defun eyebrowse-current-config-string ()
   "."
   (let ((current-config (eyebrowse-get-current-config)))
-    (ivy-eyebrowse-get-config-string current-config)))
+    (eyebrowse-config-string current-config)))
 
-(defun ivy-eyebrowse-get-config-string (config)
+(defun eyebrowse-config-string (config)
   "Get CONFIG string."
   (if (not config)
       nil
     (let* ((slot (car config))
-             (tag (nth 2 config)))
-        (ivy-eyebrowse-config-string slot tag))))
+	   (tag (nth 2 config)))
+      (eyebrowse--config-string slot tag))))
 
-(defun ivy-eyebrowse-config-string (slot tag)
+(defun eyebrowse--config-string (slot tag)
   "SLOT, TAG."
   (let* ((slot-string (int-to-string slot))
          (ret slot-string))
@@ -100,7 +99,7 @@
         (setq ret (format "%s: %s" slot-string tag))
       ret)))
 
-(defun ivy-eyebrowse-config-slot (config-string)
+(defun eyebrowse-config-slot (config-string)
   "CONFIG-STRING."
   (if (s-contains? ":" config-string)
       (string-to-number (first (split-string config-string ":")))
@@ -123,7 +122,7 @@
    (lambda (element)
      (if (not (-contains? collections element))
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
-       (let* ((slot (ivy-eyebrowse-config-slot element))
+       (let* ((slot (eyebrowse-config-slot element))
               (window-configs (eyebrowse--get 'window-configs))
               (config (assq slot window-configs)))
          (select-buffer-window-safely-at-config buffer config))))))
@@ -132,28 +131,28 @@
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
   (let* ((current-config (eyebrowse-get-current-config))
          (current-tag (nth 2 current-config))
-         (ivy-prompt (format "Select eyebrowse action (%s): " current-tag))
+         (prompt (format "Select eyebrowse action (%s): " current-tag))
          (collections))
     (dolist (window-config window-configs)
       (let* ((slot (nth 0 window-config))
              (tag (nth 2 window-config))
-             (element (ivy-eyebrowse-config-string slot tag)))
+             (element (eyebrowse--config-string slot tag)))
         (eyebrowse-message "window config: %S" element)
         (push element collections)))
     (setf collections (reverse collections))
     (eyebrowse-message "collections: %S" collections)
-    (ivy-read ivy-prompt collections
-              :preselect current-tag
-              :action action)))
+    (let ((selected (completing-read prompt collections nil t)))
+      ;; TODO: no pre select
+      (funcall action selected))))
 
 (defun select-buffer-window-safely-at-config (buffer &optional config)
   "Switch to window CONFIG, and select BUFFER."
   (let* ((locked-config (eyebrowse-get-lock-buffer-config buffer))
          (locked-slot (car locked-config))
          (target-config (or config locked-config))
-         (locked-conf-string (ivy-eyebrowse-get-config-string locked-config))
+         (locked-conf-string (eyebrowse-config-string locked-config))
          (target-slot (car target-config))
-         (target-conf-string (ivy-eyebrowse-get-config-string target-config)))
+         (target-conf-string (eyebrowse-config-string target-config)))
     (if target-slot
         (eyebrowse-switch-to-window-config target-slot))
     (cond (buffer
@@ -167,9 +166,9 @@
   (cond
    (buffer
     (if-let ((window (get-buffer-window buffer)))
-        (select-window window)
-      (switch-to-buffer
-       buffer nil 'force-same-window)))
+	    (select-window window)
+	    (switch-to-buffer
+	     buffer nil 'force-same-window)))
    (name
     (switch-to-buffer
      name nil 'force-same-window))))
@@ -190,39 +189,35 @@
       (let ((slot (eyebrowse--get 'current-slot)))
         (eyebrowse-rename-window-config slot tag)))))
 
+(defvar *eyebrowse-modify-action-alist*
+  '(("set tag" . eyebrowse-rename-window-config)
+    ("set as default config" . eyebrowse-set-as-default-config)
+    ("restore default config" . eyebrowse-restore-default-config)
+    ("create config" . eyebrowse-create-window-config-with-tag)
+    ("close config" . eyebrowse-close-window-config)))
+
 (defun eyebrowse-modify-config ()
   "."
   (interactive)
-  (eyebrowse-list-with-actions
-   (list (list "set tag" #'eyebrowse-rename-window-config)
-         (list "set as default config" #'eyebrowse-set-as-default-config)
-         (list "restore default config" #'eyebrowse-restore-default-config)
-         (list "create config" #'eyebrowse-create-window-config-with-tag)
-         (list "close config" #'eyebrowse-close-window-config))))
+  (eyebrowse-list-with-actions *eyebrowse-modify-action-alist*))
+
+(defvar *eyebrowse-modify-buffer-action-alist*
+  '(("lock buffer's config" . eyebrowse-lock-buffer-config)
+    ("free buffer's config" . eyebrowse-free-buffer-config)))
 
 (defun eyebrowse-modify-buffer-config ()
   "."
   (interactive)
-  (eyebrowse-list-with-actions
-   (list
-    (list "lock buffer's config" #'eyebrowse-lock-buffer-config)
-    (list "free buffer's config" #'eyebrowse-free-buffer-config))))
-
+  (eyebrowse-list-with-actions *eyebrowse-modify-buffer-action-alist*))
 
 (defun eyebrowse-list-with-actions (actions)
   "Select one of ACTIONS, and choose candidate from eyebrowse configs."
-  (let* ((ivy-actions (mapcar #'car actions))
-         (current-element (ivy-eyebrowse-current-config-string))
-         (ivy-prompt (format "Select eyebrowse action (config %s): " current-element)))
-    (eyebrowse-message "element: %s" current-element)
-    (ivy-read ivy-prompt ivy-actions
-              :action (lambda (action-string)
-                        (let ((action
-                               (first (remove-if-not
-                                       (lambda (ele)
-                                         (equal action-string (first ele)))
-                                       actions))))
-                          (command-execute (second action)))))))
+  (let* ((current-element (eyebrowse-current-config-string))
+         (prompt (format "Select eyebrowse action (config %s): " current-element))
+         (action (completing-read prompt actions nil t))
+         (func (alist-get action actions nil nil #'string=)))
+    (when func
+      (command-execute func))))
 
 (defun eyebrowse-get-lock-buffer-config (buffer)
   "Get the eyebrowse config that binding to the BUFFER."
@@ -246,7 +241,7 @@
    (lambda (element)
      (if (not (-contains? collections element))
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
-       (let* ((slot (ivy-eyebrowse-config-slot element))
+       (let* ((slot (eyebrowse-config-slot element))
               (config (eyebrowse-get-config-with-slot slot)))
          (eyebrowse-lock-with-config (current-buffer) config))))))
 
@@ -255,45 +250,30 @@
   (interactive)
   (setq-local *eyebrowse-locked-config* nil))
 
-(defun eyebrowse--ivy-switch-buffer ()
+(defun eyebrowse-switch-buffer ()
   "Switch to another buffer."
   (interactive)
-  (ivy-read "Switch to buffer: " #'internal-complete-buffer
-            :keymap ivy-switch-buffer-map
-            :preselect (buffer-name (other-buffer (current-buffer)))
-            :action #'eyebrowse--ivy-switch-buffer-action
-            :matcher #'ivy--switch-buffer-matcher
-            :caller 'eyebrowse--ivy-switch-buffer))
+  (let ((buffer (completing-read "Switch to buffer: " #'internal-complete-buffer nil t)))
+    ;; preselect: (buffer-name (other-buffer (current-buffer))
+    (funcall 'eyebrowse-switch-buffer-action buffer)))
 
-(defun eyebrowse--ivy-switch-buffer-action (buffer)
-  "Switch to BUFFER.
-BUFFER may be a string or nil.
-Copied from ivy-switch-buffer, and modified."
-  (if (zerop (length buffer))
-      (select-buffer-window-safely nil ivy-text)
-    (let ((virtual (assoc buffer ivy--virtual-buffers))
-          (view (assoc buffer ivy-views)))
-      (cond ((and virtual
-                  (not (get-buffer buffer)))
-             (find-file (cdr virtual)))
-            (view
-             (delete-other-windows)
-             (let (
-                   ;; silence "Directory has changed on disk"
-                   (inhibit-message t))
-               (ivy-set-view-recur (cadr view))))
-            ((eyebrowse-get-lock-buffer-config buffer)
-             (select-buffer-window-safely-at-config buffer))
-            (t
-             (eyebrowse-message "selected buffer: %S" buffer)
-             (let ((configs (eyebrowse--filter-window-config buffer t)))
-               (cond
-                ((zerop (length configs))
-                 (select-buffer-window-safely-at-config buffer))
-                ((equal 1 (length configs))
-                 (select-buffer-window-safely-at-config buffer (car configs)))
-                (t
-                 (eyebrowse-list-window-configs configs buffer)))))))))
+(defun eyebrowse-switch-buffer-action (buffer)
+  "Switch to BUFFER may be a string or nil."
+  (cond
+   ((zerop (length buffer))
+    (select-buffer-window-safely nil buffer))
+   ((eyebrowse-get-lock-buffer-config buffer)
+    (select-buffer-window-safely-at-config buffer))
+   (t
+    (eyebrowse-message "selected buffer: %S" buffer)
+    (let ((configs (eyebrowse--filter-window-config buffer t)))
+      (cond
+       ((zerop (length configs))
+        (select-buffer-window-safely-at-config buffer))
+       ((equal 1 (length configs))
+        (select-buffer-window-safely-at-config buffer (car configs)))
+       (t
+        (eyebrowse-list-window-configs configs buffer)))))))
 
 (defun eyebrowse--filter-window-config (target-buffer-name &optional include-current-config)
   "TARGET-BUFFER-NAME, INCLUDE-CURRENT-CONFIG."
@@ -319,17 +299,17 @@ Copied from ivy-switch-buffer, and modified."
                (if (not (-contains? filtered-window-config window-config))
                    (push window-config filtered-window-config))))))))
       (when (and (string-prefix-p "*" target-buffer-name)
-             include-current-config
-             (eq current-slot (car window-config))
-             (not (-contains? filtered-window-config window-config)))
+		 include-current-config
+		 (eq current-slot (car window-config))
+		 (not (-contains? filtered-window-config window-config)))
         (push window-config filtered-window-config)))
     (reverse filtered-window-config)))
 
 (defun eyebrowse-update-current-window-config ()
   "."
   (let* ((current-slot (eyebrowse--get 'current-slot))
-           (window-configs (eyebrowse--get 'window-configs))
-           (current-tag (nth 2 (assoc current-slot window-configs))))
+	 (window-configs (eyebrowse--get 'window-configs))
+	 (current-tag (nth 2 (assoc current-slot window-configs))))
     (eyebrowse--update-window-config-element
      (eyebrowse--current-window-config current-slot current-tag))))
 

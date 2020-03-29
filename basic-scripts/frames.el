@@ -16,9 +16,9 @@
                (buffer-name (buffer-name buffer))
                (file-name (buffer-file-name buffer))
                (locked-conf (and (boundp '*eyebrowse-locked-config*)
-                                 (ivy-eyebrowse-get-config-string *eyebrowse-locked-config*)))
-               (eb-conf (ivy-eyebrowse-current-config-string))
-               (last-conf (ivy-eyebrowse-get-config-string (eyebrowse-get-last-config))))
+                                 (eyebrowse-config-string *eyebrowse-locked-config*)))
+               (eb-conf (eyebrowse-current-config-string))
+               (last-conf (eyebrowse-config-string (eyebrowse-get-last-config))))
           ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
           (format "%s - [%s, %s, %s]" (or file-name buffer-name)
                   locked-conf eb-conf last-conf))))
