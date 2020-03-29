@@ -240,9 +240,21 @@ With PARSED message and PROC."
       (require 'system-util))
   (apply #'open-file-by-system (list data)))
 
+(defvar *erc-browse-function-list* '(browse-url-default-browser
+                                     eww-browse-url
+                                     w3m-browse-url
+                                     browse-url-firefox
+                                     browse-url-chrome))
+
 (defun erc-button-link-callback (data)
   "When click the nick name erc-button, response with the DATA to open the link."
-  (browse-url data))
+  (let ((browse-url-browser-function
+         (intern
+          (completing-read "Select the browser: "
+                           *erc-browse-function-list* nil t))))
+    (if (not (fboundp browse-url-browser-function))
+        (message "%s is not implemented!" browse-url-browser-function)
+      (browse-url data))))
 
 
 (define-derived-mode erc-aggregate-mode text-mode "ErcA"
