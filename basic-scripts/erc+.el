@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2020 gadmyth
 
-;; Author: erc+.el <gadmyth@gmail.com}>
-;; Version: 1.0
+;; Author: erc+.el <gadmyth@gmail.com>
+;; Version: 1.0.1
 ;; Package-Version: 20200324.001
 ;; Package-Requires: erc, s, text-mode
 ;; Keywords: erc+.el
@@ -42,6 +42,7 @@
 (defvar *erc-debug* nil)
 (defvar *erc-aggregate-buffer* nil)
 (defvar erc-aggregate-refresh t)
+(defvar erc-default-width 100)
 
 (defmacro erc-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
@@ -172,9 +173,9 @@ With PARSED message and PROC."
     (when-let ((index (string-match "\\(https?://[^\s]*\\)" msg)))
       (setq erc-link-start index)
       (setq erc-msg-link (substring msg (match-beginning 1) (match-end 1)))
-      (setq msg (replace-regexp-in-string erc-msg-link "链接" msg))
+      (setq msg (concat (substring msg 0 (match-beginning 1)) "链接" (substring msg (match-end 1))))
       (setq erc-link-end (+ erc-link-start 2)))
-         
+    
     ;; append msg
     (with-current-buffer *erc-aggregate-buffer*
       (erc-save-excursion
@@ -199,7 +200,11 @@ With PARSED message and PROC."
          ;; insert file or picture
          (when msg-file-path
            (cond (msg-picture-p
-                  (insert-image (create-image msg-file-path nil nil))
+                  (let ((image (create-image msg-file-path)))
+                    (image-flush image)
+                    (plist-put (cdr image) :type 'imagemagick)
+                    (plist-put (cdr image) :width erc-default-width)
+                    (insert-image image))
                   (insert "\n"))
                  (t
                   (erc-button-add-button (+ new-msg-start msg-start)
