@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20200324.001
+;; Version: 1.0.002
+;; Package-Version: 20200403.001
 ;; Package-Requires: erc, s, text-mode
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -135,7 +135,7 @@ With PARSED message and PROC."
 
 (defmacro erc-save-excursion (&rest body)
   "Eval the BODY using 'save-excursion or not by SAVE-EXCURSION-P."
-  `(cond (,erc-aggregate-refresh
+  `(cond ((eval erc-aggregate-refresh)
           (message "no save excursion")
          ,@body)
         (t
@@ -216,8 +216,7 @@ With PARSED message and PROC."
            (erc-button-add-button (+ new-msg-start msg-start erc-link-start)
                                   (+ new-msg-start msg-start erc-link-end)
                                   #'erc-button-link-callback
-                                  nil (list erc-msg-link)))
-         (set-window-point (get-buffer-window *erc-aggregate-buffer*) (point-max)))))
+                                  nil (list erc-msg-link))))))
     ;; show window
     (when erc-aggregate-refresh
       (display-buffer *erc-aggregate-buffer*))))
