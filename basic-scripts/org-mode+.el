@@ -5,6 +5,7 @@
 
 (defvar *org-cap-temp*)
 (defvar *temp-org-capture-buffer* nil)
+(defvar show-temp-capture-buffer-p nil)
 
 (defun display-temp-capture-buffer ()
   "."
@@ -26,7 +27,8 @@
          (encoded-line (url-encode-url line))
          (formatted-line (format "[[file:%s::%s][%s]]" (buffer-file-name) encoded-line description)))
     (setq *org-cap-temp* formatted-line)
-    (display-temp-capture-buffer)))
+    (when show-temp-capture-buffer-p
+      (display-temp-capture-buffer))))
 
 (defun org-capture-insert-temp ()
   "."
