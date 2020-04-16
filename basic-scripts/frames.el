@@ -127,8 +127,28 @@ Copied some codes from window-numbering.el."
        (if (listp cand)
            (swap-window (cdr cand)))))))
 
+(defun copy-window-in-current-frame ()
+  "."
+  (interactive)
+  (let* ((buffer (current-buffer))
+         (current-window (get-buffer-window buffer))
+         (windows (delq current-window (window-list)))
+         (cands (mapcar (lambda (window)
+                          (cons (buffer-name (window-buffer window)) window))
+                        windows))
+         (preselect (caar cands)))
+    (ivy-read
+     "Select the buffer to copy: " cands
+     :preselect preselect
+     :action
+     (lambda (cand)
+       (when (listp cand)
+         (select-window (cdr cand))
+         (switch-to-buffer buffer))))))
+
 (global-set-key (kbd "C-c m") 'goto-main-window)
-(global-set-key (kbd "C-c C-s") 'swap-window-in-current-frame)
+(global-set-key (kbd "C-c M-s") 'swap-window-in-current-frame)
+(global-set-key (kbd "C-c M-c") 'copy-window-in-current-frame)
 (global-set-key (kbd "C-c RET") 'swap-to-main-window)
 (global-set-key (kbd "C-c C-n") 'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
