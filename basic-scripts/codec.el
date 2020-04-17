@@ -36,7 +36,7 @@
 
 (defun url-encode-region (beg end)
   "Url encode the string of region from BEG to END."
-  (interactive)
+  (interactive "r")
   (let ((url-str (delete-and-extract-region beg end)))
     (insert (url-hexify-string url-str))))
 
