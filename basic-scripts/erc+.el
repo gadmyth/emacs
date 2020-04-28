@@ -4,7 +4,7 @@
 
 ;; Author: erc+.el <gadmyth@gmail.com>
 ;; Version: 1.0.002
-;; Package-Version: 20200403.001
+;; Package-Version: 20200428.001
 ;; Package-Requires: erc, s, text-mode
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -244,21 +244,30 @@ With PARSED message and PROC."
       (require 'system-util))
   (apply #'open-file-by-system (list data)))
 
-(defvar *erc-browse-function-list* '(browse-url-default-browser
-                                     eww-browse-url
-                                     w3m-browse-url
-                                     browse-url-firefox
-                                     browse-url-chrome))
+(defvar *erc-browse-function-list* '((browse-url-default-browser . browse-url)
+                                     (eww-browse-url . browse-url)
+                                     (w3m-browse-url . browse-url)
+                                     (browse-url-firefox . browse-url)
+                                     (browse-url-chrome . browse-url)
+                                     (erc-show-link-url . erc-show-link-url)))
+
+(defun erc-show-link-url (url)
+  "Show erc link's URL."
+  (message "erc link url is: %s" url))
 
 (defun erc-button-link-callback (data)
   "When click the nick name erc-button, response with the DATA to open the link."
-  (let ((browse-url-browser-function
-         (intern
-          (completing-read "Select the browser: "
-                           *erc-browse-function-list* nil t))))
-    (if (not (fboundp browse-url-browser-function))
-        (message "%s is not implemented!" browse-url-browser-function)
-      (browse-url data))))
+  (let* ((action-list *erc-browse-function-list*)
+         (action (intern (completing-read "Select the browser: "
+                                          action-list nil t)))
+         (func (alist-get action action-list nil nil #'string=))
+         (browse-url-browser-function action))
+    (erc-message "browser function is: %s" browse-url-browser-function)
+    (if (equal func #'browse-url)
+        (if (not (fboundp browse-url-browser-function))
+            (message "%s is not implemented!" browse-url-browser-function)
+          (browse-url data))
+      (funcall func data))))
 
 
 (define-derived-mode erc-aggregate-mode text-mode "ErcA"
