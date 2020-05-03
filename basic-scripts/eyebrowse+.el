@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.1
-;; Package-Version: 20200317.001
+;; Version: 1.0.2
+;; Package-Version: 20200503.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -131,18 +131,18 @@
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
   (let* ((current-config (eyebrowse-get-current-config))
          (current-tag (nth 2 current-config))
+         (default-candidate (eyebrowse-config-string current-config))
          (prompt (format "Select eyebrowse action (%s): " current-tag))
          (collections))
     (dolist (window-config window-configs)
       (let* ((slot (nth 0 window-config))
              (tag (nth 2 window-config))
-             (element (eyebrowse--config-string slot tag)))
+             (element (eyebrowse-config-string window-config)))
         (eyebrowse-message "window config: %S" element)
         (push element collections)))
     (setf collections (reverse collections))
     (eyebrowse-message "collections: %S" collections)
-    (let ((selected (completing-read prompt collections nil t)))
-      ;; TODO: no pre select
+    (let ((selected (completing-read prompt collections nil t nil nil default-candidate)))
       (funcall action selected))))
 
 (defun select-buffer-window-safely-at-config (buffer &optional config)
