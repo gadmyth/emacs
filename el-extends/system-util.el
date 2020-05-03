@@ -13,6 +13,15 @@
             (format "gvim %s" path))))
     (shell-command-to-string command)))
 
+(defun open-file-by-system (file-path)
+  "Open file of FILE-PATH with system software."
+  (let ((command
+         (cond ((eq window-system 'ns) (format "open -a %s" file-path))
+               ((eq window-system 'x) (format "xdg-open %s" file-path))
+               (t nil))))
+    (message "open-file-by-system: %s" command)
+    (and command (shell-command-to-string command))))
+
 (defun open-file-manager ()
   "."
   (interactive)
