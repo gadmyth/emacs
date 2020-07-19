@@ -95,5 +95,13 @@ Version 2017-05-24"
   (let ((uuid (replace-regexp-in-string "-" "" (org-id-uuid))))
     (insert uuid)))
 
+(defun prepend-major-mode-language ()
+  "PREPEND-MAJOR-MODE-LANGUAGE ."
+  (interactive)
+  (goto-char 0)
+  (let* ((major-mode-string (symbol-name major-mode))
+         (major-mode-language (replace-regexp-in-string "-mode" "" major-mode-string)))
+    (insert (format "# -*- %s -*-\n" major-mode-language))))
+
 (provide 'work)
 ;;; work.el ends here
