@@ -2,4 +2,4 @@
 # name: ipt-accept
 # key: ipt-acpt
 # --
-sudo iptables -I ${1:INPUT} -p ${5:tcp} --dport ${10:80} -j ACCEPT
+sudo iptables -I ${1:INPUT} ${2:-s:${3:}} -p ${5:tcp} --dport ${10:80} -j ACCEPT
