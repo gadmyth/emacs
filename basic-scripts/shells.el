@@ -3,7 +3,7 @@
 ;;; Code:
 
 (defconst +LOAD-SHELL-PROFILE+ (if (eq window-system 'ns)
-                                   "source ~/.profile; source ~/mybash_profile"
+                                   "source ~/.profile; source ~/.bash_alias; source ~/mybash_profile"
                                  "source ~/.bashrc"))
 
 (let* ((command (format "%s; echo $PATH" +LOAD-SHELL-PROFILE+))
