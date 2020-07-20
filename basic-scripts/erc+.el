@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.002
-;; Package-Version: 20200428.001
-;; Package-Requires: erc, s, text-mode
+;; Version: 1.0.003
+;; Package-Version: 20200721.001
+;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/erc+.el
@@ -36,6 +36,7 @@
 (require 'erc)
 (require 's)
 (require 'text-mode)
+(require 'system-util)
 
 
 (defvar erc-nick nil)
@@ -251,6 +252,8 @@ With PARSED message and PROC."
                                      (browse-url-chrome . browse-url)
                                      (erc-show-link-url . erc-show-link-url)))
 
+(defvar *erc-image-action-list* '(erc-open-image))
+
 (defun erc-show-link-url (url)
   "Show erc link's URL."
   (message "erc link url is: %s" url))
@@ -261,7 +264,7 @@ With PARSED message and PROC."
          (action (intern (completing-read "Select the browser: "
                                           action-list nil t)))
          (func (alist-get action action-list nil nil #'string=))
-         (browse-url-browser-function action))
+          (browse-url-browser-function action))
     (erc-message "browser function is: %s" browse-url-browser-function)
     (if (equal func #'browse-url)
         (if (not (fboundp browse-url-browser-function))
@@ -269,15 +272,35 @@ With PARSED message and PROC."
           (browse-url data))
       (funcall func data))))
 
+(defun image-at-point ()
+  "Get the image at point."
+  (interactive)
+  (let ((image (get-text-property (point) 'display)))
+    (if (eq 'image (car image)) image nil)))
+
+(defun erc-open-image (&rest image)
+  "Open the IMAGE by it's path."
+  (if-let ((image-path (plist-get (cdr image) :file)))
+      (open-file-by-system image-path)))
+
+(defun erc-right-click ()
+  "Double click in the erc aggregate buffer."
+  (interactive)
+  (if-let ((image (image-at-point)))
+      (let* ((action-list *erc-image-action-list*)
+             (action (intern (completing-read "Select the action: "
+                                              action-list nil t))))
+        (apply action image))))
 
 (define-derived-mode erc-aggregate-mode text-mode "ErcA"
   ;; The mode for *erc-aggregate-buffer*.
-  )
+  (use-local-map erc-aggregate-mode-map))
 
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent erc-aggregate-mode-map text-mode-map)
+    (set-keymap-parent map text-mode-map)
     (define-key map "q" 'quit-window)
+    (define-key map (kbd "<mouse-3>") 'erc-right-click)
     map))
 
 (provide 'erc+)
