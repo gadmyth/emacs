@@ -4,7 +4,7 @@
 
 (defconst +LOAD-SHELL-PROFILE+ (if (eq window-system 'ns)
                                    "source ~/.profile; source ~/.bash_alias; source ~/mybash_profile"
-                                 "source ~/.bashrc"))
+                                 "source ~/.bashrc; source ~/.bash_alias; source ~/mybash_profile"))
 
 (let* ((command (format "%s; echo $PATH" +LOAD-SHELL-PROFILE+))
        (path (shell-command-to-string command)))
