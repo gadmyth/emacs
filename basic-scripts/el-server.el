@@ -56,7 +56,7 @@
 
 (defvar *my-default-elnode-port* 8000)
 
-(defvar *my-default-elnode-host* "localhost")
+(defvar *my-default-elnode-host* "0.0.0.0")
 
 (defun my-elnode-add-handlers (handlers)
   "HANDLERS: ."

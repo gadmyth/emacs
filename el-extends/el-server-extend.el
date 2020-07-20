@@ -128,6 +128,19 @@
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
       (elnode-http-return httpcon (decode-coding-string (url-unhex-string content) 'utf-8)))))
 
+(defun elnode-capture ()
+  "DOCROOT: , PORT: , HOST: . Capture the content, append it to *scratch* buffer."
+  (lambda (httpcon)
+    (let* ((content (elnode-http-param httpcon "content")))
+      (message "elnode-capture, capture content: %s" content)
+      (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
+      (with-current-buffer (get-buffer "*scratch*")
+        (save-excursion
+          (goto-char (point-max))
+          (newline)
+          (insert content)))
+      (elnode-http-return httpcon "ok"))))
+
 (defun elnode-cache-getter ()
   "DOCROOT: , PORT: , HOST: . Make a redis cache server."
   (lambda (httpcon)
@@ -189,7 +202,8 @@
    ("^/cache/keys/\\(.*\\)$" . ,(byte-compile (elnode-cache-keys)))
    ("^/cache/del/\\(.*\\)$" . ,(byte-compile (elnode-cache-delete)))
    ("^/cache/get/\\(.*\\)$" . ,(byte-compile (elnode-cache-getter)))
-   ("^/cache/save/\\(.*\\)$" . ,(byte-compile (elnode-cache-saver)))))
+   ("^/cache/save/\\(.*\\)$" . ,(byte-compile (elnode-cache-saver)))
+   ("^/capture/\\(.*\\)$" . ,(byte-compile (elnode-capture)))))
 
 (defun open-org-file-by-elnode ()
   "."
