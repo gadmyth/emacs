@@ -4,7 +4,7 @@
 
 ;; Author: erc+.el <gadmyth@gmail.com>
 ;; Version: 1.0.003
-;; Package-Version: 20200721.001
+;; Package-Version: 20200721.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -292,16 +292,16 @@ With PARSED message and PROC."
                                               action-list nil t))))
         (apply action image))))
 
-(define-derived-mode erc-aggregate-mode text-mode "ErcA"
-  ;; The mode for *erc-aggregate-buffer*.
-  (use-local-map erc-aggregate-mode-map))
-
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map text-mode-map)
     (define-key map "q" 'quit-window)
     (define-key map (kbd "<mouse-3>") 'erc-right-click)
     map))
+
+(define-derived-mode erc-aggregate-mode text-mode "ErcA"
+  ;; The mode for *erc-aggregate-buffer*.
+  (use-local-map erc-aggregate-mode-map))
 
 (provide 'erc+)
 ;;; erc+.el ends here
