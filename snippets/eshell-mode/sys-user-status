@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: user system status
+# key: sys-user-stat
+# --
+systemctl --user status ${1:service}

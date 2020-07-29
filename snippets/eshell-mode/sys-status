@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: systemctl status
+# key: sys-stat
+# --
+sudo systemctl status ${1:service}
