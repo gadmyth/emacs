@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.2
-;; Package-Version: 20200503.001
+;; Version: 1.0.3
+;; Package-Version: 20200801.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -105,7 +105,7 @@
       (string-to-number (first (split-string config-string ":")))
     (string-to-number config-string)))
 
-(defun eyebrowse-list-configs ()
+(defun eyebrowse-list-configs (&rest _)
   "."
   (interactive)
   (eyebrowse-list-window-configs (eyebrowse--get 'window-configs) nil))
@@ -173,7 +173,7 @@
     (switch-to-buffer
      name nil 'force-same-window))))
 
-(defun eyebrowse-switch-other-buffer ()
+(defun eyebrowse-switch-other-buffer (&rest _)
   "Switch to other buffer, and switch to the window config binding to the buffer first if necessary."
   (interactive)
   (let* ((buffer (other-buffer)))
@@ -196,7 +196,7 @@
     ("create config" . eyebrowse-create-window-config-with-tag)
     ("close config" . eyebrowse-close-window-config)))
 
-(defun eyebrowse-modify-config ()
+(defun eyebrowse-modify-config (&rest _)
   "."
   (interactive)
   (eyebrowse-list-with-actions *eyebrowse-modify-action-alist*))
@@ -205,7 +205,7 @@
   '(("lock buffer's config" . eyebrowse-lock-buffer-config)
     ("free buffer's config" . eyebrowse-free-buffer-config)))
 
-(defun eyebrowse-modify-buffer-config ()
+(defun eyebrowse-modify-buffer-config (&rest _)
   "."
   (interactive)
   (eyebrowse-list-with-actions *eyebrowse-modify-buffer-action-alist*))
@@ -250,7 +250,7 @@
   (interactive)
   (setq-local *eyebrowse-locked-config* nil))
 
-(defun eyebrowse-switch-buffer ()
+(defun eyebrowse-switch-buffer (&rest _)
   "Switch to another buffer."
   (interactive)
   (let ((buffer (completing-read "Switch to buffer: " #'internal-complete-buffer nil t)))

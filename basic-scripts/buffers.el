@@ -22,10 +22,11 @@
     (funcall (and initial-major-mode))
     (setq buffer-offer-save t)))
 
-(defun switch-buffer-default-scratch (name)
+(defun switch-buffer-default-scratch (&rest _)
   "NAME: ."
-  (interactive (list (read-string "Switch buffer(*scratch*): " nil nil "*scratch*")))
-  (let ((buffer (get-buffer name)))
+  (interactive)
+  (let* ((name (read-string "Switch buffer(*scratch*): " nil nil "*scratch*"))
+         (buffer (get-buffer name)))
     (if (buffer-live-p buffer)
         (progn
           (switch-to-buffer buffer)
