@@ -12,8 +12,9 @@
  (lambda ()
    (call-after
     1
+    ;; This could use (emacs-init-time)
     (message "**** Emacs startup end in %s with %d garbage collections *****"
-             (float-time (time-subtract after-init-time before-init-time))
+             (emacs-init-time)
              gcs-done))))
 
 (provide 'loading-config)
