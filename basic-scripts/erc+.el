@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.003
-;; Package-Version: 20200721.002
+;; Version: 1.0.004
+;; Package-Version: 20200805.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -252,7 +252,7 @@ With PARSED message and PROC."
                                      (browse-url-chrome . browse-url)
                                      (erc-show-link-url . erc-show-link-url)))
 
-(defvar *erc-image-action-list* '(erc-open-image))
+(defvar *erc-image-action-list* '(erc-ffap-image erc-open-image))
 
 (defun erc-show-link-url (url)
   "Show erc link's URL."
@@ -272,7 +272,7 @@ With PARSED message and PROC."
           (browse-url data))
       (funcall func data))))
 
-(defun image-at-point ()
+(defun erc-image-at-point ()
   "Get the image at point."
   (interactive)
   (let ((image (get-text-property (point) 'display)))
@@ -283,10 +283,15 @@ With PARSED message and PROC."
   (if-let ((image-path (plist-get (cdr image) :file)))
       (open-file-by-system image-path)))
 
+(defun erc-ffap-image (&rest image)
+  "Open the IMAGE by it's path."
+  (if-let ((image-path (plist-get (cdr image) :file)))
+      (ffap image-path)))
+
 (defun erc-right-click ()
   "Double click in the erc aggregate buffer."
   (interactive)
-  (if-let ((image (image-at-point)))
+  (if-let ((image (erc-image-at-point)))
       (let* ((action-list *erc-image-action-list*)
              (action (intern (completing-read "Select the action: "
                                               action-list nil t))))
