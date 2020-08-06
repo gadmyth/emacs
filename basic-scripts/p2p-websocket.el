@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.1
-;; Package-Version: 20200805.001
+;; Version: 0.1.2
+;; Package-Version: 20200806.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -38,6 +38,7 @@
 (defvar *p2p-ws-server* nil)
 (defvar *p2p-ws-server-host* "0.0.0.0")
 (defvar *p2p-ws-server-port* 3000)
+(defvar *p2p-ws-client-conns* '())
 
 
 ;; -*- websocket server -*-
@@ -82,10 +83,15 @@
 (defun connect-websocket-server (host port)
   "Connect to a websocket server with HOST and PORT."
   (interactive "splease input host: \nsplease input port: ")
-  (setq my-websocket
-        (websocket-open (format "ws://%s:%s" host port)
-                      :on-message #'websocket-client-message-handler
-                      :on-close #'websocket-client-close-handler)))
+  (let* ((ws-url (format "ws://%s:%s" host port))
+         (ws-conns (p2p-ws-filter-connection ws-url)))
+    (message "%S" ws-conns)
+    (if (> (length ws-conns) 0)
+        (message "The connection %s already exists!" ws-url)
+      (let ((new-ws-conn (websocket-open ws-url
+                                         :on-message #'websocket-client-message-handler
+                                         :on-close #'websocket-client-close-handler)))
+        (push new-ws-conn *p2p-ws-client-conns*)))))
 
 (defun websocket-client-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
@@ -94,12 +100,29 @@
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
-  (message "client websocket closed"))
+  (message "client websocket %s closed" (websocket-url ws)))
 
-(defun send-websocket-message-1 (message)
+(defun websocket-send-message (message)
   "Send MESSAGE though websocket."
   (interactive "splease input the message to send: ")
-  (websocket-send-text my-websocket message))
+  (p2p-ws-send-text message))
+
+(defun p2p-ws-send-text (message)
+  "Send MESSAGE through the selected websocket connection."
+  (interactive "splease input the message to send: ")
+  (let* ((ws-url (completing-read "Select the connection: "
+                                  (mapcar #'websocket-url *p2p-ws-client-conns*) nil t))
+         (ws-conns (p2p-ws-filter-connection ws-url)))
+    (if (> (length ws-conns) 0)
+        (let ((conn (car ws-conns)))
+          (send-websocket-message conn message)))))
+
+(defun p2p-ws-filter-connection (url)
+  "Filter the connections by URL."
+  (let (ws-conns)
+    (dolist (conn *p2p-ws-client-conns* ws-conns)
+      (if (string-equal url (websocket-url conn))
+          (push conn ws-conns)))))
 
 (provide 'p2p-websocket)
 ;;; p2p-websocket.el ends here
