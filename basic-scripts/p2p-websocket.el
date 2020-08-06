@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Package-Version: 20200805.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
@@ -76,7 +76,7 @@
 (defun send-websocket-message (ws message)
   "Send MESSAGE though websocket WS."
   (websocket-send-text ws message))
-​
+
 ;; -*- websocket client -*-
 
 (defun connect-websocket-server (host port)
