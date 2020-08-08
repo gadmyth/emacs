@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.3
-;; Package-Version: 20200807.001
+;; Version: 0.1.4
+;; Package-Version: 20200808.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -62,16 +62,16 @@
 
 (defun websocket-server-open-handler (ws)
   "Handle the websocket WS's open event."
-  (message "server websocket %s opened" (websocket-url ws)))
+  (message "*** websocket server opened %s ***" (websocket-remote-name ws)))
 
 (defun websocket-server-close-handler (ws)
   "Handle the websocket WS's close event."
-  (message "server websocket %s closed" (websocket-url ws)))
+  (message "*** websocket server closed %s ***" (websocket-remote-name ws)))
 
 (defun websocket-server-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
-    (message "server received websocket message from %s:\n%s" (websocket-url ws) message)
+    (message "*** websocket server received message from %s ***" (websocket-remote-name ws))
     (p2p-update-websocket-buffer ws frame)
     (cond ((equal "hello" message)
            (websocket-send-text ws "world"))
@@ -96,11 +96,12 @@
 (defun websocket-client-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
-    (message "client received websocket message: %s" message)))
+    (message "websocket client received message from: %s" (websocket-url ws))
+    (p2p-update-websocket-buffer ws frame)))
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
-  (message "client websocket %s closed" (websocket-url ws))
+  (message "websocket client %s closed" (websocket-url ws))
   (p2p-ws-client-list-remove ws))
 
 (defun websocket-send-message (message)
@@ -111,35 +112,50 @@
 (defun p2p-ws-send-text (message)
   "Send MESSAGE through the selected websocket connection."
   (interactive "splease input the message to send: ")
-  (let* ((ws-url (completing-read "Select the connection: "
-                                  (mapcar #'websocket-url *p2p-ws-client-list*) nil t))
-         (ws-list (p2p-ws-filter-with-url ws-url)))
-    (if (= (length ws-list) 0)
-        (message "Can't send message, for no websocket is opened!")
-      (let ((ws (car ws-list)))
-        (when (not (websocket-openp ws))
-          (p2p-ws-client-list-remove ws)
-          (setq ws (websocket-ensure-connected ws)))
-        (when (websocket-openp ws)
-          (websocket-send-text ws message))))))
+  (p2p-ws-list-with-action
+   (when (not (websocket-openp ws))
+     (message "websocket %s is not opened, open a new again!" (websocket-remote-name nil))
+     (p2p-ws-client-list-remove ws)
+     (setq ws (websocket-ensure-connected ws)))
+   (when (websocket-openp ws)
+     (message "send message to %s" (websocket-remote-name ws))
+     (websocket-send-text ws message))))
+
+(defmacro p2p-ws-list-with-action (&rest body)
+  "List all the server inbound and client outbound websocket, select one and execute the BODY."
+  `(let* ((ws-url (completing-read "Select the connection: "
+                                   (concatenate
+                                    'list
+                                    (mapcar #'websocket-remote-name websocket-server-websockets)
+                                    (mapcar #'websocket-remote-name *p2p-ws-client-list*))
+                                   nil t))
+          (ws-list (websocket-inbound-filter-with-url ws-url)))
+     (message "ws-list length: %S" (length ws-list))
+     (if (> (length ws-list) 0)
+         (let ((ws (car ws-list)))
+           (message "ws opened: %S" (websocket-openp ws))
+           ,@body))))
 
 (defun p2p-ws-close ()
   "Send MESSAGE through the selected websocket connection."
   (interactive)
-  (let* ((ws-url (completing-read "Select the connection: "
-                                  (mapcar #'websocket-url *p2p-ws-client-list*) nil t))
-         (ws-list (p2p-ws-filter-with-url ws-url)))
-    (if (= (length ws-list) 0)
-        (message "Can't close websocket, for no websocket is selected!")
-      (let ((ws (car ws-list)))
-        (when (websocket-openp ws)
-          (websocket-close ws))))))
+  (p2p-ws-list-with-action
+   (when (websocket-openp ws)
+     (websocket-close ws))))
 
 (defun p2p-ws-filter-with-url (url)
   "Filter the connections by URL."
   (let (ws-list)
     (dolist (ws *p2p-ws-client-list* ws-list)
       (if (string-equal url (websocket-url ws))
+          (push ws ws-list)))))
+
+(defun websocket-inbound-filter-with-url (url)
+  "Filter the inbound websocket by URL."
+  (let ((origin-ws-list (concatenate 'list websocket-server-websockets *p2p-ws-client-list*))
+        ws-list)
+    (dolist (ws origin-ws-list ws-list)
+      (if (string-equal url (websocket-remote-name ws))
           (push ws ws-list)))))
 
 (defun p2p-ws-client-list-remove (ws)
@@ -166,7 +182,7 @@
     (erc-save-excursion
      (goto-char (point-max))
      (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-            (sender (websocket-url ws))
+            (sender (websocket-remote-name ws))
             (msg (websocket-frame-text frame))
             (content (format "%s [%s]:\n%s\n\n" sender now msg))
             (new-msg-start (point-max))
@@ -178,6 +194,21 @@
                             'font-lock-face 'erc-notice-face content)
       (insert content)
       (display-buffer *p2p-websocket-buffer*)))))
+
+(defun websocket-remote-name (ws)
+  "Get the WS's sender of remote."
+  (if (websocket-p ws)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (remote-info (mapcar 'identity (plist-get conn-info :remote)))
+             (sender (format "%s.%s.%s.%s:%s"
+                             (first remote-info)
+                             (second remote-info)
+                             (third remote-info)
+                             (fourth remote-info)
+                             (fifth remote-info))))
+        (message "remote-name: %s" sender)
+        sender)))
 
 (defvar p2p-websocket-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
