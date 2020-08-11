@@ -115,5 +115,15 @@
       (re-search-backward "^" nil t)
       (replace-regexp word new-word nil (line-beginning-position) (line-end-position)))))
 
+(defun sql-in-collection (start end)
+  "Format and insert sql IN collection from START to END of region."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (lines (split-string region-string "\n"))
+           (lines-with-action (mapcar (lambda (str) (format "'%s'" str)) lines)))
+      (goto-char end)
+      (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
+
 (provide 'editors)
 ;;; editors.el ends here
