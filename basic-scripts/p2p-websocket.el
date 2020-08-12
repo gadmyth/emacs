@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.4
-;; Package-Version: 20200808.001
+;; Version: 0.1.5
+;; Package-Version: 20200813.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -113,13 +113,19 @@
   "Send MESSAGE through the selected websocket connection."
   (interactive "splease input the message to send: ")
   (p2p-ws-list-with-action
-   (when (not (websocket-openp ws))
-     (message "websocket %s is not opened, open a new again!" (websocket-remote-name nil))
-     (p2p-ws-client-list-remove ws)
-     (setq ws (websocket-ensure-connected ws)))
-   (when (websocket-openp ws)
-     (message "send message to %s" (websocket-remote-name ws))
-     (websocket-send-text ws message))))
+   (p2p-ws-do-send-text message ws)))
+
+(defun p2p-ws-do-send-text (message ws)
+  "Do send the MESSAGE to WS."
+  ;; check the websocket is opened or not
+  (when (not (websocket-openp ws))
+    (message "websocket %s is not opened, open a new again!" (websocket-remote-name nil))
+    (p2p-ws-client-list-remove ws)
+    (setq ws (websocket-ensure-connected ws)))
+  ;; recheck and send the message
+  (when (websocket-openp ws)
+    (message "send message to %s" (websocket-remote-name ws))
+    (websocket-send-text ws message)))
 
 (defmacro p2p-ws-list-with-action (&rest body)
   "List all the server inbound and client outbound websocket, select one and execute the BODY."
@@ -168,6 +174,54 @@
 
 ;; -*- p2p-websocket-buffer -*-
 
+(defface p2p-websocket-notice-face
+  '((default :weight bold)
+    (((class color) (min-colors 88)) :foreground "SlateBlue")
+    (t :foreground "blue"))
+  "p2p websocket face for notices."
+  :group 'p2p-websocket-faces)
+
+(defcustom p2p-websocket-button-mouse-face 'highlight
+  "Face used for mouse highlighting in p2p websocket buffers.
+
+Buttons will be displayed in this face when the mouse cursor is
+above them."
+  :type 'face
+  :group 'p2p-websocket-faces)
+
+(defface p2p-websocket-button-face '((t :weight bold))
+  "p2p websocket button face."
+  :group 'p2p-websokcet-faces)
+
+(defvar p2p-websocket-button-keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") 'p2p-websocket-button-press-button)
+    (define-key map (kbd "<mouse-2>") 'p2p-websocket-button-click-button)
+    (define-key map [follow-link] 'mouse-face)
+    (set-keymap-parent map p2p-websocket-aggregate-mode-map)
+    map)
+  "Local keymap for PWA buttons.")
+
+(defun p2p-websocket-button-press-button (&rest _ignore)
+  "Check text at point for a callback function.
+If the text at point has a `p2p-websocket-button-callback' property,
+call it with the value of the `pp2-websocket-data' text property."
+  (interactive)
+  (let* ((data (get-text-property (point) 'p2p-websocket-data))
+         (fun (get-text-property (point) 'p2p-websocket-button-callback)))
+    (unless fun
+      (message "No button at point"))
+    (when (and fun (symbolp fun) (not (fboundp fun)))
+      (error "Function %S is not bound" fun))
+    (apply fun data)))
+
+(defun p2p-websocket-button-click-button (_ignore event)
+  "Call `p2p-websocket-button-press-button'."
+  (interactive "P\ne")
+  (save-excursion
+    (mouse-set-point event)
+    (p2p-websocket-button-press-button)))
+
 (defun p2p-update-websocket-buffer (ws frame)
   "Parse the websocket WS's FRAME message and update *p2p-websocket-buffer*."
   (when (not (buffer-live-p *p2p-websocket-buffer*))
@@ -179,21 +233,54 @@
       (p2p-websocket-aggregate-mode)))
   
   (with-current-buffer *p2p-websocket-buffer*
-    (erc-save-excursion
-     (goto-char (point-max))
-     (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-            (sender (websocket-remote-name ws))
-            (msg (websocket-frame-text frame))
-            (content (format "%s [%s]:\n%s\n\n" sender now msg))
-            (new-msg-start (point-max))
-            (time-start (- (s-index-of now content) 1))
-            (time-end (+ time-start (length now) 2))
-            (msg-start (+ time-end 2))
-            (msg-end (+ msg-start (length msg))))
-     (erc-put-text-property time-start time-end
-                            'font-lock-face 'erc-notice-face content)
-      (insert content)
-      (display-buffer *p2p-websocket-buffer*)))))
+    (save-excursion
+      (goto-char (point-max))
+      (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
+             (sender (websocket-remote-name ws))
+             (msg (websocket-frame-text frame))
+             (content (format "%s [%s]:\n%s\n\n" sender now msg))
+             (new-msg-start (point-max))
+             (sender-start new-msg-start)
+             (sender-end (+ sender-start (length sender)))
+             (time-start (- (s-index-of now content) 1))
+             (time-end (+ time-start (length now) 2))
+             (msg-start (+ time-end 2))
+             (msg-end (+ msg-start (length msg))))
+        
+        ;; add the sender property
+        (put-text-property 0 (length sender)
+                           'font-lock-face 'p2p-websocket-button-face content)
+        ;; add the time property
+        (put-text-property time-start time-end
+                           'font-lock-face 'p2p-websocket-notice-face content)
+        ;; insert the whole message
+        (insert content)
+        ;; add sender button
+        (p2p-websocket-add-target-button sender-start sender-end sender)
+        )))
+  
+  (display-buffer *p2p-websocket-buffer*))
+
+(defun p2p-websocket-add-target-button (start end sender)
+  "Add a button property to from START to END with target SENDER."
+  (add-text-properties
+   start end
+   (nconc (list 'mouse-face p2p-websocket-button-mouse-face)
+          (list 'p2p-websocket-button-callback #'p2p-websocket-sender-callback)
+          (list 'keymap p2p-websocket-button-keymap)
+          (list 'rear-nonsticky t)
+          (list 'p2p-websocket-data (list sender)))))
+
+(defun p2p-websocket-sender-callback (data)
+  "Callback of the p2p websocket sender button with DATA as args."
+  (when (and data (> (length data) 0))
+    (let* ((remote-name data)
+           (ws-list (websocket-inbound-filter-with-url remote-name)))
+      (if (> (length ws-list) 0)
+          (let ((ws (car ws-list))
+                (message (read-from-minibuffer "Please input the message to send: ")))
+            (p2p-ws-do-send-text message ws))))))
+      
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
@@ -218,7 +305,7 @@
 
 (define-derived-mode p2p-websocket-aggregate-mode text-mode "PWA"
   ;; The mode for *p2p-websocket-buffer*.
-  (use-local-map erc-aggregate-mode-map))
+  (use-local-map p2p-websocket-aggregate-mode-map))
 
 (provide 'p2p-websocket)
 ;;; p2p-websocket.el ends here
