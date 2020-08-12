@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.004
-;; Package-Version: 20200805.001
+;; Version: 1.0.005
+;; Package-Version: 20200812.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -252,7 +252,7 @@ With PARSED message and PROC."
                                      (browse-url-chrome . browse-url)
                                      (erc-show-link-url . erc-show-link-url)))
 
-(defvar *erc-image-action-list* '(erc-ffap-image erc-open-image))
+(defvar *erc-image-action-list* '(erc-ffap-image erc-open-image erc-image-path))
 
 (defun erc-show-link-url (url)
   "Show erc link's URL."
@@ -282,6 +282,12 @@ With PARSED message and PROC."
   "Open the IMAGE by it's path."
   (if-let ((image-path (plist-get (cdr image) :file)))
       (open-file-by-system image-path)))
+
+(defun erc-image-path (&rest image)
+  "Open the IMAGE by it's path."
+  (when-let ((image-path (plist-get (cdr image) :file)))
+    (message "image path is: %s" image-path)
+    image-path))
 
 (defun erc-ffap-image (&rest image)
   "Open the IMAGE by it's path."
