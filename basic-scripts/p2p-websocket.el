@@ -4,7 +4,7 @@
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
 ;; Version: 0.1.5
-;; Package-Version: 20200813.001
+;; Package-Version: 20200813.002
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -37,7 +37,7 @@
 
 (defvar *p2p-ws-server* nil)
 (defvar *p2p-ws-server-host* "0.0.0.0")
-(defvar *p2p-ws-server-port* 3000)
+(defvar *p2p-ws-server-port* 3618)
 (defvar *p2p-ws-client-list* '())
 
 (defvar *p2p-websocket-buffer* nil)
