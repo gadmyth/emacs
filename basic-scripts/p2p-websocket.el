@@ -4,7 +4,7 @@
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
 ;; Version: 0.1.5
-;; Package-Version: 20200813.002
+;; Package-Version: 20200813.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -174,6 +174,12 @@
 
 ;; -*- p2p-websocket-buffer -*-
 
+(defvar p2p-websocket-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map text-mode-map)
+    (define-key map "q" 'quit-window)
+    map))
+
 (defface p2p-websocket-notice-face
   '((default :weight bold)
     (((class color) (min-colors 88)) :foreground "SlateBlue")
@@ -296,12 +302,6 @@ call it with the value of the `pp2-websocket-data' text property."
                              (fifth remote-info))))
         (message "remote-name: %s" sender)
         sender)))
-
-(defvar p2p-websocket-aggregate-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map text-mode-map)
-    (define-key map "q" 'quit-window)
-    map))
 
 (define-derived-mode p2p-websocket-aggregate-mode text-mode "PWA"
   ;; The mode for *p2p-websocket-buffer*.
