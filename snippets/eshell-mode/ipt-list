@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ipt-list
+# key: ipt-list
+# --
+sudo iptables -L

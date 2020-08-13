@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ipt-delete
+# key: ipt-del
+# --
+sudo iptables -D INPUT ${1:1}
