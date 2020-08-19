@@ -39,6 +39,7 @@
                    `([?\s-v] . ,(exwm-start-process "vim" "gvim"))
                    `([?\M-\s-s] . ,(exwm-exec-shell-command "suspend" "systemctl suspend"))
                    `(,(kbd "<M-s-delete>") . ,(exwm-exec-shell-command "lock screen" "xscreensaver-command -lock"))
+                   `(,(kbd "<s-return>") . ,(exwm-start-process "terminal" "xfce4-terminal"))
                    `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder")))
 
 (provide 'exwm-conf)
