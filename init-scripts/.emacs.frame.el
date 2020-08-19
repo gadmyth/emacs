@@ -75,6 +75,7 @@
 (require-package 'auto-complete (global-auto-complete-mode))
 (require-package 'customized-dir (customized-dir-init))
 (require-package 'wcy-desktop (wcy-desktop-init))
+(require-if-installed 'exwm (require 'exwm-conf))
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))
