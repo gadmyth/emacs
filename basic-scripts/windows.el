@@ -3,9 +3,10 @@
 ;;; Code:
 
 (require 'windmove)
-
 (windmove-default-keybindings)
-(window-numbering-mode 1)
+
+;(require 'window-numbering)
+;(window-numbering-mode 1)
 
 (require 'winner)
 (winner-mode 1)

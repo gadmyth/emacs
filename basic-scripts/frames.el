@@ -5,7 +5,6 @@
 (require 'frame)
 (require 'async)
 (require 'eyebrowse+)
-(require 'window-numbering)
 
 (defvar *max-frame-width* 0)
 (defvar *max-frame-height* 0)
