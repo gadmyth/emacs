@@ -40,7 +40,18 @@
                    `([?\M-\s-s] . ,(exwm-exec-shell-command "suspend" "systemctl suspend"))
                    `(,(kbd "<M-s-delete>") . ,(exwm-exec-shell-command "lock screen" "xscreensaver-command -lock"))
                    `(,(kbd "<s-return>") . ,(exwm-start-process "terminal" "xfce4-terminal"))
-                   `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder")))
+                   `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder"))
+                   `([?\s-t] . ,(exwm-exec-shell-command "file manager" "Thunar")))
+
+;; add workspace move keys
+(let ((workspace-numbers (number-sequence 0 9))
+      (keys ")!@#$%^&*("))
+  (seq-doseq (num workspace-numbers)
+    (let* ((idx num)
+           (key (aref keys idx))
+           (exwm-key `(,(kbd (format "s-%c" key)) .
+                       (lambda () (interactive) (exwm-workspace-move-window ,num)))))
+      (add-to-list 'exwm-input-global-keys exwm-key))))
 
 (provide 'exwm-conf)
 ;;; exwm-conf.el ends here
