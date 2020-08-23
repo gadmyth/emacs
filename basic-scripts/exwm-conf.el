@@ -21,6 +21,14 @@
   (dolist (element elements)
     (add-to-list list element)))
 
+(defun exwm-input-do-release-keyboard ()
+  "Toggle between 'line-mode' and 'char-mode'."
+  (interactive)
+  (exwm--log)
+  (when (derived-mode-p 'exwm-mode)
+    (call-interactively #'exwm-input-release-keyboard)
+    (exwm-input--update-focus (selected-window))))
+
 ;; start xscreensaver after exwm init
 (add-hook 'exwm-init-hook (exwm-start-process "xscreensaver" "xscreensaver"))
 
@@ -35,6 +43,7 @@
 
 ;; config global keys
 (add-multi-to-list 'exwm-input-global-keys
+                   `([?\M-\s-r] . exwm-input-do-release-keyboard)
                    `([?\s-f] . ,(exwm-start-process "firefox" "firefox"))
                    `([?\s-v] . ,(exwm-start-process "vim" "gvim"))
                    `([?\M-\s-s] . ,(exwm-exec-shell-command "suspend" "systemctl suspend"))
