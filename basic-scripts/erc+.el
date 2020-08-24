@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.005
-;; Package-Version: 20200812.001
+;; Version: 1.0.006
+;; Package-Version: 20200825.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -182,7 +182,7 @@ With PARSED message and PROC."
       (erc-save-excursion
        (goto-char (point-max))
        (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-              (content (format "%s [%s]:\n%s\n\n" sender now msg))
+              (content (format "%s [%s]:\n%s\n" sender now msg))
               (new-msg-start (point-max))
               (time-start (- (s-index-of now content) 1))
               (time-end (+ time-start (length now) 2))
@@ -217,7 +217,8 @@ With PARSED message and PROC."
            (erc-button-add-button (+ new-msg-start msg-start erc-link-start)
                                   (+ new-msg-start msg-start erc-link-end)
                                   #'erc-button-link-callback
-                                  nil (list erc-msg-link))))))
+                                  nil (list erc-msg-link)))
+         (insert "\n"))))
     ;; show window
     (when erc-aggregate-refresh
       (display-buffer *erc-aggregate-buffer*))))
