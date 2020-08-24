@@ -29,16 +29,12 @@
     (call-interactively #'exwm-input-release-keyboard)
     (exwm-input--update-focus (selected-window))))
 
-;; exec xrdb merge when setup window
-;(add-hook 'before-init-hook (exwm-exec-shell-command "xrdb" "xrdb -merge ~/.xmonad/.Xresources"))
-
 ;; start some application after exwm init
-(add-hook 'exwm-init-hook (lambda ()
-                            (interactive)
-                            (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
-                            (funcall (exwm-start-shell-command-process "yong" "yong"))
-                            (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
-
+(add-hook 'window-setup-hook (lambda ()
+                               (interactive)
+                               (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
+                               (funcall (exwm-start-shell-command-process "yong" "yong"))
+                               (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
 
 (require 'exwm-systemtray)
 (exwm-systemtray-enable)
