@@ -37,6 +37,7 @@
                                (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
 
 (require 'exwm-systemtray)
+(setq exwm-systemtray-height 25)
 (exwm-systemtray-enable)
 
 (require 'exwm-config)
