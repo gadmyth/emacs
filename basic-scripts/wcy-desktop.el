@@ -1,9 +1,13 @@
 ;;; wcy-desktop.el --- faster than desktop.el and less features.
 
-;; Copyright (C) 2009  
+;; Copyright (C) 2020 gadmyth
 
 ;; Author:  <chunye.wang@nsn.com>
+;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
+
+;; Version: 2.0.0
+;; Package-Version: 20200826.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -47,9 +51,12 @@
   "Save the buffer list, this should be part of `kill-emacs-hook."
   (with-temp-file wcy-desktop-file-name
     (print
-     (mapcar #'(lambda(b) (with-current-buffer b
-			    (cons default-directory buffer-file-name)))
-	     (remove-if-not 'buffer-file-name (buffer-list)))
+     (mapcar #'(lambda(b)
+                 (with-current-buffer b
+                   (if (buffer-file-name b)
+                       (list :type 'file :directory default-directory :path buffer-file-name)
+                     (list :type 'buffer :name (buffer-name b)))))
+             (buffer-list))
      (current-buffer))))
 
 (defun  wcy-desktop-init ()
@@ -64,22 +71,34 @@
       (insert-file-contents wcy-desktop-file-name)
       (goto-char (point-min))
       (dolist (x (read (current-buffer)))
-        (let* ((my-default-directory (car x))
-               (my-buffer-file-name (cdr x)))
-          (when (file-readable-p my-buffer-file-name)
-            (let ((buffer (or (get-file-buffer my-buffer-file-name)
-                              (create-file-buffer my-buffer-file-name))))
-              (with-current-buffer buffer
-                (insert "THE BUFFER IS NOT LOADED YET. PRESS ANY KEY TO LOAD IT.")
-                (goto-char 1)
-                (set (make-local-variable 'wcy-desktop-is-buffer-loaded) nil)
-                (use-local-map wcy-desktop-key-map)
-                (setq default-directory  my-default-directory
-                      buffer-file-name my-buffer-file-name
-                      major-mode 'not-loaded-yet
-                      buffer-read-only t
-                      mode-name  "not loaded yet")
-                (set-buffer-modified-p nil)))))))))
+        (let ((type (plist-get x :type)))
+          (message "wcy desktop open last opened files, type: %s, %s" type (type-of type))
+          (cond
+           ((eq type 'file)
+            (let* ((directory (plist-get x :directory))
+                   (file-name (plist-get x :path)))
+              (wcy-desktop-prepare-buffer directory file-name)))
+           ((eq type 'buffer)
+            (message "The type is buffer, TODO"))
+           (t
+            (message "Unrecognized type: %S" type))))))))
+
+(defun wcy-desktop-prepare-buffer (directory file-name)
+  "Prepare the wcy buffer of FILE-NAME in DIRECTORY."
+  (when (file-readable-p file-name)
+    (let ((buffer (or (get-file-buffer file-name)
+                      (create-file-buffer file-name))))
+      (with-current-buffer buffer
+        (insert "THE BUFFER IS NOT LOADED YET. PRESS ANY KEY TO LOAD IT.")
+        (goto-char 1)
+        (set (make-local-variable 'wcy-desktop-is-buffer-loaded) nil)
+        (use-local-map wcy-desktop-key-map)
+        (setq default-directory  directory
+              buffer-file-name file-name
+              major-mode 'not-loaded-yet
+              buffer-read-only t
+              mode-name  "not loaded yet")
+        (set-buffer-modified-p nil)))))
 
 (defun  wcy-desktop-load-file (&optional buffer)
   "Load file by reverting BUFFER."
