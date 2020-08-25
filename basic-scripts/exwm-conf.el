@@ -33,7 +33,6 @@
 (add-hook 'window-setup-hook (lambda ()
                                (interactive)
                                (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
-                               (funcall (exwm-start-shell-command-process "yong" "yong"))
                                (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
 
 (require 'exwm-systemtray)
