@@ -16,6 +16,24 @@
      (interactive)
      (start-process-shell-command ,name nil ,command)))
 
+(defmacro exwm-start-shell-command-process (name command)
+  "Define a shell command process with NAME and COMMAND after DELAY seconds."
+  `(lambda ()
+     (interactive)
+     (start-process-shell-command ,name nil ,command)))
+
+(defmacro exwm-exec-delay (delay &rest body)
+  "Exec the BODY after DELAY seconds."
+  `(run-with-timer
+    ,delay nil
+    (lambda ()
+      ,@body)))
+
+(defmacro exwm-exec-function-delay (delay function)
+  "Exec the FUNCTION after DELAY seconds."
+  `(run-with-timer
+    ,delay nil ,function))
+
 (defun add-multi-to-list (list &rest elements)
   "Add all the ELEMENTS to LIST."
   (dolist (element elements)
@@ -30,10 +48,11 @@
     (exwm-input--update-focus (selected-window))))
 
 ;; start some application after exwm init
-(add-hook 'window-setup-hook (lambda ()
-                               (interactive)
-                               (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
-                               (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
+(add-hook 'emacs-startup-hook (lambda ()
+                                (interactive)
+                                (exwm-exec-function-delay 1 (exwm-start-shell-command-process "LG3D" "wmname LG3D"))
+                                (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
+                                (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
 
 (require 'exwm-systemtray)
 (setq exwm-systemtray-height 25)
