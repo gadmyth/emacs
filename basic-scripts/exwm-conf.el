@@ -11,16 +11,16 @@
      (start-process ,name nil ,command)))
 
 (defmacro exwm-start-shell-command-process (name command)
-  "Define a shell command process with NAME and COMMAND."
+  "Define a shell command process with NAME and COMMAND, the COMMAND run and blocked."
   `(lambda ()
      (interactive)
      (start-process-shell-command ,name nil ,command)))
 
-(defmacro exwm-start-shell-command-process (name command)
-  "Define a shell command process with NAME and COMMAND after DELAY seconds."
+(defmacro exwm-call-shell-command (command)
+  "Define a shell command process with COMMAND, the COMMAND return immediately."
   `(lambda ()
      (interactive)
-     (start-process-shell-command ,name nil ,command)))
+     (call-process-shell-command ,command)))
 
 (defmacro exwm-exec-delay (delay &rest body)
   "Exec the BODY after DELAY seconds."
@@ -50,9 +50,10 @@
 ;; start some application after exwm init
 (add-hook 'emacs-startup-hook (lambda ()
                                 (interactive)
-                                (exwm-exec-function-delay 1 (exwm-start-shell-command-process "LG3D" "wmname LG3D"))
-                                (funcall (exwm-start-process "xscreensaver" "xscreensaver"))
-                                (funcall (exwm-start-shell-command-process "network" "nm-applet"))))
+                                (exwm-exec-function-delay 1 (exwm-call-shell-command "wmname LG3D"))
+                                (funcall (exwm-start-shell-command-process "xscreensaver" "xscreensaver"))
+                                (funcall (exwm-start-shell-command-process "network" "nm-applet"))
+                                (funcall (exwm-call-shell-command "blueberry-tray"))))
 
 (require 'exwm-systemtray)
 (setq exwm-systemtray-height 25)
@@ -69,8 +70,8 @@
                    `([?\M-\s-r] . exwm-input-do-release-keyboard)
                    `([?\s-f] . ,(exwm-start-process "firefox" "firefox"))
                    `([?\s-v] . ,(exwm-start-process "vim" "gvim"))
-                   `([?\M-\s-s] . ,(exwm-start-shell-command-process "suspend" "systemctl suspend"))
-                   `(,(kbd "<M-s-delete>") . ,(exwm-start-shell-command-process "lock screen" "xscreensaver-command -lock"))
+                   `([?\M-\s-s] . ,(exwm-call-shell-command "systemctl suspend"))
+                   `(,(kbd "<M-s-delete>") . ,(exwm-call-shell-command "xscreensaver-command -lock"))
                    `(,(kbd "<s-return>") . ,(exwm-start-process "terminal" "xfce4-terminal"))
                    `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder"))
                    `([?\s-t] . ,(exwm-start-shell-command-process "file manager" "Thunar")))
