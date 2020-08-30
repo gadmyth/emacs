@@ -58,6 +58,9 @@
 ;; set char-mode as default
 (setq exwm-manage-configurations '((t char-mode t)))
 
+;; set char-mode as default
+(setq exwm-workspace-number 10)
+
 (require 'exwm-systemtray)
 (setq exwm-systemtray-height 25)
 (exwm-systemtray-enable)
@@ -79,15 +82,17 @@
                    `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder"))
                    `([?\s-t] . ,(exwm-start-shell-command-process "file manager" "Thunar")))
 
-;; add workspace move keys
+
+;; add workspace move global keys
 (let ((workspace-numbers (number-sequence 0 9))
       (keys ")!@#$%^&*("))
   (seq-doseq (num workspace-numbers)
     (let* ((idx num)
-           (key (aref keys idx))
-           (exwm-key `(,(kbd (format "s-%c" key)) .
-                       (lambda () (interactive) (exwm-workspace-move-window ,num)))))
-      (add-to-list 'exwm-input-global-keys exwm-key))))
+           (key (aref keys idx)))
+      (exwm-input-set-key (kbd (format "s-%c" key))
+                          `(lambda ()
+                             (interactive)
+                             (exwm-workspace-move-window ,num))))))
 
 (provide 'exwm-extend)
 ;;; exwm-extend.el ends here
