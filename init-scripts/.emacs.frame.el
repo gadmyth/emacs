@@ -65,6 +65,7 @@
 (require 'python-config)
 (require 'scratch+)
 (require 'notifications)
+(require 'lsp-config)
 
 (require-if-installed 'eredis (require 'redis-config))
 (require-if-installed 'smartparens (smartparens-global-mode))
@@ -75,7 +76,7 @@
 (require-package 'auto-complete (global-auto-complete-mode))
 (require-package 'customized-dir (customized-dir-init))
 (require-package 'wcy-desktop (wcy-desktop-init))
-(require-if-installed 'exwm (require 'exwm-conf))
+(require 'exwm-conf)
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))
