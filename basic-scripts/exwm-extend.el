@@ -34,19 +34,6 @@
   `(run-with-timer
     ,delay nil ,function))
 
-(defun add-multi-to-list (list &rest elements)
-  "Add all the ELEMENTS to LIST."
-  (dolist (element elements)
-    (add-to-list list element)))
-
-(defun exwm-input-do-release-keyboard ()
-  "Toggle between 'line-mode' and 'char-mode'."
-  (interactive)
-  (exwm--log)
-  (when (derived-mode-p 'exwm-mode)
-    (call-interactively #'exwm-input-release-keyboard)
-    (exwm-input--update-focus (selected-window))))
-
 ;; start some application after exwm init
 (add-hook 'emacs-startup-hook (lambda ()
                                 (interactive)
@@ -72,16 +59,14 @@
 (exwm-randr-enable)
 
 ;; config global keys
-(add-multi-to-list 'exwm-input-global-keys
-                   `([?\M-\s-r] . exwm-input-do-release-keyboard)
-                   `([?\s-f] . ,(exwm-start-process "firefox" "firefox"))
-                   `([?\s-v] . ,(exwm-start-process "vim" "gvim"))
-                   `([?\M-\s-s] . ,(exwm-call-shell-command "systemctl suspend"))
-                   `(,(kbd "<M-s-delete>") . ,(exwm-call-shell-command "xscreensaver-command -lock"))
-                   `(,(kbd "<s-return>") . ,(exwm-start-process "terminal" "xfce4-terminal"))
-                   `([?\s-p] . ,(exwm-start-process "appfinder" "xfce4-appfinder"))
-                   `([?\s-t] . ,(exwm-start-shell-command-process "file manager" "Thunar")))
-
+(exwm-input-set-key [?\s-r] #'exwm-input-toggle-keyboard)
+(exwm-input-set-key [?\s-f] (exwm-start-process "firefox" "firefox"))
+(exwm-input-set-key [?\s-v] (exwm-start-process "vim" "gvim"))
+(exwm-input-set-key [?\M-\s-s] (exwm-call-shell-command "systemctl suspend"))
+(exwm-input-set-key (kbd "<M-s-delete>") (exwm-call-shell-command "xscreensaver-command -lock"))
+(exwm-input-set-key (kbd "<s-return>") (exwm-start-process "terminal" "xfce4-terminal"))
+(exwm-input-set-key [?\s-p] (exwm-start-process "appfinder" "xfce4-appfinder"))
+(exwm-input-set-key [?\s-t] (exwm-start-shell-command-process "file manager" "Thunar"))
 
 ;; add workspace move global keys
 (let ((workspace-numbers (number-sequence 0 9))
