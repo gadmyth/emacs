@@ -278,7 +278,7 @@
 (defun eyebrowse--filter-window-config (target-buffer-name &optional include-current-config)
   "TARGET-BUFFER-NAME, INCLUDE-CURRENT-CONFIG."
   (interactive "bbuffer: ")
-  (eyebrowse-update-current-window-config)
+  (eyebrowse-update-window-config)
   (let ((filtered-window-config)
         (current-slot (eyebrowse--get 'current-slot)))
     (dolist (window-config (eyebrowse--get 'window-configs))
@@ -305,18 +305,34 @@
         (push window-config filtered-window-config)))
     (reverse filtered-window-config)))
 
-(defun eyebrowse-update-current-window-config ()
-  "."
-  (let* ((current-slot (eyebrowse--get 'current-slot))
-	 (window-configs (eyebrowse--get 'window-configs))
+(defun eyebrowse--get-window-config (slot tag &optional window)
+  "Copied and modified from eyebrowse--current-window-config.
+Returns a window config list appliable for SLOT and TAG of WINDOW."
+  (list slot (window-state-get window t) tag))
+
+(defun eyebrowse--update-window-config-element-with-frame (new-element &optional frame)
+  "Copied and modified from eyebrowse--update-window-config-element;
+with parameter FRAME and NEW-ELEMENT.
+Replace the old element with NEW-ELEMENT in the window config list.
+The old element is identified by the first element of NEW-ELEMENT."
+  (eyebrowse--set 'window-configs
+    (--replace-where (= (car it) (car new-element))
+                     new-element (eyebrowse--get 'window-configs frame))
+    frame))
+
+(defun eyebrowse-update-window-config (&optional frame)
+  "Update window config for the FRAME.
+If FRAME is nil, update the current frame."
+  (let* ((current-slot (eyebrowse--get 'current-slot frame))
+	 (window-configs (eyebrowse--get 'window-configs frame))
 	 (current-tag (nth 2 (assoc current-slot window-configs))))
-    (eyebrowse--update-window-config-element
-     (eyebrowse--current-window-config current-slot current-tag))))
+    (eyebrowse--update-window-config-element-with-frame
+     (eyebrowse--get-window-config current-slot current-tag (frame-root-window frame)) frame)))
 
 (defun eyebrowse-set-as-default-config ()
   "."
   (interactive)
-  (eyebrowse-update-current-window-config)
+  (eyebrowse-update-window-config)
   (let* ((config (eyebrowse-get-current-config))
          (slot (car config))
          (default-config (assq slot *eyebrowse-default-configs*)))
@@ -370,6 +386,17 @@ COPY from eyebrowse--load-window-config."
   (let ((content (format "%S" (eyebrowse--get 'window-configs))))
     (with-temp-file +eyebrowse-file-name+
       (insert content))))
+
+(defun eyebrowse-sync-config ()
+  "Sync the eyebrowse config from the first frame."
+  (interactive)
+  (let ((default-frame (car (last (frame-list))))
+        (current-frame (window-frame)))
+    (when (not (eq default-frame current-frame))
+      (eyebrowse-update-window-config default-frame)
+      (when-let ((configs (eyebrowse--get 'window-configs default-frame)))
+        (eyebrowse--set 'window-configs configs)
+        (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
 
 (provide 'eyebrowse+)
 ;;; eyebrowse+.el ends here
