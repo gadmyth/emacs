@@ -47,6 +47,7 @@
         'flycheck
         'eyebrowse
         'goto-last-point
+        'exwm
         ;'vkill
         ))
 
