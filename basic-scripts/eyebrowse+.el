@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.3
-;; Package-Version: 20200801.001
+;; Version: 1.0.4
+;; Package-Version: 20200907.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -382,7 +382,7 @@ COPY from eyebrowse--load-window-config."
   "Save eyebrowse workspace to file."
   (interactive)
   (message "Saving eyebrowse config to file %S ..." +eyebrowse-file-name+)
-  (eyebrowse-update-current-window-config)
+  (eyebrowse-update-window-config)
   (let ((content (format "%S" (eyebrowse--get 'window-configs))))
     (with-temp-file +eyebrowse-file-name+
       (insert content))))
