@@ -11,7 +11,7 @@
           (if (eq window-system 'ns)
               (format "open -a MacVim %s" path)
             (format "gvim %s" path))))
-    (shell-command-to-string command)))
+    (start-process-shell-command "vim" nil command)))
 
 (defun open-file-by-system (file-path)
   "Open file of FILE-PATH with system software."
