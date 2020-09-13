@@ -53,9 +53,21 @@
     (print
      (mapcar #'(lambda(b)
                  (with-current-buffer b
-                   (if (buffer-file-name b)
-                       (list :type 'file :directory default-directory :path buffer-file-name)
-                     (list :type 'buffer :name (buffer-name b)))))
+                   (cond ((buffer-file-name b)
+                          (list :type 'file
+                                :directory default-directory
+                                :path buffer-file-name))
+                         ((get-buffer-process b)
+                          (let* ((process (get-buffer-process b))
+                                 (command (process-command process))
+                                 (buffer-major-mode major-mode))
+                            (list :type 'process
+                                  :command command
+                                  :name (buffer-name b)
+                                  :major-mode buffer-major-mode)))
+                         (t
+                          (list :type 'buffer
+                                :name (buffer-name b))))))
              (buffer-list))
      (current-buffer))))
 
@@ -78,6 +90,14 @@
             (let* ((directory (plist-get x :directory))
                    (file-name (plist-get x :path)))
               (wcy-desktop-prepare-buffer directory file-name)))
+           ((eq type 'process)
+            (let ((buffer-major-mode (plist-get x :major-mode)))
+              (cond ((eq buffer-major-mode "Eshell")
+                     (message "The type is eshell process, TODO"))
+                    ((eq buffer-major-mode "Term")
+                     (message "The type is term process, TODO"))
+                    (t
+                     (message "The type is process, TODO")))))
            ((eq type 'buffer)
             (message "The type is buffer, TODO"))
            (t
