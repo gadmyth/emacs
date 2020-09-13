@@ -20,8 +20,7 @@
 (defun swiper-with-symbol-at-point ()
   "."
   (interactive)
-  (let* ((sym (symbol-at-point))
-         (string-at-point (if (null sym) "" (symbol-name sym))))
+  (let* ((string-at-point (ffap-string-at-point)))
     (message "string-at-point is [%s]" string-at-point)
     (swiper string-at-point)))
 
