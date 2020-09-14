@@ -90,9 +90,16 @@ Version 2017-05-24"
     (message base-name)
     base-name))
 
-(defun insert-uuid ()
+(defun insert-short-uuid ()
+  "Insert lowercase uuid without dash."
   (interactive)
   (let ((uuid (replace-regexp-in-string "-" "" (org-id-uuid))))
+    (insert uuid)))
+
+(defun insert-normal-uuid ()
+  "Insert uppercase uuid with dash."
+  (interactive)
+  (let ((uuid (upcase (org-id-uuid))))
     (insert uuid)))
 
 (defun prepend-major-mode-language ()
