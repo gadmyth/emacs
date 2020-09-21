@@ -34,5 +34,8 @@
           (setq buffer-offer-save t))
       (message (format "The buffer %s doesn't exist!" name)))))
 
+(global-set-key (kbd "s-<left>") #'previous-buffer)
+(global-set-key (kbd "s-<right>") #'next-buffer)
+
 (provide 'buffers)
 ;;; buffers.el ends here
