@@ -4,6 +4,7 @@
 
 (require 'swiper)
 (require 'counsel)
+(require 'ffap)
 
 (ivy-mode 1)
 
