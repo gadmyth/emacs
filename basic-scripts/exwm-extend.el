@@ -45,6 +45,9 @@
 ;; set char-mode as default
 (setq exwm-manage-configurations '((t char-mode t)))
 
+;; set force tiling
+(setq exwm-manage-force-tiling t)
+
 ;; set char-mode as default
 (setq exwm-workspace-number 10)
 
