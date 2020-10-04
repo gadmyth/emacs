@@ -60,7 +60,7 @@
                (alist content))
           (when (or
                  (featurep major-mode-package)
-                 (package-installed-p major-mode-package)
+                 (package-installed-p major-mode-package))
             (require major-mode-package)
             (add-abbrev-hook major-mode-name alist)))))))
 
