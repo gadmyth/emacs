@@ -58,7 +58,9 @@
         (goto-char (point-min))
         (let* ((content (read (current-buffer)))
                (alist content))
-          (when (package-installed-p major-mode-package)
+          (when (or
+                 (featurep major-mode-package)
+                 (package-installed-p major-mode-package)
             (require major-mode-package)
             (add-abbrev-hook major-mode-name alist)))))))
 
