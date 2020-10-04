@@ -52,7 +52,6 @@
 (require 'el-server)
 (require 'el-server-extend)
 (require 'servers)
-(require 'eyebrowse-config)
 (require 'goto-last-point+)
 (require 'f-zone-key-bindings)
 (require 'holiday-config)
@@ -76,6 +75,7 @@
 (require-package 'auto-complete (global-auto-complete-mode))
 (require-package 'customized-dir (customized-dir-init))
 (require-package 'wcy-desktop (wcy-desktop-init))
+(require-package 'eyebrowse+ (eyebrowse-plus-mode t))
 (require 'exwm-conf)
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))

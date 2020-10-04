@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.4
-;; Package-Version: 20200907.001
+;; Version: 1.0.5
+;; Package-Version: 20201004.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -41,8 +41,28 @@
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
 (defvar *eyebrowse-default-configs* nil)
 (defvar eyebrowse-lazy-load-hook nil)
+(defvar *eyebrowse-init-function-swapped* nil)
 
-(add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\'" . utf-8))
+(add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\.*\\'" . utf-8))
+
+(defun eyebrowse-init-original (&optional frame)
+  "Original function of eyebrowse-init with option parameter FRAME.")
+
+(defun eyebrowse-init-from-config (&optional frame)
+  "Initialize Eyebrowse for the current FRAME."
+  (message "*** eyebrowse-init-from-config ***")
+  (unless (eyebrowse--get 'window-configs frame)
+    (eyebrowse-init-original frame))
+    (eyebrowse-rename-window-config 1 "default")
+    (eyebrowse-lazy-load-config))
+
+(defun eyebrowse-swap-init-function()
+  "."
+  (unless *eyebrowse-init-function-swapped*
+    (let ((func (symbol-function 'eyebrowse-init)))
+      (setf (symbol-function 'eyebrowse-init-original) func)
+      (setf (symbol-function 'eyebrowse-init) #'eyebrowse-init-from-config))
+    (setq *eyebrowse-init-function-swapped* t)))
 
 (defun eyebrowse-lazy-load-config ()
   "."
@@ -360,16 +380,17 @@ COPY from eyebrowse--load-window-config."
 (defun load-eyebrowse-config ()
   "Load eyebrowse workspace from file."
   (interactive)
-  (let ((loading-success-p))
+  (let ((loading-success-p)
+        (file-name (eyebrowse-file-name)))
     (cond
-     ((not (file-exists-p +eyebrowse-file-name+))
-      (message "Can't load %s file, for it does not exist!" +eyebrowse-file-name+)
+     ((not (file-exists-p file-name))
+      (message "Can't load %s file, for it does not exist!" file-name)
       ;; set loading-success-p to t, for the reason of it's at the very beginnig
       (setq loading-success-p t))
      (t
-      (message "Loading eyebrowse config from file %S ..." +eyebrowse-file-name+)
+      (message "Loading eyebrowse config from file %S ..." file-name)
       (with-temp-buffer
-        (insert-file-contents +eyebrowse-file-name+)
+        (insert-file-contents file-name)
         (goto-char (point-min))
         (let ((content (read (current-buffer))))
           (eyebrowse--set 'window-configs content)
@@ -378,14 +399,27 @@ COPY from eyebrowse--load-window-config."
     ;; return the loading result
     loading-success-p))
 
-(defun save-eyebrowse-config ()
-  "Save eyebrowse workspace to file."
+(defun eyebrowse-file-name ()
+  "."
   (interactive)
-  (message "Saving eyebrowse config to file %S ..." +eyebrowse-file-name+)
-  (eyebrowse-update-window-config)
-  (let ((content (format "%S" (eyebrowse--get 'window-configs))))
-    (with-temp-file +eyebrowse-file-name+
-      (insert content))))
+  (let* ((frames (frame-list))
+         (current-frame (window-frame (get-buffer-window)))
+         (max-index (- (length frames) 1))
+         (index (- max-index (-elem-index current-frame frames))))
+    (if index
+        (format "%s.%d" +eyebrowse-file-name+ index)
+      +eyebrowse-file-name+)))
+  
+
+(defun save-eyebrowse-config (&optional frame)
+  "Save eyebrowse workspace to file of FRAME."
+  (interactive)
+  (let ((file-name (eyebrowse-file-name)))
+    (message "Saving eyebrowse config to file %S ..." file-name)
+    (eyebrowse-update-window-config)
+    (let ((content (format "%S" (eyebrowse--get 'window-configs))))
+      (with-temp-file file-name
+        (insert content)))))
 
 (defun eyebrowse-sync-config ()
   "Sync the eyebrowse config from the first frame."
@@ -397,6 +431,22 @@ COPY from eyebrowse--load-window-config."
       (when-let ((configs (eyebrowse--get 'window-configs default-frame)))
         (eyebrowse--set 'window-configs configs)
         (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
+
+(define-minor-mode eyebrowse-plus-mode
+  "Toggle `eyebrowse-plus-mode."
+  :global t
+  (if eyebrowse-plus-mode
+      (progn
+        (eyebrowse-swap-init-function)
+        (add-hook 'eyebrowse-lazy-load-hook
+                  (lambda ()
+                    (add-hook 'delete-frame-functions #'save-eyebrowse-config)
+                    (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))
+        (eyebrowse-mode 1))
+    (progn
+      (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
+      (remove-hook 'kill-emacs-hook #'save-eyebrowse-config)
+      (eyebrowse-mode 0))))
 
 (provide 'eyebrowse+)
 ;;; eyebrowse+.el ends here
