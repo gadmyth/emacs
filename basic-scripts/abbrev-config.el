@@ -36,22 +36,28 @@
 (defvar *abbrev-default-directory* (expand-file-name "abbrevs" +emacs-context-directory+))
 
 (add-to-list 'auto-coding-alist '("\\.abbrev\\'" . utf-8))
-;; TODO: add major-mode config for xxx-mode.abbrev file
 
-(defun load-abbrevs ()
-  "."
-  (mapc (lambda (file-full-path)
-          (let* ((relative-path (file-name-nondirectory file-full-path))
-                 (major-mode-name (file-name-sans-extension relative-path)))
-            (with-temp-buffer
-              (insert-file-contents file-full-path)
-              (goto-char (point-min))
-              (let* ((content (read (current-buffer)))
-                     (alist content))
-                (add-abbrev-hook major-mode-name alist)))))
-        (directory-files *abbrev-default-directory* t ".*?\\.abbrev$")))
+(defvar *abbrev-config-special-major-modes* (list 'emacs-lisp-mode 'elisp-mode
+                                                  nil))
 
-(load-abbrevs)
+(defun load-abbrev-file ()
+  "Load abbrev file of MAJOR-MODE."
+  (interactive)
+  (let* ((file-full-path (format "%s/%s.abbrev" *abbrev-default-directory* major-mode))
+         (major-mode-name (symbol-name major-mode))
+         (major-mode-package (plist-get *abbrev-config-special-major-modes* major-mode)))
+    (if (not major-mode-package) (setq major-mode-package major-mode))
+    (message "*** load-abbrev-file, major-mode-name: %S, package: %S, file path: %S" major-mode-name major-mode-package file-full-path)
+    (when (and major-mode-package
+               (file-exists-p file-full-path))
+      (with-temp-buffer
+        (insert-file-contents file-full-path)
+        (goto-char (point-min))
+        (let* ((content (read (current-buffer)))
+               (alist content))
+          (when (package-installed-p major-mode-package)
+            (require major-mode-package)
+            (add-abbrev-hook major-mode-name alist)))))))
 
 (setq save-abbrevs nil)
 
