@@ -11,13 +11,14 @@
 (defun tab-expand-abbrev-first ()
   "."
   (interactive)
-  (message "%S" (expand-abbrev))
   (unless (expand-abbrev)
     (when-let ((func (alist-get major-mode abbrev-tab-functions)))
+      (message "tab-expand-abbrev-first, now call function: %S" func)
       (funcall func))))
 
 (defun bind-expand-abbrev-with-tab ()
   "."
+  (interactive)
   (let* ((key (kbd "TAB"))
          (tab-function (key-binding key t)))
     (when (not (function-equal tab-function #'tab-expand-abbrev-first))
@@ -38,6 +39,7 @@
 (add-to-list 'auto-coding-alist '("\\.abbrev\\'" . utf-8))
 
 (defvar *abbrev-config-special-major-modes* (list 'emacs-lisp-mode 'elisp-mode
+                                                  'org-mode 'org
                                                   nil))
 
 (defun load-abbrev-file ()
