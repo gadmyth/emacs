@@ -12,14 +12,15 @@
   "."
   (interactive)
   (unless (expand-abbrev)
-    (when-let ((func (alist-get major-mode abbrev-tab-functions)))
-      (message "tab-expand-abbrev-first, now call function: %S" func)
-      (funcall func))))
+    (let ((func (alist-get major-mode abbrev-tab-functions)))
+      (message "expand-abbrev failed, now call function: %S" func)
+      (when func
+        (funcall func)))))
 
 (defun bind-expand-abbrev-with-tab ()
   "."
   (interactive)
-  (let* ((key (kbd "TAB"))
+  (let* ((key (kbd "<tab>"))
          (tab-function (key-binding key t)))
     (when (not (function-equal tab-function #'tab-expand-abbrev-first))
       (add-to-list 'abbrev-tab-functions (cons major-mode tab-function))
