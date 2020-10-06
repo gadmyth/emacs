@@ -10,6 +10,8 @@
 
 (require 'winner)
 (winner-mode 1)
+(global-set-key (kbd "s-<up>") #'winner-undo)
+(global-set-key (kbd "s-<down>") #'winner-redo)
 
 (defun quit-help-window ()
   "."
