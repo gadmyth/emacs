@@ -70,7 +70,7 @@
          (top-ratio (- 1 (/ 1.0 ratio)))
          (top-window-height (round (* height top-ratio))))
     (select-window (split-window-below top-window-height))
-    (switch-to-buffer  (get-buffer-create "*scratch*"))))
+    (switch-to-buffer (get-buffer-create "*scratch*"))))
 
 (global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
 
@@ -99,7 +99,7 @@
   (interactive)
   (swap-window (frame-first-window)))
 
-(defun swap-window (window)
+(defun swap-window-old (window)
   "Swap the current window with WINDOW."
   (interactive)
   (when (>= (count-windows) 2)
@@ -113,6 +113,14 @@
       (set-window-start window current-start)
       (set-window-start current-window first-start)
       (select-window window))))
+
+(defun swap-window (window)
+  "Swap the current window with WINDOW."
+  (interactive)
+  (when (and (>= (count-windows) 2)
+             (window-live-p window))
+    (let* ((current-window (get-buffer-window)))
+      (window-swap-states current-window  window))))
 
 (defun goto-main-window ()
   "."
