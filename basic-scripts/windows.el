@@ -13,6 +13,9 @@
 (global-set-key (kbd "s-<up>") #'winner-undo)
 (global-set-key (kbd "s-<down>") #'winner-redo)
 
+;; set mouse autoselect window
+(setq mouse-autoselect-window t)
+
 (defun quit-help-window ()
   "."
   (interactive)
