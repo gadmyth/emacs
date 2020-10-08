@@ -29,6 +29,7 @@
 (global-set-key (kbd "<s-return>") 'swap-to-main-window)
 (global-set-key (kbd "s-k") #'goto-previous-window)
 (global-set-key (kbd "s-j") #'goto-next-window)
+(global-set-key (kbd "<s-tab>") #'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
 
 (defun split-window-below-with-ratio ()
