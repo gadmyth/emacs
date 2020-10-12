@@ -51,14 +51,9 @@
 ;; set char-mode as default
 (setq exwm-workspace-number 10)
 
-;; FIX exwm char-mode/line-mode BUG, sometimes can't input under char-mode
+;; the original exwm-switch-window function doesn't work well, make it empty.
 (defun exwm-switch-window (&optional frame)
-  "When select workspace or switch window of FRAME, release exwm keyboard under char-mode."
-  (interactive)
-  (let ((window (frame-selected-window frame)))
-    (when (and (featurep 'exwm))
-      (message "exwm-switch-window: %s, %s" window exwm--input-mode)
-      (call-interactively #'exwm-input-release-keyboard))))
+  "FRAME.")
 
 (defun exwm-switch-workspace-callback (&optional id)
   "When select workspace or switch window, release exwm keyboard of ID."
