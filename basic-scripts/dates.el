@@ -28,6 +28,11 @@
     (message date-str)
     date-str))
 
+(defun current-time-string ()
+  "."
+  (interactive)
+  (timestamp-to-string (current-timestamp)))
+
 (defun org-current-timestamp ()
   "."
   (interactive)
@@ -38,7 +43,7 @@
 (defun insert-current-time ()
   "."
   (interactive)
-  (insert (timestamp-to-string (current-timestamp))))
+  (insert (current-time-string)))
 
 
 (provide 'dates)
