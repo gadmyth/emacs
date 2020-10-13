@@ -28,7 +28,7 @@
     (message date-str)
     date-str))
 
-(defun current-time-string ()
+(defun show-current-time-string ()
   "."
   (interactive)
   (timestamp-to-string (current-timestamp)))
