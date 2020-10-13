@@ -31,7 +31,7 @@
 (setq org-enforce-todo-dependencies t)
 
 ;;; agenda
-(setq org-agenda-files '("~/org"))
+(defvar org-agenda-files '("~/org"))
 (setq org-agenda-ndays 14)
 (setq org-agenda-include-diary t)
 (global-set-key (kbd "C-c a") 'org-agenda)
