@@ -23,5 +23,7 @@
 
 (setq org-agenda-files '("~/org"))
 
+(setq *gkroam-default-root-dir* "~/gkroam")
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here
