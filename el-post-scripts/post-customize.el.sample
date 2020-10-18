@@ -2,7 +2,10 @@
 ;;; Commentary:
 ;;; Code:
 
+(setq erc-nick "<erc nick name>")
+(setq erc-default-server "127.0.0.1")
 
+(add-to-list 'yas-snippet-dirs (expand-file-name "~/snippets"))
 
 (provide 'post-customize)
 ;;; post-customize.el ends here
