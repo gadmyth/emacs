@@ -42,6 +42,7 @@
 (require 'elisp+)
 (require 'org-mode+)
 (require 'org-config)
+(require 'gkroam-config)
 (require 'ido-config)
 (require 'eww-config)
 (require 'slime-config)
@@ -66,7 +67,6 @@
 (require 'notifications)
 (require 'lsp-config)
 
-(require-if-installed 'gkroam (require 'gkroam-config))
 (require-if-installed 'eredis (require 'redis-config))
 (require-if-installed 'smartparens (smartparens-global-mode))
 (require-if-installed 'expand-region (global-set-key (kbd "C-=") 'er/expand-region))
