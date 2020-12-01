@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: sql-update-condition
+# key: sql-update-condition
+# --
+<if test="$1 != null and $1 != ''">, $2=#{$1}</if>
