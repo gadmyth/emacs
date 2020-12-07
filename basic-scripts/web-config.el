@@ -12,14 +12,14 @@
         auto-mode-alist))
 
  (add-hook 'web-mode-hook
-           '(lambda ()
-              ; web-mode, html tag
-              (setq web-mode-markup-indent-offset 2)
-              ; web-mode, css
-              (setq web-mode-css-indent-offset 2)
-              ; web-mode, js code
-              (setq web-mode-code-indent-offset 2)
-              ))
+           (lambda ()
+             ; web-mode, html tag
+             (setq web-mode-markup-indent-offset 2)
+             ; web-mode, css
+             (setq web-mode-css-indent-offset 2)
+             ; web-mode, js code
+             (setq web-mode-code-indent-offset 2)
+             ))
 
  (add-hook 'js2-mode-hook #'js2-refactor-mode)
  (js2r-add-keybindings-with-prefix "C-c C-m")
