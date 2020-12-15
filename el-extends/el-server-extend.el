@@ -189,6 +189,19 @@
     (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
     (elnode-http-return httpcon (r-save))))
 
+(defun buffer-switcher ()
+  "HTTPCON."
+  (lambda (httpcon)
+    (let* ((buffer-name (elnode-http-param httpcon "buffer"))
+           (buffer (get-buffer buffer-name)))
+      (if (buffer-live-p buffer)
+          (progn
+            (message "buffer: %s" buffer-name)
+            (switch-to-buffer buffer-name)
+            (switch-to-buffer "Linux.org")
+            (elnode-send-status httpcon 200 "Switch buffer success!"))
+        (elnode-send-status httpcon 404 "Can't find buffer")))))
+
 (reset-my-default-elnode-url-mapping-table)
 
 (my-elnode-add-handlers
@@ -203,7 +216,9 @@
    ("^/cache/del/\\(.*\\)$" . ,(byte-compile (elnode-cache-delete)))
    ("^/cache/get/\\(.*\\)$" . ,(byte-compile (elnode-cache-getter)))
    ("^/cache/save/\\(.*\\)$" . ,(byte-compile (elnode-cache-saver)))
-   ("^/capture/\\(.*\\)$" . ,(byte-compile (elnode-capture)))))
+   ("^/capture/\\(.*\\)$" . ,(byte-compile (elnode-capture)))
+   ("^/switch-buffer/\\(.*\\)$" . (byte-compile (buffer-switcher)))
+   ))
 
 (defun open-org-file-by-elnode ()
   "."
