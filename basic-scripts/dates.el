@@ -19,14 +19,23 @@
     (message ct)
     ct))
 
-(defun timestamp-to-string (timestamp)
-  "TIMESTAMP: ."
+
+(defun timestamp-to-string-with-format (timestamp time-format)
+  "TIMESTAMP: , TIME-FORMAT."
   (interactive "sInput the timestamp: ")
   (let* ((timestamp (if (stringp timestamp) (string-to-number timestamp)
                       timestamp))
-         (date-str (format-time-string "%Y-%m-%d %H:%M:%S" timestamp)))
+         (date-str (format-time-string time-format timestamp)))
     (message date-str)
     date-str))
+
+(defun timestamp-to-string (timestamp)
+  ".TIMESTAMP: ."
+  (timestamp-to-string-with-format timestamp "%Y-%m-%d %H:%M:%S"))
+
+(defun timestamp-to-short-string (timestamp)
+  ".TIMESTAMP: ."
+  (timestamp-to-string-with-format timestamp "%Y-%m-%d"))
 
 (defun show-current-time-string ()
   "."
@@ -44,6 +53,16 @@
   "."
   (interactive)
   (insert (current-time-string)))
+
+(defun insert-date-normal-string ()
+  "."
+  (interactive)
+  (insert (timestamp-to-string (current-timestamp))))
+
+(defun insert-date-normal-short-string ()
+  "."
+  (interactive)
+  (insert (timestamp-to-short-string (current-timestamp))))
 
 
 (provide 'dates)
