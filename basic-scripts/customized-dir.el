@@ -46,7 +46,11 @@
   (interactive)
   (ivy-read "Switch to dir: " *customized-dir*
             :action (lambda (dir)
-                      (dired dir))))
+                      (ivy-read "Choose the action:" (list (cons "dir" 'dired)
+                                                           (cons "vc-dir" 'vc-dir))
+                                :action (lambda (pair)
+                                          (let ((f (cdr pair)))
+                                            (funcall f dir)))))))
 
 (defvar +customized-dir-file-name+ "~/.customized-dir-save")
 (defvar +dired-al-mode-header+ "  drwx------.  0 user user     4096 Mar  0 00:00 ")
