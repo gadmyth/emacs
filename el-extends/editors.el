@@ -137,5 +137,19 @@
 
 (global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
 
+(defun kill-the-whole-line ()
+  "."
+  (interactive)
+  (save-excursion
+    (let ((begin (progn
+                   (beginning-of-visual-line)
+                   (point)))
+          (end (progn
+                   (end-of-visual-line)
+                   (point))))
+    (kill-region begin end))))
+
+(global-set-key (kbd "C-S-k") 'kill-the-whole-line)
+
 (provide 'editors)
 ;;; editors.el ends here
