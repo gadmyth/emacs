@@ -125,5 +125,17 @@
       (goto-char end)
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
+(defun kill-to-beginning-of-line ()
+  "."
+  (interactive)
+  (save-excursion
+    (let ((end (point))
+          (begin (progn
+                   (beginning-of-visual-line)
+                   (point))))
+    (kill-region begin end))))
+
+(global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
+
 (provide 'editors)
 ;;; editors.el ends here
