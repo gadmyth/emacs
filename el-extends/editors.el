@@ -163,7 +163,8 @@
             (end (progn
                    (end-of-visual-line)
                    (point))))
-        (kill-ring-save begin end)))))
+        (kill-ring-save begin end)
+        (message "*** line copied ***")))))
 
 ;; M-w origin key bind to kill-ring-save
 (global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
