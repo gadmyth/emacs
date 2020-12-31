@@ -145,11 +145,28 @@
                    (beginning-of-visual-line)
                    (point)))
           (end (progn
-                   (end-of-visual-line)
-                   (point))))
-    (kill-region begin end))))
+                 (end-of-visual-line)
+                 (point))))
+      (kill-region begin end))))
 
 (global-set-key (kbd "C-S-k") 'kill-the-whole-line)
+
+(defun kill-the-whole-line-ring-save (start end)
+  "START, END."
+  (interactive "r")
+  (if (region-active-p)
+      (kill-ring-save start end)
+    (save-excursion
+      (let ((begin (progn
+                     (beginning-of-visual-line)
+                     (point)))
+            (end (progn
+                   (end-of-visual-line)
+                   (point))))
+        (kill-ring-save begin end)))))
+
+;; M-w origin key bind to kill-ring-save
+(global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
 
 (provide 'editors)
 ;;; editors.el ends here
