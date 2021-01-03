@@ -29,7 +29,6 @@
         'smex
         'swiper
         'counsel
-        'textmate
         'elnode
         'sudo-edit
         'smart-compile
@@ -83,6 +82,7 @@
 
 (defconst +option-packages+
   (list 'alpha
+        'textmate
         'elisp-format
         'with-namespace
         'vcomp
