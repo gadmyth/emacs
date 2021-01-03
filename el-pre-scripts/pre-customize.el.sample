@@ -1,3 +1,4 @@
+;;; -*- emacs-lisp -*-
 ;;; package --- pre-customize.el
 ;;; Commentary:
 ;;; Code:
@@ -24,6 +25,8 @@
 (setq org-agenda-files '("~/org"))
 
 (setq *gkroam-default-root-dir* "~/gkroam")
+
+(setq org-agenda-files '("~/file1.org"))
 
 (provide 'pre-customize)
 ;;; pre-customize.el ends here
