@@ -61,6 +61,7 @@
          "* %?")
         ))
 
+;; config for global id link
 (require 'org-id)
 (setq org-id-link-to-org-use-id t)
 

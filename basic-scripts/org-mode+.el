@@ -96,6 +96,9 @@
 (global-set-key (kbd "<f8>") 'org-capture-insert-temp)
 (global-set-key (kbd "C-c d") 'org-open-dir)
 (global-set-key (kbd "C-c P") 'org-show-link)
+;; config for create a link with id property
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c C-.") 'org-time-stamp-inactive)
 
 (provide 'org-mode+)
 ;;; org-mode+.el ends here
