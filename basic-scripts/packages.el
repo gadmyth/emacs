@@ -23,6 +23,7 @@
 (defconst +required-packages+
   (list 'try
         'xcscope
+        'valign
         'async
         'dired-narrow
         'window-numbering

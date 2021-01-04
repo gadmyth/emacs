@@ -1,4 +1,7 @@
-;;; org-config.el --- config org-mode
+;;; package --- org-config.el
+;;; Commentary:
+;;; Code:
+
 (require 'org)
 
 ;;; todo-keywords
@@ -125,7 +128,8 @@
 (eval-after-load "org"
   '(progn
 	 (setq org-startup-indented t)
-     (setq org-startup-folded "showall")))
+     (setq org-startup-folded "showall")
+     (require-if-installed 'valign (valign-mode))))
 
 ;;; setup org src code color
 (setq org-src-fontify-natively t)
