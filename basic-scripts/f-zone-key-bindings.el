@@ -5,16 +5,37 @@
 
 (require 'eyebrowse+)
 (require 'customized-dir)
-(require 'ivy)
+
+(defvar *minibuffer-func* nil)
+
+(defun minibuffer-func-p (func)
+  "Check the *minibuffer-func* is FUNC."
+  (eq *minibuffer-func* func))
+
+(defun call-and-mark-func (func &rest args)
+  "Call FUNC interactively with ARGS."
+  (setq *minibuffer-func* func)
+  (funcall-interactively func args))
+
+(defun quit-minibuffer-and-unmark-func ()
+  "Quit minibuffer and unmark *minibuffer-func*."
+  (minibuffer-keyboard-quit)
+  (setq *minibuffer-func* nil))
 
 (defmacro toggle-minibuffer (func)
   "When in a minibuffer, exit the minibuffer, or call the FUNC."
   "ATTENION: this can't pass the args."
   `(lambda (&rest args)
-    (interactive)
-    (if (window-minibuffer-p)
-        (minibuffer-keyboard-quit)
-      (funcall-interactively ,func args))))
+     (interactive)
+     (if (window-minibuffer-p)
+         (if (minibuffer-func-p ,func)
+             (quit-minibuffer-and-unmark-func)
+           (progn
+             (run-with-timer
+              0 nil
+              (lambda (f &rest args) (call-and-mark-func f args)) ,func args))
+           (minibuffer-keyboard-quit))
+       (call-and-mark-func ,func args))))
 
 ;; buffer
 (global-set-key (kbd "<f1>") (toggle-minibuffer 'switch-buffer-default-scratch))
