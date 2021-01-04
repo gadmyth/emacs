@@ -2,10 +2,11 @@
 (require 'org)
 
 ;;; todo-keywords
-(setq org-todo-keywords '((sequence "TODO(t)" "DOING(i)" "CLOSING(c)" "PENDING(p)" "PLAN(l)" "|" "DONE(d!)" "ABORT(a@/!)")))
+(setq org-todo-keywords '((sequence "DESIGN(s)" "TODO(t)" "DOING(i)" "CLOSING(c)" "PENDING(p)" "PLAN(l)" "|" "DONE(d!)" "ABORT(a@/!)")))
 
 (setq org-todo-keyword-faces '(("PENDING" . (:background "LightGreen" :foreground "black" :weight bold))
                                ("PLAN" . (:background "LightGray" :foreground "white" :weight bold))
+                               ("DESIGN" . (:background "LightGreen" :foreground "white" :weight bold))
                                ("DOING" . (:background "Green" :foreground "white" :weight bold))
                                ("CLOSING" . (:background "Orange" :foreground "white" :weight bold))
                                ("TODO" . (:background "DarkOrange" :foreground "black" :weight bold))
