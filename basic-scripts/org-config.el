@@ -147,6 +147,9 @@
 ;;; underline
 (setq-default org-export-with-emphasize nil)
 
+;;; tag
+(setq org-export-with-tags nil)
+
 ;;; babel language
 (org-babel-do-load-languages
  'org-babel-load-languages
