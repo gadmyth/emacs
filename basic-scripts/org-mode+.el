@@ -117,7 +117,9 @@
           org-link))))
 
 (global-set-key (kbd "<f7>") 'org-capture-current-line)
-(global-set-key (kbd "<f8>") 'org-capture-insert-temp)
+(global-set-key (kbd "<M-f7>") 'org-capture-insert-temp)
+(global-set-key (kbd "<f8>") 'org-make-element-link)
+(global-set-key (kbd "<M-f8>") 'org-insert-element-link)
 (global-set-key (kbd "C-c d") 'org-open-dir)
 (global-set-key (kbd "C-c P") 'org-show-link)
 ;; config for create a link with id property
