@@ -68,6 +68,9 @@
          (properties (org-entry-properties))
          (item (alist-get "ITEM" properties nil nil #'string-equal))
          (custom-id (alist-get "CUSTOM_ID" properties nil nil #'string-equal)))
+    (when (null custom-id)
+      (setq custom-id (upcase (org-id-uuid)))
+      (org-set-property "CUSTOM_ID" custom-id))
     (when (and
            (not (null item))
            (not (null custom-id)))
