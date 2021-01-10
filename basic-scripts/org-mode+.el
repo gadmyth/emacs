@@ -6,6 +6,7 @@
 (defvar *org-cap-temp*)
 (defvar *temp-org-capture-buffer* nil)
 (defvar show-temp-capture-buffer-p nil)
+(defvar *org-element-link-temp*)
 
 (defun display-temp-capture-buffer ()
   "."
@@ -59,6 +60,29 @@
                                (file-name-directory org-link-file))))
           (cons org-link-file org-link-dir))
       (cons nil nil))))
+
+(defun org-make-element-link ()
+  "."
+  (interactive)
+  (let* ((filename (buffer-file-name))
+         (properties (org-entry-properties))
+         (item (alist-get "ITEM" properties nil nil #'string-equal))
+         (custom-id (alist-get "CUSTOM_ID" properties nil nil #'string-equal)))
+    (when (and
+           (not (null item))
+           (not (null custom-id)))
+      (let ((link (format "[[file:%s::#%s][%s]]" filename custom-id item)))
+        (message "org element link copied: %s" link)
+        (setq *org-element-link-temp* link)))))
+
+(defun org-insert-element-link ()
+  "."
+  (interactive)
+  (when *org-element-link-temp*
+    (let* ((dir (file-name-directory (buffer-file-name)))
+           (link (replace-regexp-in-string dir "" *org-element-link-temp*)))
+      (insert link)
+      (setq *org-element-link-temp* nil))))
 
 (defun org-open-dir ()
   "."
