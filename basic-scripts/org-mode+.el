@@ -26,7 +26,8 @@
   (re-search-forward "^[ \t(]*\\(.*?\\)$" nil t 1)
   (let* ((line (match-string-no-properties 1))
          (encoded-line (url-encode-url line))
-         (formatted-line (format "[[file:%s::%s][%s]]" (buffer-file-name) encoded-line description)))
+         (filename (replace-regexp-in-string (getenv "HOME") "${HOME}" (buffer-file-name)))
+         (formatted-line (format "[[file:%s::%s][%s]]" filename line description)))
     (setq *org-cap-temp* formatted-line)
     (when show-temp-capture-buffer-p
       (display-temp-capture-buffer))))
