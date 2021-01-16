@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.5
-;; Package-Version: 20200813.001
+;; Version: 0.1.6
+;; Package-Version: 20210116.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -82,7 +82,11 @@
 
 (defun connect-websocket-server (host port)
   "Connect to a websocket server with HOST and PORT."
-  (interactive "splease input host: \nsplease input port: ")
+  ;(interactive "splease input host: \nsplease input port: ")
+  (interactive
+   (list
+    (read-string (format "please input host (default %s): " *p2p-ws-server-host*) nil nil *p2p-ws-server-host*)
+    (read-number "please input port: " *p2p-ws-server-port*)))
   (let* ((ws-url (format "ws://%s:%s" host port))
          (ws-list (p2p-ws-filter-with-url ws-url)))
     (if (> (length ws-list) 0)
