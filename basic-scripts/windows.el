@@ -10,26 +10,26 @@
 
 (require 'winner)
 (winner-mode 1)
-(global-set-key (kbd "<s-up>") #'winner-undo)
-(global-set-key (kbd "<s-down>") #'winner-redo)
+(global-set-key (kbd "<H-up>") #'winner-undo)
+(global-set-key (kbd "<H-down>") #'winner-redo)
 
 ;; set mouse autoselect window
 (setq mouse-autoselect-window t)
 
 ;; adjust window size
-(global-set-key (kbd "s-h") #'enlarge-window-horizontally)
-(global-set-key (kbd "s-l") #'shrink-window-horizontally)
+(global-set-key (kbd "H-h") #'enlarge-window-horizontally)
+(global-set-key (kbd "H-l") #'shrink-window-horizontally)
 
 ;; window operation
 (global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
 (global-set-key (kbd "C-x 3") #'split-window-right-with-ratio)
-(global-set-key (kbd "s-m") 'goto-main-window)
-(global-set-key (kbd "s-s") 'swap-window-in-current-frame)
-(global-set-key (kbd "s-c") 'copy-window-in-current-frame)
-(global-set-key (kbd "<s-return>") 'swap-to-main-window)
-(global-set-key (kbd "s-k") #'goto-previous-window)
-(global-set-key (kbd "s-j") #'goto-next-window)
-(global-set-key (kbd "<s-tab>") #'goto-next-window)
+(global-set-key (kbd "H-m") 'goto-main-window)
+(global-set-key (kbd "H-s") 'swap-window-in-current-frame)
+(global-set-key (kbd "H-c") 'copy-window-in-current-frame)
+(global-set-key (kbd "<H-return>") 'swap-to-main-window)
+(global-set-key (kbd "H-k") #'goto-previous-window)
+(global-set-key (kbd "H-j") #'goto-next-window)
+(global-set-key (kbd "<H-tab>") #'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
 
 (defun split-window-below-with-ratio ()
