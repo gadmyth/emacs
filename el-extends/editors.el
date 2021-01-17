@@ -125,6 +125,8 @@
       (goto-char end)
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
+;; ------ line editor -------
+
 (defun kill-to-beginning-of-line ()
   "."
   (interactive)
@@ -134,8 +136,6 @@
                    (beginning-of-visual-line)
                    (point))))
     (kill-region begin end))))
-
-(global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
 
 (defun kill-the-whole-line ()
   "."
@@ -148,8 +148,6 @@
                  (end-of-visual-line)
                  (point))))
       (kill-region begin end))))
-
-(global-set-key (kbd "C-S-k") 'kill-the-whole-line)
 
 (defun kill-the-whole-line-ring-save (start end)
   "START, END."
@@ -166,7 +164,15 @@
         (kill-ring-save begin end)
         (message "*** line copied ***")))))
 
-;; M-w origin key bind to kill-ring-save
+;; ----- global keys for line editor -----
+
+;; C-k: kill-line from current point to end of line
+;; C-S-u: kill-to-beginning-of-line
+;; C-S-k: kill the whole line
+;; M-w origin key bind to kill-ring-save, original function is copy region
+
+(global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
+(global-set-key (kbd "C-S-k") 'kill-the-whole-line)
 (global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
 
 (provide 'editors)
