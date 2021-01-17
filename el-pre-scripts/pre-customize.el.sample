@@ -22,7 +22,10 @@
 
 (setq *load-slime* nil)
 
-(setq org-agenda-files '("~/org"))
+(setq org-agenda-files '("some org files"))
+(setq *calendar-longitude* 0)
+(setq *calendar-latitude* 0)
+(setq *diary-file* "diary file")
 
 (setq *gkroam-default-root-dir* "~/gkroam")
 

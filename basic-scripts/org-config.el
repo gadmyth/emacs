@@ -35,11 +35,64 @@
 (setq org-enforce-todo-dependencies t)
 
 ;;; agenda
-(defvar org-agenda-files '("~/org"))
+(require 'org-agenda)
+
+;; config files
+(defvar org-agenda-files)
+(defvar *diary-file*)
+(setq org-agenda-diary-file *diary-file*)
+(setq diary-file *diary-file*)
+
 (setq org-agenda-ndays 30)
 (setq org-agenda-include-diary t)
+;; use agenda time grid
+(setq org-agenda-use-time-grid t)
+;; org agenda time grid
+(setq org-agenda-time-grid
+      `((daily today require-timed)
+        ,(number-sequence 300 2400 300)
+        "......" "----------------"))
+
+;; set (longitude, latitude) for sunrise and sunset
+(require 'solar)
+(defvar *calendar-longitude* 0)
+(defvar *calendar-latitude* 0)
+(setq calendar-longitude *calendar-longitude*)
+(setq calendar-latitude *calendar-latitude*)
+
+(defun diary-sunrise ()
+  "."
+  (setq date (calendar-current-date))
+  (let* ((dss (diary-sunrise-sunset)))
+    (with-temp-buffer
+      (insert dss)
+      (goto-char (point-min))
+      (while (re-search-forward " ([^)]*)" nil t)
+        (replace-match "" nil nil))
+      (goto-char (point-min))
+      (search-forward ",")
+      (buffer-substring (point-min) (match-beginning 0)))))
+
+(defun diary-sunset ()
+  "."
+  (setq date (calendar-current-date))
+  (let ((dss (diary-sunrise-sunset))
+        start end)
+    (with-temp-buffer
+      (insert dss)
+      (goto-char (point-min))
+      (while (re-search-forward " ([^)]*)" nil t)
+        (replace-match "" nil nil))
+      (goto-char (point-min))
+      (search-forward ", ")
+      (setq start (match-end 0))
+      (search-forward " at")
+      (setq end (match-beginning 0))
+      (goto-char start)
+      (capitalize-word 1)
+      (buffer-substring start end))))
+
 (global-set-key (kbd "C-c a") 'org-agenda)
-;(global-set-key (kbd "<f6>") 'org-todo-list)
 
 ;;; capture
 (require 'org-capture)

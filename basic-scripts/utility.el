@@ -42,7 +42,7 @@
 
 (defvar *must-loading-files*
 	  (mapcar (lambda (n) (expand-file-name n))
-			  '("~/diary" "~/org/notes.org" "~/org/task.org" "~/org/timeline.org" "~/unix-config/.emacs")))
+			  '("~/org/notes.org" "~/org/task.org" "~/org/timeline.org" "~/unix-config/.emacs")))
 
 (defun ensure-mkdir (dirname)
   "DIRNAME: ."
