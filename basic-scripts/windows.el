@@ -142,6 +142,20 @@ Copied some codes from window-numbering.el."
          (select-window (cdr cand))
          (switch-to-buffer buffer))))))
 
+(defun delete-other-windows-of-super-window (&optional window)
+  "WINDOW."
+  (interactive)
+  (let* ((window (or window (get-buffer-window)))
+         (super-window (window-parent window))
+         child)
+    (when (and (windowp super-window)
+               (setq child (window-child super-window)))
+      (while child
+        (let ((w child))
+          (setq child (window-next-sibling window))
+          (if (not (eq window w))
+              (delete-window w)))))))
+
 (defun quit-help-window ()
   "."
   (interactive)
@@ -167,6 +181,7 @@ Copied some codes from window-numbering.el."
       (minibuffer-keyboard-quit)
     (quit-help-windows)))
 
+(global-set-key (kbd "C-x 9") 'delete-other-windows-of-super-window)
 (global-set-key (kbd "C-x q") 'quit-temp-windows)
 
 (provide 'windows)
