@@ -3,7 +3,7 @@
 ;;; Code:
 
 (require-packages-if-installed
- '('web-mode)
+ '(web-mode)
  (add-hook 'web-mode-hook
            (lambda ()
              ; web-mode, html tag
@@ -16,7 +16,7 @@
  )
 
 (require-packages-if-installed
- '('js2-mode 'js2-refactor)
+ '(js2-mode js2-refactor)
  (setq auto-mode-alist
        (append
         '(("\\.js\\'" . js2-mode))
@@ -27,7 +27,7 @@
  )
 
 (require-packages-if-installed
- '('emmet-mode)
+ '(emmet-mode)
  ;; Auto-start on any markup modes
  (add-hook 'sgml-mode-hook 'emmet-mode)
  ;; enable Emmet's css abbreviation.

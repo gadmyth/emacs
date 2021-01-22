@@ -24,8 +24,9 @@
   "PACKAGES, BODY."
   `(let ((all-package-installed t))
      (dolist (p ,packages)
-       (if (not (package-installed-p p))
-           (setq all-package-installed nil)))
+       (when (not (package-installed-p p))
+         (message "%S not installed!" p)
+         (setq all-package-installed nil)))
      (when all-package-installed
        (dolist (p ,packages)
          (require-package p ,@body)))))
