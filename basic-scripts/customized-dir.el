@@ -47,7 +47,11 @@
   (ivy-read "Switch to dir: " *customized-dir*
             :action (lambda (dir)
                       (ivy-read "Choose the action:" (list (cons "dir" 'dired)
-                                                           (cons "vc-dir" 'vc-dir))
+                                                           (cons "vc-dir" 'vc-dir)
+                                                           (cons "remove-customerized-dir"
+                                                                 '(lambda (dir)
+                                                                    (let ((default-directory dir))
+                                                                      (call-interactively #'remove-customized-dir)))))
                                 :action (lambda (pair)
                                           (let ((f (cdr pair)))
                                             (funcall f dir)))))))
@@ -121,7 +125,7 @@
     (message "Action canceled!")))
 
 (defun remove-customized-dir (confirm)
-  "."
+  "CONFIRM."
   (interactive (list (y-or-n-p (format "Sure to remove %s to customized-dir? " default-directory))))
   (if confirm
       (let ((dir (expand-file-name default-directory)))
