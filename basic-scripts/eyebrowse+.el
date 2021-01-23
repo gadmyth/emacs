@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
 ;; Version: 1.0.6
-;; Package-Version: 20210123.001
+;; Package-Version: 20210123.002
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -130,10 +130,10 @@
   (interactive)
   (eyebrowse-list-window-configs (eyebrowse--get 'window-configs) nil))
 
-(defun eyebrowse-list-configs-with-action (action)
-  "ACTION: ."
+(defun eyebrowse-list-configs-with-action (action &optional buffer)
+  "ACTION: , BUFFER."
   (interactive)
-  (eyebrowse-list-window-configs-with-action (eyebrowse--get 'window-configs) nil action))
+  (eyebrowse-list-window-configs-with-action (eyebrowse--get 'window-configs) buffer action))
 
 (defun eyebrowse-list-window-configs (configs buffer)
   "CONFIGS, BUFFER."
@@ -249,6 +249,7 @@
          (action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
+      (message "list actions: %s" args)
       (apply func args))))
 
 (defun eyebrowse-get-lock-buffer-config (buffer)
@@ -275,7 +276,9 @@
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
        (let* ((slot (eyebrowse-config-slot element))
               (config (eyebrowse-get-config-with-slot slot)))
-         (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))))
+         (message "locked, buffer: %s" buffer)
+         (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))
+   buffer))
 
 (defun eyebrowse-free-buffer-config (&optional buffer)
   "Free the current BUFFER that binding to a certain eyebrowse config."
