@@ -15,7 +15,7 @@
 (defun call-and-mark-func (func &rest args)
   "Call FUNC interactively with ARGS."
   (setq *minibuffer-func* func)
-  (funcall-interactively func args))
+  (call-interactively func args))
 
 (defun quit-minibuffer-and-unmark-func ()
   "Quit minibuffer and unmark *minibuffer-func*."
@@ -68,7 +68,7 @@
                                           (find-file (concatenate 'string prename ".m"))))))))
 
 ;; library
-(global-set-key (kbd "<f6>") 'find-library)
+(global-set-key (kbd "<f6>") (toggle-minibuffer 'find-library))
 (global-set-key (kbd "<M-f6>") 'require-library)
 
 (provide 'f-zone-key-bindings)
