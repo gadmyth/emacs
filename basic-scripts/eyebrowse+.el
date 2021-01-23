@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.5
-;; Package-Version: 20201004.001
+;; Version: 1.0.6
+;; Package-Version: 20210123.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -175,6 +175,9 @@
          (target-conf-string (eyebrowse-config-string target-config)))
     (if target-slot
         (eyebrowse-switch-to-window-config target-slot))
+    (and buffer
+         (null (eyebrowse-get-lock-buffer-config buffer))
+         (funcall #'eyebrowse-switch-buffer-with-actions buffer))
     (cond (buffer
            (eyebrowse-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
            (select-buffer-window-safely buffer))
@@ -186,9 +189,8 @@
   (cond
    (buffer
     (if-let ((window (get-buffer-window buffer)))
-	    (select-window window)
-	    (switch-to-buffer
-	     buffer nil 'force-same-window)))
+        (select-window window)
+      (switch-to-buffer buffer nil 'force-same-window)))
    (name
     (switch-to-buffer
      name nil 'force-same-window))))
@@ -230,14 +232,24 @@
   (interactive)
   (eyebrowse-list-with-actions *eyebrowse-modify-buffer-action-alist*))
 
-(defun eyebrowse-list-with-actions (actions)
-  "Select one of ACTIONS, and choose candidate from eyebrowse configs."
+(defvar *eyebrowse-switch-buffer-action-alist*
+  '(("switch to the buffer" . select-buffer-window-safely)
+    ("lock buffer's config" . eyebrowse-lock-buffer-config)))
+
+(defun eyebrowse-switch-buffer-with-actions (&rest args)
+  "ARGS."
+  (interactive)
+  (message "actions args: %S" args)
+  (apply #'eyebrowse-list-with-actions (cons *eyebrowse-switch-buffer-action-alist* args)))
+
+(defun eyebrowse-list-with-actions (actions &rest args)
+  "Select one of ACTIONS, and choose action from eyebrowse configs, call the action with ARGS."
   (let* ((current-element (eyebrowse-current-config-string))
          (prompt (format "Select eyebrowse action (config %s): " current-element))
          (action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
-      (command-execute func))))
+      (apply func args))))
 
 (defun eyebrowse-get-lock-buffer-config (buffer)
   "Get the eyebrowse config that binding to the BUFFER."
@@ -254,8 +266,8 @@
     (setq-local *eyebrowse-locked-config* config)
     (select-buffer-window-safely-at-config buffer)))
 
-(defun eyebrowse-lock-buffer-config ()
-  "Lock the current buffer that binding to the current eyebrowse config."
+(defun eyebrowse-lock-buffer-config (&optional buffer)
+  "Lock the current BUFFER that binding to the current eyebrowse config."
   (interactive)
   (eyebrowse-list-configs-with-action
    (lambda (element)
@@ -263,22 +275,42 @@
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
        (let* ((slot (eyebrowse-config-slot element))
               (config (eyebrowse-get-config-with-slot slot)))
-         (eyebrowse-lock-with-config (current-buffer) config))))))
+         (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))))
 
-(defun eyebrowse-free-buffer-config ()
-  "Free the current buffer that binding to a certain eyebrowse config."
+(defun eyebrowse-free-buffer-config (&optional buffer)
+  "Free the current BUFFER that binding to a certain eyebrowse config."
   (interactive)
-  (setq-local *eyebrowse-locked-config* nil))
+  (with-current-buffer (or buffer (current-buffer))
+    (setq-local *eyebrowse-locked-config* nil)))
+
+(defun eyebrowse-buffer-name-with-config (buffer)
+  "BUFFER."
+  (let* ((name (buffer-name buffer))
+         (locked-config (eyebrowse-get-lock-buffer-config buffer))
+         (config-string (eyebrowse-config-string locked-config))
+         (info (if (null config-string) "" (format " (%s)" config-string)))
+         (name-with-config (format "%s%s" name info)))
+    name-with-config))
 
 (defun eyebrowse-switch-buffer (&rest _)
   "Switch to another buffer."
   (interactive)
-  (let ((buffer (completing-read "Switch to buffer: " #'internal-complete-buffer nil t)))
+  (let* ((locked-config (eyebrowse-get-lock-buffer-config (current-buffer)))
+         (config-string (eyebrowse-config-string locked-config))
+         (info (if (null config-string) "" (format " (%s)" config-string)))
+         (buffer (completing-read (format "Switch to buffer%s: " info)
+                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t)))
+         ;(buffer (completing-read (format "Switch to buffer%s: " info) #'internal-complete-buffer nil t)))
     ;; preselect: (buffer-name (other-buffer (current-buffer))
-    (funcall 'eyebrowse-switch-buffer-action buffer)))
+    (funcall 'eyebrowse-switch-buffer-action-with-config buffer)))
 
-(defun eyebrowse-switch-buffer-action (buffer)
-  "Switch to BUFFER may be a string or nil."
+(defun eyebrowse-switch-buffer-action-with-config (buffer-name-with-config)
+  "Switch to buffer may be a string or nil, BUFFER-NAME-WITH-CONFIG."
+  (let ((buffer (replace-regexp-in-string " (.*)" "" buffer-name-with-config)))
+    (eyebrowse-switch-buffer-action buffer)))
+
+(defun eyebrowse-switch-buffer-action (buffer-name)
+  "Switch to buffer of BUFFER-NAME may be a string or nil."
   (cond
    ((zerop (length buffer))
     (select-buffer-window-safely nil buffer))
@@ -287,6 +319,7 @@
    (t
     (eyebrowse-message "selected buffer: %S" buffer)
     (let ((configs (eyebrowse--filter-window-config buffer t)))
+      (eyebrowse-message "filted window config: %S" (length configs))
       (cond
        ((zerop (length configs))
         (select-buffer-window-safely-at-config buffer))
@@ -296,7 +329,7 @@
         (eyebrowse-list-window-configs configs buffer)))))))
 
 (defun eyebrowse--filter-window-config (target-buffer-name &optional include-current-config)
-  "TARGET-BUFFER-NAME, INCLUDE-CURRENT-CONFIG."
+  "TARGET-BUFFER-NAME, INCLUDE-CURRENT-CONFIG, list all configs that show the buffer."
   (interactive "bbuffer: ")
   (eyebrowse-update-window-config)
   (let ((filtered-window-config)
