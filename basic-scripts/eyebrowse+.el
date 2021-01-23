@@ -276,7 +276,7 @@
          (eyebrowse-message "eyebrowse config %S does not exist!" element)
        (let* ((slot (eyebrowse-config-slot element))
               (config (eyebrowse-get-config-with-slot slot)))
-         (message "locked, buffer: %s" buffer)
+         (eyebrowse-message "locked, buffer: %s" buffer)
          (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))
    buffer))
 
