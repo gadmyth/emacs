@@ -46,6 +46,7 @@
         'multi-term
         'flycheck
         'eyebrowse
+        'annotate
         'goto-last-point
         'exwm
         ;'vkill
@@ -64,7 +65,6 @@
         'eredis
         'dirtree
         'foreign-regexp
-        'annotate
         'expand-region
         'edit-list
         'projectile

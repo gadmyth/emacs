@@ -31,5 +31,7 @@
 
 (setq org-agenda-files '("~/file1.org"))
 
+(setq *annotate-file* "~/.emacs.d/annotations")
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here
