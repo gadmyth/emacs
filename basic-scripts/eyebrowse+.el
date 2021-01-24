@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
 ;; Version: 1.0.6
-;; Package-Version: 20210124.002
+;; Package-Version: 20210124.003
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -301,13 +301,14 @@
 (defun eyebrowse-switch-buffer (&rest _)
   "Switch to another buffer."
   (interactive)
-  (let* ((locked-config (eyebrowse-get-lock-buffer-config (current-buffer)))
+  (let* ((buffer (current-buffer))
+         (last-buffer (buffer-name (other-buffer (current-buffer))))
+         (locked-config (eyebrowse-get-lock-buffer-config buffer))
          (config-string (eyebrowse-config-string locked-config))
          (info (if (null config-string) "" (format " (%s)" config-string)))
          (buffer (completing-read (format "Switch to buffer%s: " info)
-                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t)))
+                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t nil nil last-buffer)))
          ;(buffer (completing-read (format "Switch to buffer%s: " info) #'internal-complete-buffer nil t)))
-    ;; preselect: (buffer-name (other-buffer (current-buffer))
     (funcall 'eyebrowse-switch-buffer-action-with-config buffer)))
 
 (defun eyebrowse-switch-buffer-action-with-config (buffer-name-with-config)
