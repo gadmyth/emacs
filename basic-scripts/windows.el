@@ -168,7 +168,7 @@ Copied some codes from window-numbering.el."
   (dolist (window (window-list))
     (let* ((buffer (window-buffer window))
            (name (buffer-name buffer)))
-      (if (and (string-prefix-p "*" name)
+      (if (and (string-prefix-p "*" (string-trim name))
                (let ((first-char (substring name 1 2)))
                  (equal (upcase first-char) first-char)))
           (if (window-live-p window)
