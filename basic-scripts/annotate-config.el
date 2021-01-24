@@ -14,7 +14,7 @@
   (when-let ((annotation (annotate-annotation-at (point))))
     (annotate--delete-annotation-chain annotation)))
 
-(define-key annotate-mode-map (kbd "C-c C-d") 'annotate-remove-annotation)
+(define-key annotate-mode-map (kbd "C-c d") 'annotate-remove-annotation)
 
 ;; TODO: list all the annotations, list the annotation of current buffer
 
