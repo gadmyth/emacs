@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
 ;; Version: 1.0.6
-;; Package-Version: 20210124.003
+;; Package-Version: 20210124.004
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -178,7 +178,7 @@
     ;; if buffer is not locked to an config, show the actions to just switch buffer or lock config
     (and buffer
          (null (eyebrowse-get-lock-buffer-config buffer))
-         (not (string-prefix-p "*" (string-trim buffer)))
+         (not (string-prefix-p "*" (string-trim (or (and (stringp buffer) buffer) (buffer-name buffer)))))
          (buffer-file-name (get-buffer buffer))
          (funcall #'eyebrowse-switch-buffer-with-actions buffer))
     (cond (buffer
