@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
 ;; Version: 1.0.6
-;; Package-Version: 20210124.004
+;; Package-Version: 20210124.005
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -497,7 +497,7 @@ COPY from eyebrowse--load-window-config."
          ;; copy the default buffer identification from bindings.el.gz
          (propertized-buffer-identification "%12b")
          ;; - [locked-conf, current-conf, last-conf]
-         (format " - [%s, %s, %s]"
+         (format " [%s, %s, %s]"
                  locked-conf
                  ;; the current eb config is active, and with no keymap
                  (propertize current-conf-string 'face 'eyebrowse-mode-line-active
