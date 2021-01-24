@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
 ;; Version: 1.0.6
-;; Package-Version: 20210123.002
+;; Package-Version: 20210124.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -468,6 +468,47 @@ COPY from eyebrowse--load-window-config."
         (eyebrowse--set 'window-configs configs)
         (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
 
+(defvar eyebrowse-buffer-name-format
+  '(:eval
+    (let* ((buffer (current-buffer))
+           (buffer-name (buffer-name buffer))
+           (locked-conf (and (boundp '*eyebrowse-locked-config*)
+                             (eyebrowse-config-string *eyebrowse-locked-config*)))
+           (current-conf (eyebrowse-get-current-config))
+           (current-conf-string (eyebrowse-config-string current-conf))
+           (last-conf (eyebrowse-get-last-config))
+           (last-conf-string (eyebrowse-config-string last-conf))
+           (help-echo "mouse-1: Switch to indicated workspace"))
+      ;; make a keymap with a eyebrowse config slot paramter
+      (flet ((make-keymap
+              (slot)
+              (let ((map (make-sparse-keymap)))
+                (define-key map (kbd "<mode-line><mouse-1>")
+                  `(lambda (_e)
+                     (interactive "e")
+                     (eyebrowse-switch-to-window-config ,slot)))
+                map)))
+        ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
+        (list
+         ;; copy the default buffer identification from bindings.el.gz
+         (propertized-buffer-identification "%12b")
+         ;; - [locked-conf, current-conf, last-conf]
+         (format " - [%s, %s, %s]"
+                 locked-conf
+                 ;; the current eb config is active, and with no keymap
+                 (propertize current-conf-string 'face 'eyebrowse-mode-line-active
+                             'mouse-face 'mode-line-highlight
+                             'slot (car current-conf)
+                             'local-map nil
+                             'help-echo help-echo)
+                 ;; last-conf can be clicked to the last eb config
+                 (propertize last-conf-string 'face 'eyebrowse-mode-line-inactive
+                             'mouse-face 'mode-line-highlight
+                             'slot (car last-conf)
+                             'local-map (make-keymap (car last-conf))
+                             'help-echo help-echo)))
+        ))))
+
 (define-minor-mode eyebrowse-plus-mode
   "Toggle `eyebrowse-plus-mode."
   :global t
@@ -478,6 +519,8 @@ COPY from eyebrowse--load-window-config."
                   (lambda ()
                     (add-hook 'delete-frame-functions #'save-eyebrowse-config)
                     (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))
+        ;; set mode-line-buffer-identification
+        (setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
         (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
