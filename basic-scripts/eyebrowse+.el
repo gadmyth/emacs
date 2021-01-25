@@ -252,8 +252,10 @@
          (action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
-      (message "list actions: %s" args)
-      (apply func args))))
+      (eyebrowse-message "list actions, actions: %s, args: %s" actions args)
+      (if args
+          (apply func args)
+        (call-interactively func)))))
 
 (defun eyebrowse-get-lock-buffer-config (buffer)
   "Get the eyebrowse config that binding to the BUFFER."
