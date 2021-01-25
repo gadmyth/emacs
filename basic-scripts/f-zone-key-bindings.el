@@ -43,12 +43,12 @@
 
 ;; eyebrowse config
 (global-set-key (kbd "<f2>") (toggle-minibuffer 'eyebrowse-list-configs))
-(global-set-key (kbd "<M-f2>") 'eyebrowse-modify-config)
+(global-set-key (kbd "<M-f2>") (toggle-minibuffer 'eyebrowse-modify-config))
 (global-set-key (kbd "<C-f2>") 'eyebrowse-last-window-config)
 
 ;; eyebrowse buffer config
 (global-set-key (kbd "<f3>") (toggle-minibuffer 'eyebrowse-switch-buffer))
-(global-set-key (kbd "<M-f3>") 'eyebrowse-modify-buffer-config)
+(global-set-key (kbd "<M-f3>") (toggle-minibuffer 'eyebrowse-modify-buffer-config))
 (global-set-key (kbd "<C-f3>") 'eyebrowse-switch-other-buffer)
 
 ;; customized dir
@@ -69,7 +69,7 @@
 
 ;; library
 (global-set-key (kbd "<f6>") (toggle-minibuffer 'find-library))
-(global-set-key (kbd "<M-f6>") 'require-library)
+(global-set-key (kbd "<M-f6>") (toggle-minibuffer 'require-library))
 
 (provide 'f-zone-key-bindings)
 ;;; f-zone-key-bindings.el ends here
