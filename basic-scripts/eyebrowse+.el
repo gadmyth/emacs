@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.6
-;; Package-Version: 20210124.005
+;; Version: 1.0.7
+;; Package-Version: 20210126.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -173,19 +173,23 @@
          (locked-conf-string (eyebrowse-config-string locked-config))
          (target-slot (car target-config))
          (target-conf-string (eyebrowse-config-string target-config)))
-    (if target-slot
-        (eyebrowse-switch-to-window-config target-slot))
+
+    ;; if has target slot, switch to config
+    (when target-slot
+      (eyebrowse-switch-to-window-config target-slot)
+      (eyebrowse-message "switch to config %s" target-conf-string))
+    
+
     ;; if buffer is not locked to an config, show the actions to just switch buffer or lock config
-    (and buffer
+    (if (and
+         (null target-slot)
          (null (eyebrowse-get-lock-buffer-config buffer))
          (not (string-prefix-p "*" (string-trim (or (and (stringp buffer) buffer) (buffer-name buffer)))))
-         (buffer-file-name (get-buffer buffer))
-         (funcall #'eyebrowse-switch-buffer-with-actions buffer))
-    (cond (buffer
-           (eyebrowse-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
-           (select-buffer-window-safely buffer))
-          (target-slot
-           (eyebrowse-message "switch to config %s" target-conf-string)))))
+         (buffer-file-name (get-buffer buffer)))
+        (funcall #'eyebrowse-switch-buffer-with-actions buffer)
+      (progn
+        (eyebrowse-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
+        (select-buffer-window-safely buffer)))))
 
 (defun select-buffer-window-safely (buffer &optional name)
   "If BUFFER's window is live, select it, otherwise switch to it or a new buffer named NAME."
@@ -242,13 +246,14 @@
 (defun eyebrowse-switch-buffer-with-actions (&rest args)
   "ARGS."
   (interactive)
-  (message "actions args: %S" args)
-  (apply #'eyebrowse-list-with-actions (cons *eyebrowse-switch-buffer-action-alist* args)))
+  (eyebrowse-message "actions args: %S" args)
+  (apply #'eyebrowse-list-with-actions *eyebrowse-switch-buffer-action-alist* args))
 
 (defun eyebrowse-list-with-actions (actions &rest args)
   "Select one of ACTIONS, and choose action from eyebrowse configs, call the action with ARGS."
   (let* ((current-element (eyebrowse-current-config-string))
-         (prompt (format "Select eyebrowse action (config %s): " current-element))
+         (buffer-name (if (> (length args) 0) (car args) (buffer-name (current-buffer))))
+         (prompt (format "Select eyebrowse action for %s (%s): " buffer-name current-element))
          (action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
@@ -261,7 +266,7 @@
   "Get the eyebrowse config that binding to the BUFFER."
   (if buffer
       (with-current-buffer buffer
-        (if (boundp '*eyebrowse-locked-config-slot*)
+        (if (and (boundp '*eyebrowse-locked-config-slot*) *eyebrowse-locked-config-slot*)
             (eyebrowse-get-config-with-slot *eyebrowse-locked-config-slot*)
           nil))
     nil))
@@ -304,12 +309,13 @@
   "Switch to another buffer."
   (interactive)
   (let* ((buffer (current-buffer))
-         (last-buffer (buffer-name (other-buffer (current-buffer))))
+         (last-buffer (other-buffer (current-buffer)))
+         (last-buffer-name (eyebrowse-buffer-name-with-config last-buffer))
          (locked-config (eyebrowse-get-lock-buffer-config buffer))
          (config-string (eyebrowse-config-string locked-config))
          (info (if (null config-string) "" (format " (%s)" config-string)))
          (buffer (completing-read (format "Switch to buffer%s: " info)
-                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t nil nil last-buffer)))
+                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t nil nil last-buffer-name)))
          ;(buffer (completing-read (format "Switch to buffer%s: " info) #'internal-complete-buffer nil t)))
     (funcall 'eyebrowse-switch-buffer-action-with-config buffer)))
 
@@ -361,9 +367,9 @@
                (if (not (-contains? filtered-window-config window-config))
                    (push window-config filtered-window-config))))))))
       (when (and (string-prefix-p "*" target-buffer-name)
-		 include-current-config
-		 (eq current-slot (car window-config))
-		 (not (-contains? filtered-window-config window-config)))
+                 include-current-config
+                 (eq current-slot (car window-config))
+                 (not (-contains? filtered-window-config window-config)))
         (push window-config filtered-window-config)))
     (reverse filtered-window-config)))
 
