@@ -261,15 +261,15 @@
   "Get the eyebrowse config that binding to the BUFFER."
   (if buffer
       (with-current-buffer buffer
-        (if (boundp '*eyebrowse-locked-config*)
-            *eyebrowse-locked-config*
+        (if (boundp '*eyebrowse-locked-config-slot*)
+            (eyebrowse-get-config-with-slot *eyebrowse-locked-config-slot*)
           nil))
     nil))
 
 (defun eyebrowse-lock-with-config (buffer config)
   "Lock the BUFFER that binding to the current eyebrowse CONFIG."
   (with-current-buffer buffer
-    (setq-local *eyebrowse-locked-config* config)
+    (setq-local *eyebrowse-locked-config-slot* (car config))
     (select-buffer-window-safely-at-config buffer)))
 
 (defun eyebrowse-lock-buffer-config (&optional buffer)
@@ -289,7 +289,7 @@
   "Free the current BUFFER that binding to a certain eyebrowse config."
   (interactive)
   (with-current-buffer (or buffer (current-buffer))
-    (setq-local *eyebrowse-locked-config* nil)))
+    (setq-local *eyebrowse-locked-config-slot* nil)))
 
 (defun eyebrowse-buffer-name-with-config (buffer)
   "BUFFER."
@@ -478,8 +478,9 @@ COPY from eyebrowse--load-window-config."
   '(:eval
     (let* ((buffer (current-buffer))
            (buffer-name (buffer-name buffer))
-           (locked-conf (and (boundp '*eyebrowse-locked-config*)
-                             (eyebrowse-config-string *eyebrowse-locked-config*)))
+           (locked-conf (and (boundp '*eyebrowse-locked-config-slot*)
+                             (eyebrowse-get-config-with-slot *eyebrowse-locked-config-slot*)))
+           (locked-conf-string (eyebrowse-config-string locked-conf))
            (current-conf (eyebrowse-get-current-config))
            (current-conf-string (eyebrowse-config-string current-conf))
            (last-conf (eyebrowse-get-last-config))
@@ -500,7 +501,7 @@ COPY from eyebrowse--load-window-config."
          (propertized-buffer-identification "%12b")
          ;; - [locked-conf, current-conf, last-conf]
          (format " [%s, %s, %s]"
-                 locked-conf
+                 locked-conf-string
                  ;; the current eb config is active, and with no keymap
                  (propertize current-conf-string 'face 'eyebrowse-mode-line-active
                              'mouse-face 'mode-line-highlight
