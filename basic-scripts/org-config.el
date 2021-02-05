@@ -5,7 +5,7 @@
 (require 'org)
 
 ;;; todo-keywords
-(setq org-todo-keywords '((sequence "DESIGN(s)" "TODO(t)" "DOING(i)" "BLOCKED(b)" "CLOSING(c)" "PENDING(p)" "PLAN(l)" "|" "DONE(d!)" "ABORT(a@/!)")))
+(setq org-todo-keywords '((sequence "DESIGN(s)" "TODO(t)" "REDO(r)" "DOING(i)" "BLOCKED(b)" "CLOSING(c)" "PENDING(p)" "PLAN(l)" "|" "DONE(d!)" "ABORT(a@/!)")))
 
 (setq org-todo-keyword-faces '(("PENDING" . (:background "LightGreen" :foreground "black" :weight bold))
                                ("PLAN" . (:background "LightGray" :foreground "white" :weight bold))
@@ -14,6 +14,7 @@
                                ("BLOCKED" . (:background "Purple" :foreground "white" :weight bold))
                                ("CLOSING" . (:background "Orange" :foreground "white" :weight bold))
                                ("TODO" . (:background "DarkOrange" :foreground "black" :weight bold))
+                               ("REDO" . (:background "DarkOrange" :foreground "black" :weight bold))
                                ("DONE" . (:background "azure" :foreground "Darkgreen" :weight bold))
                                ("ABORT" . (:background "gray" :foreground "black"))))
 (setq org-log-done 'time)
