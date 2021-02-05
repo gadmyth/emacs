@@ -45,7 +45,7 @@
 (setq org-agenda-diary-file *diary-file*)
 (setq diary-file *diary-file*)
 
-(setq org-agenda-ndays 30)
+(setq org-agenda-span 'day)
 (setq org-agenda-include-diary t)
 ;; use agenda time grid
 (setq org-agenda-use-time-grid t)
