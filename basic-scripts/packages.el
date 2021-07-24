@@ -91,7 +91,9 @@
         'slime
         'magit
         'git-timemachine
-        'datetime-format))
+        'datetime-format
+        'solarized-theme
+        ))
 
 ;; create autoloads
 ;(require 'autoload)
