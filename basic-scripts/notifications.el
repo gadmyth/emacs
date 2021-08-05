@@ -27,9 +27,12 @@
       (let ((seconds (* 60 ,minutes)))
         (sleep-for seconds) seconds))
    `(lambda (arg)
-     (with-output-to-temp-buffer "*notification*"
-       (print ,message)
-       (print (format-time-string "%Y-%m-%d %a %H:%M" (current-time)))))))
+      (with-current-buffer (get-buffer-create "*notification*")
+        (read-only-mode 0)
+        (goto-char (point-max))
+        (insert (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)) "\n" ,message "\n\n")
+        (read-only-mode t))
+      (display-buffer "*notification*"))))
 
 
 (global-set-key (kbd "C-x s") 'start-notify)
