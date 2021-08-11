@@ -35,23 +35,24 @@
 (defun split-window-below-with-ratio ()
   "."
   (interactive)
-  (let* ((height (window-height (get-buffer-window)))
-         (ratio (string-to-number
-                 (completing-read "Select the split ratio: " '("2" "3" "4" "5") nil t)))
-         (top-ratio (- 1 (/ 1.0 ratio)))
-         (top-window-height (round (* height top-ratio))))
-    (select-window (split-window-below top-window-height))
-    (switch-to-buffer (get-buffer-create "*scratch*"))))
+  (split-window-to-scratch-buffer 'above 'below))
 
 (defun split-window-right-with-ratio ()
   "."
   (interactive)
-  (let* ((width (window-width (get-buffer-window)))
+  (split-window-to-scratch-buffer 'left 'right))
+
+(defun split-window-to-scratch-buffer (side1 side2)
+  "Split buffer default on SIDE2, if ctrl-u is pressed, split the new window on SIDE1."
+  (let* ((split-another-side (not (null current-prefix-arg)))
+         (side (if split-another-side side1 side2))
+         (full-window-size (if (eq side1 'left)
+                               (window-width (get-buffer-window))
+                             (window-height (get-buffer-window))))
          (ratio (string-to-number
-                 (completing-read "Select the split ratio: " '("2" "3" "4" "5") nil t)))
-         (left-ratio (- 1 (/ 1.0 ratio)))
-         (left-window-width (round (* width left-ratio))))
-    (select-window (split-window-right left-window-width))
+                 (completing-read "Select the split ratio: " '("0.5" "0.8" "0.75" "0.618" "0.33" "0.25" "0.2" "0.1") nil t)))
+         (split-window-size (round (* full-window-size ratio))))
+    (select-window (split-window nil (* -1 split-window-size) side))
     (switch-to-buffer (get-buffer-create "*scratch*"))))
 
 (defun swap-to-main-window ()
