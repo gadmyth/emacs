@@ -23,6 +23,8 @@
 ;; window operation
 (global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
 (global-set-key (kbd "C-x 3") #'split-window-right-with-ratio)
+(global-set-key (kbd "C-x @") #'(lambda () (interactive) (split-window-below-with-ratio t)))
+(global-set-key (kbd "C-x #") #'(lambda () (interactive) (split-window-right-with-ratio t)))
 (global-set-key (kbd "H-m") 'goto-main-window)
 (global-set-key (kbd "H-s") 'swap-window-in-current-frame)
 (global-set-key (kbd "H-c") 'copy-window-in-current-frame)
@@ -32,17 +34,18 @@
 (global-set-key (kbd "<H-tab>") #'goto-next-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
 
-(defun split-window-below-with-ratio ()
-  "."
-  (interactive)
-  (split-window-to-scratch-buffer 'above 'below))
 
-(defun split-window-right-with-ratio ()
-  "."
+(defun split-window-below-with-ratio (&optional switch-to-scratch-buffer-p)
+  "Split window below with ratio that the user selected, if SWITCH-TO-SCRATCH-BUFFER-P, change the new buffer to *scratch* buffer."
   (interactive)
-  (split-window-to-scratch-buffer 'left 'right))
+  (split-window-with-ratio 'above 'below switch-to-scratch-buffer-p))
 
-(defun split-window-to-scratch-buffer (side1 side2)
+(defun split-window-right-with-ratio (&optional switch-to-scratch-buffer-p)
+  "Split window right with ratio that the user selected, if SWITCH-TO-SCRATCH-BUFFER-P, change the new buffer to *scratch* buffer."
+  (interactive)
+  (split-window-with-ratio 'left 'right switch-to-scratch-buffer-p))
+
+(defun split-window-with-ratio (side1 side2 &optional switch-to-scratch-buffer-p)
   "Split buffer default on SIDE2, if ctrl-u is pressed, split the new window on SIDE1."
   (let* ((split-another-side (not (null current-prefix-arg)))
          (side (if split-another-side side1 side2))
@@ -53,7 +56,8 @@
                  (completing-read "Select the split ratio: " '("0.5" "0.8" "0.75" "0.618" "0.33" "0.25" "0.2" "0.1") nil t)))
          (split-window-size (round (* full-window-size ratio))))
     (select-window (split-window nil (* -1 split-window-size) side))
-    (switch-to-buffer (get-buffer-create "*scratch*"))))
+    (if switch-to-scratch-buffer-p
+        (switch-to-buffer (get-buffer-create "*scratch*")))))
 
 (defun swap-to-main-window ()
   "."
