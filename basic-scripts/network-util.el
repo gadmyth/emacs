@@ -10,6 +10,13 @@
          (result (shell-command-to-string shell-command-string)))
     (message result)))
 
+(defun show-public-ip ()
+  "."
+  (interactive)
+  (let* ((shell-command-string "curl -s cip.cc | grep IP | cut -f2 -d ':' | awk '{ gsub(/^[ \t]+|[ \t]+$/, \"\"); print }'")
+         (result (shell-command-to-string shell-command-string)))
+    (message result)))
+
 (defun switch-proxy (enable)
   "ENABLE's value is t or nil."
   (interactive "Senable? ")
