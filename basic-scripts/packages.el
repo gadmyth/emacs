@@ -93,6 +93,7 @@
         'git-timemachine
         'datetime-format
         'solarized-theme
+        'telega
         ))
 
 ;; create autoloads

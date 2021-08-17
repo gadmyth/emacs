@@ -33,5 +33,9 @@
 
 (setq *annotate-file* "~/.emacs.d/annotations")
 
+;; socks5 proxy
+(setq *socks5-proxy-server* "127.0.0.1")
+(setq *socks5-proxy-port* 1080)
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here

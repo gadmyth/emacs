@@ -30,6 +30,7 @@
 (require 'themes)
 (require 'shells)
 (require 'irc-config)
+(require 'telega-config)
 (require 'tab-config)
 (require 'clipboard)
 ;(require 'codings)
