@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-if-installed
+(require-safely
  'restclient
  (defun restclient-find-vars-before-point ()
    (let ((vars nil)

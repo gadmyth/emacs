@@ -4,23 +4,29 @@
 
 (require 'package)
 
-(defmacro require-if-installed (package &rest body)
+(defmacro require-safely (package &rest body)
   "PACKAGE, BODY."
   `(if (package-installed-p ,package)
-       (progn
-         (require ,package)
-         (message "%S required!" ,package)
-         (progn ,@body))
+       (require-package ,package ,@body)
      (message "%S not installed!" ,package)))
 
 (defmacro require-package (package &rest body)
-  "PACKAGE, BODY."
-  `(progn
-     (require ,package)
-     (message "%S required!" ,package)
-     (progn ,@body)))
+  "Require PACKAGE and execute the BODY."
+  `(require-package-with-depends ,package nil ,@body))
+  
+(defmacro require-package-with-depends (package dependencies &rest body)
+  "Require PACKAGE if all DEPENDENCIES are features and execute BODY."
+  `(let ((all-package-featurep t))
+     (dolist (p ,dependencies)
+       (when (not (featurep p))
+         (message "%S is not a feature, can't install package %S!" p ,package)
+         (setq all-package-featurep nil)))
+     (when all-package-featurep
+       (require ,package)
+       (message "%S required!" ,package)
+       (progn ,@body))))
 
-(defmacro require-packages-if-installed (packages &rest body)
+(defmacro require-packages-safely (packages &rest body)
   "PACKAGES, BODY."
   `(let ((all-package-installed t))
      (dolist (p ,packages)

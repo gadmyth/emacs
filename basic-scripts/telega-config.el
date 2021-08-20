@@ -5,7 +5,7 @@
 (defvar *socks5-proxy-server* nil)
 (defvar *socks5-proxy-port* nil)
 
-(require-if-installed
+(require-safely
  'telega
  (when (and *socks5-proxy-server* *socks5-proxy-port*)
    (setq telega-proxies

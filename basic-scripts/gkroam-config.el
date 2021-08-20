@@ -2,8 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-packages-if-installed
- '('gkroam 'rg)
+(require-packages-safely
+ '(gkroam rg)
 
  (let ((dir *gkroam-default-root-dir*))
    (when (and (file-exists-p dir)

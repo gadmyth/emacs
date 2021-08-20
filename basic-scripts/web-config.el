@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-packages-if-installed
+(require-packages-safely
  '(web-mode)
  (add-hook 'web-mode-hook
            (lambda ()
@@ -15,7 +15,7 @@
              ))
  )
 
-(require-packages-if-installed
+(require-packages-safely
  '(js2-mode js2-refactor)
  (setq auto-mode-alist
        (append
@@ -26,7 +26,7 @@
   (js2r-add-keybindings-with-prefix "C-c C-m")
  )
 
-(require-packages-if-installed
+(require-packages-safely
  '(emmet-mode)
  ;; Auto-start on any markup modes
  (add-hook 'sgml-mode-hook 'emmet-mode)

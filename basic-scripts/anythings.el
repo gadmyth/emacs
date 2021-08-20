@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-(require-packages-if-installed
- '(anything 'anything-config)
+(require-packages-safely
+ '(anything anything-config)
  (defvar anything-c-source-objc-headline
    '((name . "Objective-C Headline")
      (headline  "^[-+@]\\|^#pragma mark")))

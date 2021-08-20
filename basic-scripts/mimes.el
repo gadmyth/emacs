@@ -4,7 +4,7 @@
 
 (provide 'mimes)
 
-(require-if-installed
+(require-safely
  'elnode
  (dolist (mimetype
           '(("x-world/x-3dmf" . "3dm")

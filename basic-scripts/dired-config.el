@@ -17,7 +17,7 @@
 (setq-default dired-omit-files-p t)
 (add-to-list 'dired-omit-extensions ".DS_Store")
 
-(require-if-installed
+(require-safely
  'dired-narrow
  (define-key dired-mode-map (kbd "/") 'dired-narrow))
 

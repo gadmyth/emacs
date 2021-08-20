@@ -25,8 +25,7 @@
 
 ;;;***
 
-;;;### (autoloads nil "ediff-trees" "ediff-trees.el" (22289 62055
-;;;;;;  0 0))
+;;;### (autoloads nil "ediff-trees" "ediff-trees.el" (0 0 0 0))
 ;;; Generated autoloads from ediff-trees.el
 
 (autoload 'ediff-trees "ediff-trees" "\
@@ -34,6 +33,8 @@ Starts a new ediff session that recursively compares two
 trees.
 
 \(fn ROOT1 ROOT2)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ediff-trees" '("ediff-trees-")))
 
 ;;;***
 
@@ -44,25 +45,10 @@ trees.
 
 ;;;***
 
-;;;### (autoloads nil "eyebrowse-config" "eyebrowse-config.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from eyebrowse-config.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "eyebrowse-config" '("eyebrowse-" "ivy-eyebrowse-config-s")))
-
-;;;***
-
 ;;;### (autoloads nil "frames" "frames.el" (0 0 0 0))
 ;;; Generated autoloads from frames.el
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "frames" '("set-suitable-frame-size" "*max-frame-")))
-
-;;;***
-
-;;;### (autoloads nil "org-config" "org-config.el" (0 0 0 0))
-;;; Generated autoloads from org-config.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-config" '("org-publish-current-file-without-inner-resource-files" "m/org-html-checkbox" "*org-export-res-files*")))
 
 ;;;***
 
@@ -73,14 +59,10 @@ trees.
 
 ;;;***
 
-;;;### (autoloads nil "pretty-mode+" "pretty-mode+.el" (22289 62055
-;;;;;;  0 0))
+;;;### (autoloads nil "pretty-mode+" "pretty-mode+.el" (0 0 0 0))
 ;;; Generated autoloads from pretty-mode+.el
 
-(autoload 'pretty-mode+ "pretty-mode+" "\
-
-
-\(fn &optional ARG)" t nil)
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "pretty-mode+" '("load-extra-pretty")))
 
 ;;;***
 
@@ -133,11 +115,12 @@ DIR is the root directory of find command, REGEXP is the file's regular expressi
 
 ;;;***
 
-;;;### (autoloads nil "wcy-desktop" "wcy-desktop.el" (22289 62055
-;;;;;;  0 0))
+;;;### (autoloads nil "wcy-desktop" "wcy-desktop.el" (0 0 0 0))
 ;;; Generated autoloads from wcy-desktop.el
 
 (defvar wcy-desktop-file-name "~/.wcy_desktop_save")
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "wcy-desktop" '("wcy-desktop-")))
 
 ;;;***
 
@@ -148,18 +131,14 @@ DIR is the root directory of find command, REGEXP is the file's regular expressi
 
 ;;;***
 
-;;;### (autoloads nil nil ("abbrev-config.el" "annot.el" "anythings.el"
-;;;;;;  "avy-config.el" "clipboard.el" "codec.el" "codings.el" "dired++.el"
-;;;;;;  "emoji-config.el" "evil-config.el" "eww-config.el" "files-config.el"
-;;;;;;  "fonts.el" "holiday-config.el" "ido-config.el" "irc-config.el"
-;;;;;;  "key-bindings.el" "linum-relative.el" "lisping-snippet.el"
-;;;;;;  "mail-config.el" "mimes.el" "mode-bars.el" "network-util.el"
-;;;;;;  "projectile-config.el" "python-config.el" "rsa.el" "scales.el"
-;;;;;;  "script-extends.el" "servers.el" "shells.el" "slime-config.el"
-;;;;;;  "smart-compile-config.el" "swiper-config.el" "tab-config.el"
-;;;;;;  "themes.el" "translate.el" "unicad.el" "uniquify-config.el"
-;;;;;;  "version-controll.el" "web-config.el" "workspace.el" "yas-config.el")
-;;;;;;  (0 0 0 0))
+;;;### (autoloads nil nil ("abbrev-config.el" "annot.el" "avy-config.el"
+;;;;;;  "clipboard.el" "codec.el" "codings.el" "eww-config.el" "fonts.el"
+;;;;;;  "holiday-config.el" "ido-config.el" "irc-config.el" "mode-bars.el"
+;;;;;;  "network-util.el" "org-config.el" "projectile-config.el"
+;;;;;;  "python-config.el" "scales.el" "script-extends.el" "servers.el"
+;;;;;;  "shells.el" "slime-config.el" "smart-compile-config.el" "swiper-config.el"
+;;;;;;  "tab-config.el" "translate.el" "unicad.el" "uniquify-config.el"
+;;;;;;  "yas-config.el") (0 0 0 0))
 
 ;;;***
 

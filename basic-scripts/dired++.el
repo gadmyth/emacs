@@ -5,7 +5,7 @@
 
 (require 'dired)
 
-(add-hook 'after-init-hook (lambda () (require-if-installed 'dirtree)))
+(add-hook 'after-init-hook (lambda () (require-safely 'dirtree)))
 
 (setq dired-recursive-copies 'always)
 (setq dired-recursive-deletes 'always)
