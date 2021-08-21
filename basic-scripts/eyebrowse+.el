@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.7
-;; Package-Version: 20210126.001
+;; Version: 1.0.8
+;; Package-Version: 20210821.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -465,7 +465,7 @@ COPY from eyebrowse--load-window-config."
   (let ((file-name (eyebrowse-file-name)))
     (message "Saving eyebrowse config to file %S ..." file-name)
     (eyebrowse-update-window-config)
-    (let ((content (format "%S" (eyebrowse--get 'window-configs))))
+    (let ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" (eyebrowse--get 'window-configs)))))
       (with-temp-file file-name
         (insert content)))))
 
