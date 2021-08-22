@@ -12,6 +12,9 @@
 (add-to-list 'package-archives '("melpa-stable" . "/opt/elpa/melpa-stable/"))
 (add-to-list 'package-archives '("marmalade" . "/opt/elpa/marmalade/"))
 
+;; set emacs customize file
+(setq custom-file (expand-file-name ".emacs-custom.el" user-emacs-directory))
+
 (defvar +tool-bar-mode+ t)
 (defvar +menu-bar-mode+ t)
 (defvar +blink-cursor-mode+ t)
