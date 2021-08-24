@@ -147,6 +147,36 @@ Copied some codes from window-numbering.el."
          (select-window (cdr cand))
          (switch-to-buffer buffer))))))
 
+(defun adjust-window-size ()
+  "."
+  (interactive)
+  (let* ((ev last-command-event)
+         (base (event-basic-type ev)))
+    (pcase base
+      (?\] (enlarge-window-horizontally 5))
+      (?\[ (enlarge-window-horizontally -5))
+      (?6 (enlarge-window 5))
+      (?5 (enlarge-window -5))
+      (_ nil)))
+  (message "Use ctrl-[, ctrl-] for further adjustment")
+  (set-transient-map
+   (let ((map (make-sparse-keymap)))
+     (define-key map (vector (append '(control) (list ?\[)))
+       (lambda () (interactive) (adjust-window-size)))
+     (define-key map (vector (append '(control) (list ?\])))
+       (lambda () (interactive) (adjust-window-size)))
+     (define-key map (vector (append '(control) (list ?6)))
+       (lambda () (interactive) (adjust-window-size)))
+     (define-key map (vector (append '(control) (list ?5)))
+       (lambda () (interactive) (adjust-window-size)))
+     map)))
+
+(global-set-key (kbd "C-x C-]") 'adjust-window-size)
+(global-set-key (kbd "C-x C-[") 'adjust-window-size)
+(global-set-key (kbd "C-x C-6") 'adjust-window-size)
+(global-set-key (kbd "C-x C-5") 'adjust-window-size)
+
+
 (defun delete-other-windows-of-super-window (&optional window)
   "WINDOW."
   (interactive)
