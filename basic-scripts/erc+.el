@@ -203,7 +203,8 @@ With PARSED message and PROC."
            (cond (msg-picture-p
                   (let ((image (create-image msg-file-path)))
                     (image-flush image)
-                    (plist-put (cdr image) :type 'imagemagick)
+                    (when (image-type-available-p 'imagemagick)
+                      (plist-put (cdr image) :type 'imagemagick))
                     (plist-put (cdr image) :width erc-default-width)
                     (insert-image image))
                   (insert "\n"))
