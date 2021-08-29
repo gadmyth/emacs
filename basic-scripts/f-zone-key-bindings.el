@@ -38,7 +38,7 @@
        (call-and-mark-func ,func args))))
 
 ;; buffer
-(global-set-key (kbd "<f1>") (toggle-minibuffer 'switch-buffer-default-scratch))
+(global-set-key (kbd "<f1>") (toggle-minibuffer 'switch-scratch-buffers))
 (global-set-key (kbd "<M-f1>") 'new-buffer)
 
 ;; eyebrowse config
