@@ -1,10 +1,10 @@
 ;;; erc+.el --- Package.  -*- lexical-binding: nil; -*-
 
-;; Copyright (C) 2020 gadmyth
+;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.006
-;; Package-Version: 20200825.001
+;; Version: 1.0.007
+;; Package-Version: 20210829.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,13 @@
 (defvar *erc-aggregate-buffer* nil)
 (defvar erc-aggregate-refresh t)
 (defvar erc-default-width 100)
+(defvar *erc-forbidden-targets* nil)
+
+(defun erc-toggle-debug ()
+  "."
+  (interactive)
+  (setq *erc-debug* (not *erc-debug*))
+  (message "*erc-debug* is toggled as %S" *erc-debug*))
 
 (defmacro erc-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
@@ -67,8 +74,9 @@ With PARSED message and PROC."
          (tgt (car (erc-response.command-args parsed)))
          (msg (erc-response.contents parsed))
          (short-sender (erc-short-sender sender-spec)))
-    (erc-update-aggregate-buffer short-sender tgt msg)
     (erc-message "erc message: %s, %s: %s" short-sender tgt msg)
+    (when (not (member tgt *erc-forbidden-targets*))
+      (erc-update-aggregate-buffer short-sender tgt msg))
     ;; return nil, to exec the next function in the hook's list
     nil))
 

@@ -40,5 +40,8 @@
 (setq *socks5-proxy-server* "127.0.0.1")
 (setq *socks5-proxy-port* 1080)
 
+;; erc
+(add-to-list '*erc-forbidden-targets* "")
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here
