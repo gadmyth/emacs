@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.007
-;; Package-Version: 20210829.001
+;; Version: 1.0.008
+;; Package-Version: 20210829.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -43,6 +43,7 @@
 (defvar *erc-debug* nil)
 (defvar *erc-aggregate-buffer* nil)
 (defvar erc-aggregate-refresh t)
+(defvar erc-aggregate-auto-display nil)
 (defvar erc-default-width 100)
 (defvar *erc-forbidden-targets* nil)
 
@@ -50,7 +51,7 @@
   "."
   (interactive)
   (setq *erc-debug* (not *erc-debug*))
-  (message "*erc-debug* is toggled as %S" *erc-debug*))
+  (message "turn %s the *erc-debug*" (if *erc-debug* "on" "off")))
 
 (defmacro erc-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
@@ -62,6 +63,12 @@
   (interactive)
   (setq erc-aggregate-refresh (not erc-aggregate-refresh))
   (message "turn %s the erc refresh." (if erc-aggregate-refresh "on" "off")))
+
+(defun erc-aggregate-toggle-auto-display ()
+  "."
+  (interactive)
+  (setq erc-aggregate-auto-display (not erc-aggregate-auto-display))
+  (message "turn %s the erc auto display." (if erc-aggregate-auto-display "on" "off")))
 
 ;; **** add a extra function to erc-server-PRIVMSG-functions hook ****
 (add-hook 'erc-server-PRIVMSG-functions #'erc-server-PRIVMSG_AGGREGATE t)
@@ -145,11 +152,11 @@ With PARSED message and PROC."
 (defmacro erc-save-excursion (&rest body)
   "Eval the BODY using 'save-excursion or not by SAVE-EXCURSION-P."
   `(cond ((eval erc-aggregate-refresh)
-          (message "no save excursion")
-         ,@body)
+          (erc-message "no save excursion")
+          ,@body)
         (t
          (save-excursion
-           (message "save excursion")
+           (erc-message "save excursion")
            ,@body))))
 
 (defun* erc-update-aggregate-buffer (short-sender target msg)
@@ -229,7 +236,7 @@ With PARSED message and PROC."
                                   nil (list erc-msg-link)))
          (insert "\n"))))
     ;; show window
-    (when erc-aggregate-refresh
+    (when erc-aggregate-auto-display
       (display-buffer *erc-aggregate-buffer*))))
 
 (defun erc-button-nick-callback (data)
