@@ -40,10 +40,5 @@
 (setq *socks5-proxy-server* "127.0.0.1")
 (setq *socks5-proxy-port* 1080)
 
-;; erc
-(setq erc-nick user-full-name)
-(setq erc-default-server "127.0.0.1")
-(setq erc-default-port 6667)
-
 (provide 'pre-customize)
 ;;; pre-customize.el ends here

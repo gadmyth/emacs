@@ -3,8 +3,11 @@
 ;;; Commentary:
 ;;; Code:
 
-(setq erc-nick "<erc nick name>")
+;; erc
+(setq erc-nick user-full-name)
 (setq erc-default-server "127.0.0.1")
+(setq erc-default-port 6667)
+(setq erc-nick "雷少")
 
 (add-to-list 'yas-snippet-dirs (expand-file-name "~/snippets"))
 
