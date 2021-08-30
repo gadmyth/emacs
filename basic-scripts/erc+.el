@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.008
-;; Package-Version: 20210829.002
+;; Version: 1.0.009
+;; Package-Version: 20210830.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -53,7 +53,7 @@
   (setq *erc-debug* (not *erc-debug*))
   (message "turn %s the *erc-debug*" (if *erc-debug* "on" "off")))
 
-(defmacro erc-message (format-string &rest ARGS)
+(defmacro erc-debug-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
   `(if *erc-debug*
        (message ,format-string ,@ARGS)))
@@ -81,7 +81,7 @@ With PARSED message and PROC."
          (tgt (car (erc-response.command-args parsed)))
          (msg (erc-response.contents parsed))
          (short-sender (erc-short-sender sender-spec)))
-    (erc-message "erc message: %s, %s: %s" short-sender tgt msg)
+    (erc-debug-message "erc message: %s, %s: %s" short-sender tgt msg)
     (when (not (member tgt *erc-forbidden-targets*))
       (erc-update-aggregate-buffer short-sender tgt msg))
     ;; return nil, to exec the next function in the hook's list
@@ -152,11 +152,11 @@ With PARSED message and PROC."
 (defmacro erc-save-excursion (&rest body)
   "Eval the BODY using 'save-excursion or not by SAVE-EXCURSION-P."
   `(cond ((eval erc-aggregate-refresh)
-          (erc-message "no save excursion")
+          (erc-debug-message "no save excursion")
           ,@body)
         (t
          (save-excursion
-           (erc-message "save excursion")
+           (erc-debug-message "save excursion")
            ,@body))))
 
 (defun* erc-update-aggregate-buffer (short-sender target msg)
@@ -239,20 +239,46 @@ With PARSED message and PROC."
     (when erc-aggregate-auto-display
       (display-buffer *erc-aggregate-buffer*))))
 
+
+(defvar *erc-nick-function-list* '(("jump  chat" . erc-goto-target)
+                                   ("reply chat" . erc-reply-message)))
+
 (defun erc-button-nick-callback (data)
   "When click the nick name erc-button, response with the DATA."
+  (let* ((action-list *erc-nick-function-list*)
+         (action (intern (completing-read "Select the action: "
+                                          action-list nil t)))
+         (func (alist-get action action-list nil nil #'string=)))
+    (funcall func data)))
+
+(defun erc-goto-target (data)
+  "Goto target's buffer when the target info in the DATA."
   (let* ((short-sender (car data))
          (target (cdr data))
          (channel (and (string-prefix-p "#" target) target))
          (buffer-name (or channel
                           (and (string-equal target erc-nick) short-sender)
                           target)))
-    (erc-message "nick click, data: %s, short-sender: %s, channel: %s, buffer-name: %s" data short-sender channel buffer-name)
+    (erc-debug-message "nick click, data: %s, short-sender: %s, channel: %s, buffer-name: %s" data short-sender channel buffer-name)
     (let* ((buffer (get-buffer buffer-name))
            (window (get-buffer-window buffer)))
       (display-buffer buffer)
       (if (and window (window-live-p window))
           (select-window window)))))
+
+(defun erc-reply-message (data)
+  "Reply message to target with content which are wrapped in DATA."
+  (let* ((short-sender (car data))
+         (target (cdr data))
+         (content (completing-read "Reply the target: " nil nil t))
+         (channel (and (string-prefix-p "#" target) target))
+         (buffer-name (or channel
+                          (and (string-equal target erc-nick) short-sender)
+                          target)))
+    (with-current-buffer (get-buffer buffer-name)
+      (goto-char (point-max))
+      (insert content)
+      (erc-send-current-line))))
 
 (defun erc-button-file-callback (data)
   "When click the nick name erc-button, response with the DATA."
@@ -281,8 +307,8 @@ With PARSED message and PROC."
          (action (intern (completing-read "Select the browser: "
                                           action-list nil t)))
          (func (alist-get action action-list nil nil #'string=))
-          (browse-url-browser-function action))
-    (erc-message "browser function is: %s" browse-url-browser-function)
+         (browse-url-browser-function action))
+    (erc-debug-message "browser function is: %s" browse-url-browser-function)
     (if (equal func #'browse-url)
         (if (not (fboundp browse-url-browser-function))
             (message "%s is not implemented!" browse-url-browser-function)
