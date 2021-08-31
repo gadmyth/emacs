@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.010
-;; Package-Version: 20210830.002
+;; Version: 1.0.011
+;; Package-Version: 20210831.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -98,7 +98,7 @@ With PARSED message and PROC."
   (if (string-prefix-p "#" target)
       (let ((group-name (substring tgt 1 (length target))))
         (format "%s@%s" sender group-name))
-    target))
+    (format "%s->%s" sender target)))
 
 
 (defvar *wechat-multi-message-table* (make-hash-table :test 'equal))
