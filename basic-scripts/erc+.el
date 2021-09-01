@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.011
-;; Package-Version: 20210831.001
+;; Version: 1.0.012
+;; Package-Version: 20210901.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -194,6 +194,7 @@ With PARSED message and PROC."
     
     ;; append msg
     (with-current-buffer *erc-aggregate-buffer*
+      (read-only-mode 0)
       (erc-save-excursion
        (goto-char (point-max))
        (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
@@ -234,13 +235,14 @@ With PARSED message and PROC."
                                   (+ new-msg-start msg-start erc-link-end)
                                   #'erc-button-link-callback
                                   nil (list erc-msg-link)))
-         (insert "\n"))))
+         (insert "\n")))
+      (read-only-mode t))
     ;; show window
     (when erc-aggregate-auto-display
       (display-buffer *erc-aggregate-buffer*))))
 
 
-(defvar *erc-nick-function-list* '(("jump  chat" . erc-goto-target)
+(defvar *erc-nick-function-list* '(("jump  chat" . erc-jump-target)
                                    ("reply chat" . erc-reply-message)))
 
 (defun erc-button-nick-callback (data)
@@ -251,8 +253,8 @@ With PARSED message and PROC."
          (func (alist-get action action-list nil nil #'string=)))
     (funcall func data)))
 
-(defun erc-goto-target (data)
-  "Goto target's buffer when the target info in the DATA."
+(defun erc-jump-target (data)
+  "Jump to target's buffer when the target info in the DATA."
   (let* ((short-sender (car data))
          (target (cdr data))
          (channel (and (string-prefix-p "#" target) target))
@@ -346,9 +348,80 @@ With PARSED message and PROC."
                                               action-list nil t))))
         (apply action image))))
 
+(defun erc-aggregate-nick-name-p ()
+  "Check the current point is a nick name button or not."
+  (eq 'erc-button-nick-callback
+      (get-text-property (point) 'erc-callback)))
+
+(defun erc-aggregate-current-message ()
+  "Goto the current message's nick name head in *erc-aggregate-buffer*."
+  (interactive)
+  (loop while (and (not (erc-aggregate-nick-name-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun erc-aggregate-previous-message ()
+  "Goto the previous message's nick name head in *erc-aggregate-buffer*."
+  (interactive)
+  (previous-line)
+  (loop while (and (not (erc-aggregate-nick-name-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun erc-aggregate-next-message ()
+  "Goto the next message's nick name head in *erc-aggregate-buffer*."
+  (interactive)
+  (forward-line)
+  (loop while (and (not (erc-aggregate-nick-name-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (forward-line)))
+
+(defun erc-jump-this-message ()
+  "Jump to the chat of this current message."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (let ((data (car (get-text-property (point) 'erc-data))))
+      (erc-jump-target data))))
+
+(defun erc-reply-this-message ()
+  "Reply the chat of this current message."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (let ((data (car (get-text-property (point) 'erc-data))))
+      (erc-reply-message data))))
+
+(defun erc-delete-this-message ()
+  "Delete the message in *erc-aggregate-buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (erc-aggregate-current-message)
+  (let ((msg-start (point)))
+    (erc-aggregate-next-message)
+    (let ((msg-end (point)))
+      (delete-region msg-start msg-end)))
+  (read-only-mode 1))
+
+(defun erc-aggregate-undo ()
+  "Undo in the *erc-aggregate-buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (undo)
+  (read-only-mode 1))
+
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map text-mode-map)
+    (define-key map "n" 'erc-aggregate-next-message)
+    (define-key map "p" 'erc-aggregate-previous-message)
+    (define-key map "j" 'erc-jump-this-message)
+    (define-key map "r" 'erc-reply-this-message)
+    (define-key map "d" 'erc-delete-this-message)
+    (define-key map "u" 'erc-aggregate-undo)
     (define-key map "q" 'quit-window)
     (define-key map (kbd "<mouse-3>") 'erc-right-click)
     map))
