@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.012
-;; Package-Version: 20210901.001
+;; Version: 1.0.013
+;; Package-Version: 20210901.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -413,6 +413,30 @@ With PARSED message and PROC."
   (undo)
   (read-only-mode 1))
 
+(defun erc-forbidden-this-channel ()
+  "Forbidden the channel at this point in *erc-aggregate-buffer*."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (let* ((data (car (get-text-property (point) 'erc-data)))
+           (target (cdr data))
+           (channel (and (string-prefix-p "#" target) target)))
+      (when channel
+        (add-to-list '*erc-forbidden-targets* channel)
+        (message "The channel %s is forbbiden now." channel)))))
+
+(defun erc-unforbidden-this-channel ()
+  "Unforbidden the channel at this point in *erc-aggregate-buffer*."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (let* ((data (car (get-text-property (point) 'erc-data)))
+           (target (cdr data))
+           (channel (and (string-prefix-p "#" target) target)))
+      (when channel
+        (delete channel *erc-forbidden-targets*)
+        (message "The channel %s is unforbbiden now." channel)))))
+
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map text-mode-map)
@@ -421,6 +445,8 @@ With PARSED message and PROC."
     (define-key map "j" 'erc-jump-this-message)
     (define-key map "r" 'erc-reply-this-message)
     (define-key map "d" 'erc-delete-this-message)
+    (define-key map "f" 'erc-forbidden-this-channel)
+    (define-key map "F" 'erc-unforbidden-this-channel)
     (define-key map "u" 'erc-aggregate-undo)
     (define-key map "q" 'quit-window)
     (define-key map (kbd "<mouse-3>") 'erc-right-click)
