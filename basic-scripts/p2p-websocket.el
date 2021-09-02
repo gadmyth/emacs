@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.6
-;; Package-Version: 20210116.001
+;; Version: 0.1.7
+;; Package-Version: 20210902.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -178,12 +178,6 @@
 
 ;; -*- p2p-websocket-buffer -*-
 
-(defvar p2p-websocket-aggregate-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map text-mode-map)
-    (define-key map "q" 'quit-window)
-    map))
-
 (defface p2p-websocket-notice-face
   '((default :weight bold)
     (((class color) (min-colors 88)) :foreground "SlateBlue")
@@ -243,6 +237,7 @@ call it with the value of the `pp2-websocket-data' text property."
       (p2p-websocket-aggregate-mode)))
   
   (with-current-buffer *p2p-websocket-buffer*
+    (read-only-mode 0)
     (save-excursion
       (goto-char (point-max))
       (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
@@ -267,7 +262,8 @@ call it with the value of the `pp2-websocket-data' text property."
         (insert content)
         ;; add sender button
         (p2p-websocket-add-target-button sender-start sender-end sender)
-        )))
+        ))
+    (read-only-mode t))
   
   (display-buffer *p2p-websocket-buffer*))
 
@@ -306,6 +302,74 @@ call it with the value of the `pp2-websocket-data' text property."
                              (fifth remote-info))))
         (message "remote-name: %s" sender)
         sender)))
+
+(defun p2p-websocket-header-p ()
+  "."
+  (eq 'p2p-websocket-sender-callback
+      (get-text-property (point) 'p2p-websocket-button-callback)))
+
+(defun p2p-websocket-current-message ()
+  "Goto the current message's head in *p2p-websocket-buffer*."
+  (interactive)
+  (loop while (and (not (p2p-websocket-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun p2p-websocket-next-message ()
+  "Goto the next message's head in *p2p-websocket-buffer*."
+  (interactive)
+  (forward-line)
+  (loop while (and (not (p2p-websocket-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (forward-line)))
+
+(defun p2p-websocket-previous-message ()
+  "Goto the previous message's head in *p2p-websocket-buffer*."
+  (interactive)
+  (previous-line)
+  (loop while (and (not (p2p-websocket-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun p2p-websocket-reply-this-message ()
+  "."
+    "Reply this current message."
+  (interactive)
+  (save-excursion
+    (p2p-websocket-current-message)
+    (p2p-websocket-button-press-button)))
+
+(defun p2p-websocket-delete-this-message ()
+  "Delete the message in *p2p-websocket--buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (p2p-websocket-current-message)
+  (let ((msg-start (point)))
+    (p2p-websocket-next-message)
+    (let ((msg-end (point)))
+      (delete-region msg-start msg-end)))
+  (read-only-mode 1))
+
+(defun p2p-websocket-undo ()
+  "Undo in the *p2p-websocket-buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (undo)
+  (read-only-mode 1))
+
+(defvar p2p-websocket-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map text-mode-map)
+    (define-key map "n" 'p2p-websocket-next-message)
+    (define-key map "p" 'p2p-websocket-previous-message)
+    (define-key map "r" 'p2p-websocket-reply-this-message)
+    (define-key map "d" 'p2p-websocket-delete-this-message)
+    (define-key map "u" 'p2p-websocket-undo)
+    (define-key map "q" 'quit-window)
+    map))
 
 (define-derived-mode p2p-websocket-aggregate-mode text-mode "PWA"
   ;; The mode for *p2p-websocket-buffer*.
