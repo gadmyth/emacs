@@ -4,7 +4,7 @@
 
 (require 'swiper)
 (require 'counsel)
-(require 'ffap)
+(require 'thingatpt)
 
 (ivy-mode 1)
 
@@ -18,14 +18,25 @@
 (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
 (define-key swiper-map [escape] 'minibuffer-keyboard-quit)
 
-(defun swiper-with-symbol-at-point ()
-  "."
-  (interactive)
-  (let* ((string-at-point (ffap-string-at-point)))
-    (message "string-at-point is [%s]" string-at-point)
-    (swiper string-at-point)))
+(defun swiper-with-word-at-point (start end)
+  "If region is activate, swiper the word in the region from START to END."
+  "Otherwise, swiper the word at point, if current-prefix-arg is not null, toggle the superword-mode."
+  (interactive "r")
+  (if (region-active-p)
+      (progn
+        (deactivate-mark)
+        (swiper (buffer-substring-no-properties start end)))
+    (let* ((should-toggle (not (null current-prefix-arg)))
+           (origin-value (if superword-mode 1 0))
+           (toggle-value (if (not superword-mode) 1 0)))
+      (if should-toggle (superword-mode toggle-value))
+      (let ((word (word-at-point t)))
+        (if should-toggle (superword-mode origin-value))
+        (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
+        (message "string-at-point is [%s]" word)
+        (swiper word)))))
 
-(global-set-key "\C-s" 'swiper-with-symbol-at-point)
+(global-set-key "\C-s" 'swiper-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
