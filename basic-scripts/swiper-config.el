@@ -22,7 +22,7 @@
   "If region is activate, swiper the word in the region from START to END."
   "Otherwise, swiper the word at point, if current-prefix-arg is not null, toggle the superword-mode."
   (interactive "r")
-  (if (region-active-p)
+  (if (and (mark) (region-active-p))
       (progn
         (deactivate-mark)
         (swiper (buffer-substring-no-properties start end)))
