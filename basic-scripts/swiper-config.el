@@ -18,17 +18,17 @@
 (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
 (define-key swiper-map [escape] 'minibuffer-keyboard-quit)
 
-(defun swiper-with-word-at-point (start end)
+(defun swiper-with-word-at-point ()
   "If region is activate, swiper the word in the region from START to END."
   "Otherwise, swiper the word at point, if current-prefix-arg is not null, toggle the superword-mode."
-  (interactive "r")
+  (interactive)
   (if (and (mark) (region-active-p))
       (progn
         (deactivate-mark)
-        (swiper (buffer-substring-no-properties start end)))
+        (swiper (buffer-substring-no-properties (region-beginning) (region-end))))
     (let* ((should-toggle (not (null current-prefix-arg)))
-           (origin-value (if superword-mode 1 0))
-           (toggle-value (if (not superword-mode) 1 0)))
+           (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
+           (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
       (if should-toggle (superword-mode toggle-value))
       (let ((word (word-at-point t)))
         (if should-toggle (superword-mode origin-value))
