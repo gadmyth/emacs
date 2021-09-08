@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.8
-;; Package-Version: 20210908.001
+;; Version: 0.1.9
+;; Package-Version: 20210908.002
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -35,6 +35,7 @@
 
 (require 'websocket)
 
+(defvar *p2p-ws-debug* nil)
 (defvar *p2p-ws-server* nil)
 (defvar *p2p-ws-server-host* "0.0.0.0")
 (defvar *p2p-ws-server-port* 3618)
@@ -44,6 +45,17 @@
 (defvar *p2p-websocket-buffer* nil)
 
 ;; -*- websocket server -*-
+
+(defun p2p-ws-toggle-debug ()
+  "."
+  (interactive)
+  (setq *p2p-ws-debug* (not *p2p-ws-debug*))
+  (message "turn %s the *p2p-ws-debug*" (if *p2p-ws-debug* "on" "off")))
+
+(defmacro p2p-ws-debug-message (format-string &rest ARGS)
+  "If debug is open, send message with FORMAT-STRING and ARGS."
+  `(if *p2p-ws-debug*
+       (message ,format-string ,@ARGS)))
 
 (defun start-websocket-server ()
   "Start the websocket server."
@@ -63,16 +75,16 @@
 
 (defun websocket-server-open-handler (ws)
   "Handle the websocket WS's open event."
-  (message "*** websocket server opened %s ***" (websocket-remote-name ws)))
+  (p2p-ws-debug-message "*** websocket server opened %s ***" (websocket-remote-name-with-nickname ws)))
 
 (defun websocket-server-close-handler (ws)
   "Handle the websocket WS's close event."
-  (message "*** websocket server closed %s ***" (websocket-remote-name ws)))
+  (p2p-ws-debug-message "*** websocket server closed %s ***" (websocket-remote-name-with-nickname ws)))
 
 (defun websocket-server-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
-    (message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
+    (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
     (p2p-update-websocket-buffer ws frame)
     (cond ((equal "hello" message)
            (websocket-send-text ws "world"))
@@ -101,12 +113,12 @@
 (defun websocket-client-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
-    (message "websocket client received message from: %s" (websocket-url ws))
+    (p2p-ws-debug-message "websocket client received message from: %s" (websocket-url ws))
     (p2p-update-websocket-buffer ws frame)))
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
-  (message "websocket client %s closed" (websocket-url ws))
+  (p2p-ws-debug-message "websocket client %s closed" (websocket-url ws))
   (p2p-ws-client-list-remove ws))
 
 (defun websocket-send-message ()
@@ -127,24 +139,40 @@
   "Do send the MESSAGE to WS."
   ;; check the websocket is opened or not
   (when (not (websocket-openp ws))
-    (message "websocket %s is not opened, open a new again!" (websocket-remote-name nil))
+    (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname nil))
     (p2p-ws-client-list-remove ws)
     (setq ws (websocket-ensure-connected ws)))
   ;; recheck and send the message
   (when (websocket-openp ws)
-    (message "send message to %s" (websocket-remote-name ws))
+    (p2p-ws-debug-message "send message to %s" (websocket-remote-name-with-nickname ws))
     (websocket-send-text ws message)))
 
-(defun p2p-ws-nickname (ws)
-  "Get the nickname of the websocket WS."
-  (alist-get ws *p2p-ws-nickname-list*))
+(defun websocket-remote-name (ws)
+  "Get the WS's sender of remote."
+  (if (websocket-p ws)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (remote-info (mapcar 'identity (plist-get conn-info :remote)))
+             (sender (format "%s.%s.%s.%s:%s"
+                             (first remote-info)
+                             (second remote-info)
+                             (third remote-info)
+                             (fourth remote-info)
+                             (fifth remote-info))))
+        (p2p-ws-debug-message "remote-name: %s" sender)
+        sender)))
 
 (defun websocket-remote-name-with-nickname (ws)
   "Get the websocket remote-name and it's nickname of WS."
   (let ((nickname (p2p-ws-nickname ws)))
-    (message "nickname: %s" nickname)
-    (if (not nickname) (websocket-remote-name ws)
+    (p2p-ws-debug-message "get nickname: %s" nickname)
+    (if (not nickname)
+        (websocket-remote-name ws)
       (format "%s (%s)" nickname (websocket-remote-name ws)))))
+
+(defun p2p-ws-nickname (ws)
+  "Get the nickname of the websocket WS."
+  (alist-get ws *p2p-ws-nickname-list*))
 
 (defun p2p-ws-set-nickname ()
   "."
@@ -158,12 +186,12 @@
 (defun p2p-ws-do-set-nickname (nickname ws)
   "Set NICKNAME for websocket WS."
   (when (not (websocket-openp ws))
-    (message "websocket %s is not opened, open a new again!" (websocket-remote-name ws))
+    (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname ws))
     (p2p-ws-client-list-remove ws)
     (setq ws (websocket-ensure-connected ws)))
   ;; recheck and send the message
   (when (websocket-openp ws)
-    (message "set nickname %s to %s" nickname (websocket-remote-name ws))
+    (p2p-ws-debug-message "set nickname %s to %s" nickname (websocket-remote-name-with-nickname ws))
     (setf (alist-get ws *p2p-ws-nickname-list*) nickname)))
 
 (defmacro p2p-ws-list-with-action (&rest body)
@@ -175,10 +203,10 @@
                                     (mapcar #'websocket-remote-name-with-nickname *p2p-ws-client-list*))
                                    nil t))
           (ws-list (websocket-inbound-filter-with-url ws-url)))
-     (message "ws-list length: %S" (length ws-list))
+     (p2p-ws-debug-message "ws-list length: %S" (length ws-list))
      (if (> (length ws-list) 0)
          (let ((ws (car ws-list)))
-           (message "ws opened: %S" (websocket-openp ws))
+           (p2p-ws-debug-message "ws opened: %S" (websocket-openp ws))
            ,@body))))
 
 (defun p2p-ws-close ()
@@ -276,7 +304,7 @@ call it with the value of the `pp2-websocket-data' text property."
     (save-excursion
       (goto-char (point-max))
       (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-             (sender (websocket-remote-name ws))
+             (sender (websocket-remote-name-with-nickname ws))
              (msg (websocket-frame-text frame))
              (content (format "%s [%s]:\n%s\n\n" sender now msg))
              (new-msg-start (point-max))
@@ -321,22 +349,6 @@ call it with the value of the `pp2-websocket-data' text property."
           (let ((ws (car ws-list))
                 (message (read-from-minibuffer "Please input the message to send: ")))
             (p2p-ws-do-send-text message ws))))))
-      
-
-(defun websocket-remote-name (ws)
-  "Get the WS's sender of remote."
-  (if (websocket-p ws)
-      (let* ((conn (websocket-conn ws))
-             (conn-info (process-contact conn t))
-             (remote-info (mapcar 'identity (plist-get conn-info :remote)))
-             (sender (format "%s.%s.%s.%s:%s"
-                             (first remote-info)
-                             (second remote-info)
-                             (third remote-info)
-                             (fourth remote-info)
-                             (fifth remote-info))))
-        (message "remote-name: %s" sender)
-        sender)))
 
 (defun p2p-websocket-header-p ()
   "."
