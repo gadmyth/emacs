@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.013
-;; Package-Version: 20210901.002
+;; Version: 1.0.014
+;; Package-Version: 20210908.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -272,7 +272,7 @@ With PARSED message and PROC."
   "Reply message to target with content which are wrapped in DATA."
   (let* ((short-sender (car data))
          (target (cdr data))
-         (content (completing-read "Reply the target: " nil nil t))
+         (content (completing-read (format "Reply the target %s: " target) nil nil t))
          (channel (and (string-prefix-p "#" target) target))
          (buffer-name (or channel
                           (and (string-equal target erc-nick) short-sender)
