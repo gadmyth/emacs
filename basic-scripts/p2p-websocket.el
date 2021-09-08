@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.7
-;; Package-Version: 20210902.001
+;; Version: 0.1.8
+;; Package-Version: 20210908.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -39,6 +39,7 @@
 (defvar *p2p-ws-server-host* "0.0.0.0")
 (defvar *p2p-ws-server-port* 3618)
 (defvar *p2p-ws-client-list* '())
+(defvar *p2p-ws-nickname-list* '())
 
 (defvar *p2p-websocket-buffer* nil)
 
@@ -71,7 +72,7 @@
 (defun websocket-server-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
-    (message "*** websocket server received message from %s ***" (websocket-remote-name ws))
+    (message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
     (p2p-update-websocket-buffer ws frame)
     (cond ((equal "hello" message)
            (websocket-send-text ws "world"))
@@ -108,16 +109,19 @@
   (message "websocket client %s closed" (websocket-url ws))
   (p2p-ws-client-list-remove ws))
 
-(defun websocket-send-message (message)
-  "Send MESSAGE though websocket."
-  (interactive "splease input the message to send: ")
-  (p2p-ws-send-text message))
+(defun websocket-send-message ()
+  "Send message though websocket."
+  (interactive)
+  (p2p-ws-send-text))
 
-(defun p2p-ws-send-text (message)
+(defun p2p-ws-send-text ()
   "Send MESSAGE through the selected websocket connection."
-  (interactive "splease input the message to send: ")
+  (interactive)
   (p2p-ws-list-with-action
-   (p2p-ws-do-send-text message ws)))
+   (let ((message (completing-read
+                   (format "Please input the message to send %s: " (websocket-remote-name-with-nickname ws))
+                   nil nil t)))
+     (p2p-ws-do-send-text message ws))))
 
 (defun p2p-ws-do-send-text (message ws)
   "Do send the MESSAGE to WS."
@@ -131,13 +135,44 @@
     (message "send message to %s" (websocket-remote-name ws))
     (websocket-send-text ws message)))
 
+(defun p2p-ws-nickname (ws)
+  "Get the nickname of the websocket WS."
+  (alist-get ws *p2p-ws-nickname-list*))
+
+(defun websocket-remote-name-with-nickname (ws)
+  "Get the websocket remote-name and it's nickname of WS."
+  (let ((nickname (p2p-ws-nickname ws)))
+    (message "nickname: %s" nickname)
+    (if (not nickname) (websocket-remote-name ws)
+      (format "%s (%s)" nickname (websocket-remote-name ws)))))
+
+(defun p2p-ws-set-nickname ()
+  "."
+  (interactive)
+  (p2p-ws-list-with-action
+   (let ((nickname (completing-read
+                   (format "Please input the nickname to send %s: " (websocket-remote-name-with-nickname ws))
+                   nil nil t)))
+     (p2p-ws-do-set-nickname nickname ws))))
+
+(defun p2p-ws-do-set-nickname (nickname ws)
+  "Set NICKNAME for websocket WS."
+  (when (not (websocket-openp ws))
+    (message "websocket %s is not opened, open a new again!" (websocket-remote-name ws))
+    (p2p-ws-client-list-remove ws)
+    (setq ws (websocket-ensure-connected ws)))
+  ;; recheck and send the message
+  (when (websocket-openp ws)
+    (message "set nickname %s to %s" nickname (websocket-remote-name ws))
+    (setf (alist-get ws *p2p-ws-nickname-list*) nickname)))
+
 (defmacro p2p-ws-list-with-action (&rest body)
   "List all the server inbound and client outbound websocket, select one and execute the BODY."
   `(let* ((ws-url (completing-read "Select the connection: "
                                    (concatenate
                                     'list
-                                    (mapcar #'websocket-remote-name websocket-server-websockets)
-                                    (mapcar #'websocket-remote-name *p2p-ws-client-list*))
+                                    (mapcar #'websocket-remote-name-with-nickname websocket-server-websockets)
+                                    (mapcar #'websocket-remote-name-with-nickname *p2p-ws-client-list*))
                                    nil t))
           (ws-list (websocket-inbound-filter-with-url ws-url)))
      (message "ws-list length: %S" (length ws-list))
@@ -165,7 +200,7 @@
   (let ((origin-ws-list (concatenate 'list websocket-server-websockets *p2p-ws-client-list*))
         ws-list)
     (dolist (ws origin-ws-list ws-list)
-      (if (string-equal url (websocket-remote-name ws))
+      (if (string-equal url (websocket-remote-name-with-nickname ws))
           (push ws ws-list)))))
 
 (defun p2p-ws-client-list-remove (ws)
