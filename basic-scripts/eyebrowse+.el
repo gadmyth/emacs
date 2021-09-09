@@ -496,7 +496,9 @@ COPY from eyebrowse--load-window-config."
       (flet ((make-keymap
               (slot)
               (let ((map (make-sparse-keymap)))
-                (define-key map (kbd "<mode-line><mouse-1>")
+                ;; the mode-line event
+                ;(define-key map (kbd "<mode-line><mouse-1>")
+                (define-key map (kbd "<header-line><mouse-1>")
                   `(lambda (_e)
                      (interactive "e")
                      (eyebrowse-switch-to-window-config ,slot)))
@@ -504,9 +506,10 @@ COPY from eyebrowse--load-window-config."
         ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
         (list
          ;; copy the default buffer identification from bindings.el.gz
-         (propertized-buffer-identification "%12b")
+         ;(propertized-buffer-identification "%12b")
          ;; - [locked-conf, current-conf, last-conf]
-         (format " [%s, %s, %s]"
+         (format " %s\t" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
+         (format "[%s, %s, %s]\t"
                  locked-conf-string
                  ;; the current eb config is active, and with no keymap
                  (propertize current-conf-string 'face 'eyebrowse-mode-line-active
@@ -519,8 +522,15 @@ COPY from eyebrowse--load-window-config."
                              'mouse-face 'mode-line-highlight
                              'slot (car last-conf)
                              'local-map (make-keymap (car last-conf))
-                             'help-echo help-echo)))
-        ))))
+                             'help-echo help-echo)
+                 ))))))
+
+(defmacro walk-all-frame-windows (&rest body)
+  "Walk all windows in all frame for each execute the BODY."
+  `(walk-windows (lambda (window)
+                   (with-current-buffer (window-buffer window)
+                     ,@body))
+                 nil t))
 
 (define-minor-mode eyebrowse-plus-mode
   "Toggle `eyebrowse-plus-mode."
@@ -533,11 +543,16 @@ COPY from eyebrowse--load-window-config."
                     (add-hook 'delete-frame-functions #'save-eyebrowse-config)
                     (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))
         ;; set mode-line-buffer-identification
-        (setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
+        ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
+        (set-face-attribute 'header-line nil :height 100)
+        (walk-all-frame-windows
+         (setq-local header-line-format eyebrowse-buffer-name-format))
         (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
       (remove-hook 'kill-emacs-hook #'save-eyebrowse-config)
+      (walk-all-frame-windows
+       (setq-local header-line-format nil))
       (eyebrowse-mode 0))))
 
 (provide 'eyebrowse+)
