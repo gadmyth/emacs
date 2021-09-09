@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.8
-;; Package-Version: 20210821.001
+;; Version: 1.0.9
+;; Package-Version: 20210909.002
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -505,11 +505,11 @@ COPY from eyebrowse--load-window-config."
                 map)))
         ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
         (list
-         ;; copy the default buffer identification from bindings.el.gz
-         ;(propertized-buffer-identification "%12b")
          ;; - [locked-conf, current-conf, last-conf]
          (format " %s\t" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
-         (format "[%s, %s, %s]\t"
+         ;; copy the default buffer identification from bindings.el.gz
+         (propertized-buffer-identification "%b")
+         (format "\t[%s, %s, %s]\t"
                  locked-conf-string
                  ;; the current eb config is active, and with no keymap
                  (propertize current-conf-string 'face 'eyebrowse-mode-line-active
