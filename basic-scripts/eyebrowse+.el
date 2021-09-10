@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.1.0
-;; Package-Version: 20210910.001
+;; Version: 1.1.1
+;; Package-Version: 20210910.002
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -52,9 +52,9 @@
   "Initialize Eyebrowse for the current FRAME."
   (message "*** eyebrowse-init-from-config ***")
   (unless (eyebrowse--get 'window-configs frame)
-    (eyebrowse-init-original frame))
+    (eyebrowse-init-original frame)
     (eyebrowse-rename-window-config 1 "default")
-    (eyebrowse-lazy-load-config))
+    (eyebrowse-lazy-load-config)))
 
 (defun eyebrowse-swap-init-function()
   "."
