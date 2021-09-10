@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.0.9
-;; Package-Version: 20210909.002
+;; Version: 1.1.0
+;; Package-Version: 20210910.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -532,6 +532,14 @@ COPY from eyebrowse--load-window-config."
                      ,@body))
                  nil t))
 
+(defun set-eyebrowse-header-line-format ()
+  "."
+  (unless header-line-format
+    (when (window-live-p (get-buffer-window))
+      (with-current-buffer (current-buffer)
+        (eyebrowse-message "set-eyebrowse-header-line-format, buffer: %s" (current-buffer))
+        (setq-local header-line-format eyebrowse-buffer-name-format)))))
+
 (define-minor-mode eyebrowse-plus-mode
   "Toggle `eyebrowse-plus-mode."
   :global t
@@ -541,16 +549,19 @@ COPY from eyebrowse--load-window-config."
         (add-hook 'eyebrowse-lazy-load-hook
                   (lambda ()
                     (add-hook 'delete-frame-functions #'save-eyebrowse-config)
-                    (add-hook 'kill-emacs-hook #'save-eyebrowse-config)))
+                    (add-hook 'kill-emacs-hook #'save-eyebrowse-config)
+                    (set-eyebrowse-header-line-format)))
         ;; set mode-line-buffer-identification
         ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
-        (set-face-attribute 'header-line nil :height 100)
-        (walk-all-frame-windows
-         (setq-local header-line-format eyebrowse-buffer-name-format))
+        (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
+        (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
         (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
       (remove-hook 'kill-emacs-hook #'save-eyebrowse-config)
+      ;; header-line-format hook
+      (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
+      (remove-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
       (walk-all-frame-windows
        (setq-local header-line-format nil))
       (eyebrowse-mode 0))))
