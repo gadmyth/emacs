@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.1.9
-;; Package-Version: 20210908.002
+;; Version: 0.2.0
+;; Package-Version: 20210910.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -161,6 +161,20 @@
                              (fifth remote-info))))
         (p2p-ws-debug-message "remote-name: %s" sender)
         sender)))
+
+(defun websocket-remote-ip (ws)
+  "Get the WS's sender of remote."
+  (if (websocket-p ws)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (remote-info (mapcar 'identity (plist-get conn-info :remote)))
+             (remote-ip (format "%s.%s.%s.%s"
+                                (first remote-info)
+                                (second remote-info)
+                                (third remote-info)
+                                (fourth remote-info))))
+        (p2p-ws-debug-message "remote-ip: %s" remote-ip)
+        remote-ip)))
 
 (defun websocket-remote-name-with-nickname (ws)
   "Get the websocket remote-name and it's nickname of WS."
