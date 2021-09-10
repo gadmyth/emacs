@@ -125,6 +125,16 @@
       (goto-char end)
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
+(defun join-with-comma (start end)
+  "Format and insert sql IN collection from START to END of region."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (lines (split-string region-string "\n"))
+           (lines-with-action lines))
+      (goto-char end)
+      (insert "\n" (string-join lines-with-action ",") "\n"))))
+
 ;; ------ line editor -------
 
 (defun kill-to-beginning-of-line ()
@@ -163,6 +173,23 @@
                    (point))))
         (kill-ring-save begin end)
         (message "*** line copied ***")))))
+
+(defun parse-mybatis-column-property-string ()
+  "."
+  (interactive)
+  (let ((regexp "^.*?\s*property=\"\\(.*\\)\"")
+        (line (buffer-substring (line-beginning-position) (line-end-position))))
+    (if (string-match regexp line)
+        (let ((prop (substring-no-properties line (match-beginning 1) (match-end 1))))
+          (message "parsed property is %s" prop)
+          prop))))
+
+(defun create-java-property-from-mybatis-column ()
+  "."
+  (interactive)
+  (let* ((prop (parse-mybatis-column-property-string))
+         (java-property (format "private String %s;" prop)))
+    (kill-new java-property)))
 
 ;; ----- global keys for line editor -----
 
