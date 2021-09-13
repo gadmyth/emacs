@@ -274,6 +274,17 @@ above them."
   "p2p websocket button face."
   :group 'p2p-websokcet-faces)
 
+(defvar p2p-websocket-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map text-mode-map)
+    (define-key map "n" 'p2p-websocket-next-message)
+    (define-key map "p" 'p2p-websocket-previous-message)
+    (define-key map "r" 'p2p-websocket-reply-this-message)
+    (define-key map "d" 'p2p-websocket-delete-this-message)
+    (define-key map "u" 'p2p-websocket-undo)
+    (define-key map "q" 'quit-window)
+    map))
+
 (defvar p2p-websocket-button-keymap
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET") 'p2p-websocket-button-press-button)
@@ -420,17 +431,6 @@ call it with the value of the `pp2-websocket-data' text property."
   (read-only-mode 0)
   (undo)
   (read-only-mode 1))
-
-(defvar p2p-websocket-aggregate-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map text-mode-map)
-    (define-key map "n" 'p2p-websocket-next-message)
-    (define-key map "p" 'p2p-websocket-previous-message)
-    (define-key map "r" 'p2p-websocket-reply-this-message)
-    (define-key map "d" 'p2p-websocket-delete-this-message)
-    (define-key map "u" 'p2p-websocket-undo)
-    (define-key map "q" 'quit-window)
-    map))
 
 (define-derived-mode p2p-websocket-aggregate-mode text-mode "PWA"
   ;; The mode for *p2p-websocket-buffer*.
