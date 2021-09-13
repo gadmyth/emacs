@@ -2,6 +2,21 @@
 ;;; Commentary:
 ;;; Code:
 
+(defvar *network-util-debug* nil)
+
+(defmacro network-util-debug-message (format-string &rest ARGS)
+  "If debug is open, send message with FORMAT-STRING and ARGS."
+  `(if *network-util-debug*
+       (message ,format-string ,@ARGS)))
+
+(defun network-util-toggle-debug ()
+  "."
+  (interactive)
+  (setq *network-util-debug* (not *network-util-debug*))
+  (message "turn %s the %s"
+           (if *network-util-debug* "on" "off")
+           (symbol-name '*network-util-debug*)))
+
 (defun current-ip ()
   "."
   (interactive)
@@ -36,23 +51,44 @@
       (when current-prefix-arg
         (message "public-ip: %s" result))
       (when result
-        (setq *fetched-public-ip* result))
+        (network-util-debug-message "public ip fetched: [%S]" result)
+        (setq *fetched-public-ip* result)
+        (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))
       result))
    (t "")))
 
 (defvar *public-ip-fetch-timer* nil)
+
+(defun refresh-public-ip ()
+  "."
+  (interactive)
+  (message "*** now refresh-public-ip: %s ***"
+           (timestamp-to-string-with-format (current-timestamp) "%Y-%m-%d %H:%M:%S"))
+  (when (> (length *fetched-public-ip*) 0)
+    (network-util-debug-message "*fetched-public-ip* is: [%S]" *fetched-public-ip*)
+    (setq *fetched-public-ip* "")
+    (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))
+  (public-ip))
 
 (defun fetched-public-ip ()
   "."
   (when (zerop (length *fetched-public-ip*))
     (when (not *public-ip-fetch-timer*)
       (setq *public-ip-fetch-timer*
-            (run-with-timer 1 300
-                            (lambda ()
-                              (when (> (length *fetched-public-ip*) 0)
-                                (setq *fetched-public-ip* ""))
-                              (public-ip))))))
+            (run-with-timer 1 300 #'refresh-public-ip))))
   *fetched-public-ip*)
+
+(defun reset-public-ip-fetch-timer ()
+  "."
+  (interactive)
+  (when *public-ip-fetch-timer*
+    (cancel-timer *public-ip-fetch-timer*)
+    (network-util-debug-message "*public-ip-fetch-timer* cancelled")
+    (setq *fetched-public-ip* "")
+    (network-util-debug-message "*fetched-public-ip* set to [%S]" *fetched-public-ip*)
+    (setq *public-ip-fetch-timer* nil)
+    (network-util-debug-message "*public-ip-fetch-timer* set to [%S]" *public-ip-fetch-timer*)
+    ))
 
 (defun switch-proxy (enable)
   "ENABLE's value is t or nil."
