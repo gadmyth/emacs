@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.1.1
-;; Package-Version: 20210910.002
-;; Package-Requires: eyebrowse, s, dash
+;; Version: 1.1.2
+;; Package-Version: 20210913.001
+;; Package-Requires: eyebrowse, s, dash, network-util
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL:  https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/eyebrowse+.el
@@ -36,6 +36,7 @@
 (require 'eyebrowse)
 (require 's)
 (require 'dash)
+(require 'network-util)
 
 (defvar *eyebrowse-debug* nil)
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
@@ -507,6 +508,7 @@ COPY from eyebrowse--load-window-config."
         (list
          ;; - [locked-conf, current-conf, last-conf]
          (format " %s\t" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
+         (format " %s\t" (current-ip))
          ;; copy the default buffer identification from bindings.el.gz
          (propertized-buffer-identification "%b")
          (format "\t[%s, %s, %s]\t"
@@ -534,7 +536,9 @@ COPY from eyebrowse--load-window-config."
 
 (defun set-eyebrowse-header-line-format ()
   "."
-  (unless header-line-format
+  (interactive)
+  (when (or (not header-line-format)
+            current-prefix-arg)
     (when (window-live-p (get-buffer-window))
       (with-current-buffer (current-buffer)
         (eyebrowse-message "set-eyebrowse-header-line-format, buffer: %s" (current-buffer))
