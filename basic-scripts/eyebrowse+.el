@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.1.2
-;; Package-Version: 20210913.001
+;; Version: 1.1.3
+;; Package-Version: 20210913.002
 ;; Package-Requires: eyebrowse, s, dash, network-util
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -510,7 +510,7 @@ COPY from eyebrowse--load-window-config."
          (format "%s" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
          "\t"
          (format "%s" (current-ip))
-         (format "%s" (if *fetched-public-ip* " | " ""))
+         (format "%s" (if (> (length *fetched-public-ip*) 0) " | " ""))
          (format "%s" (fetched-public-ip))
          "\t"
          ;; copy the default buffer identification from bindings.el.gz
