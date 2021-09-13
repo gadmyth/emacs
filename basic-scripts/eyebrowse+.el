@@ -506,12 +506,17 @@ COPY from eyebrowse--load-window-config."
                 map)))
         ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
         (list
-         ;; - [locked-conf, current-conf, last-conf]
-         (format " %s\t" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
-         (format " %s\t" (current-ip))
+         " "
+         (format "%s" (format-time-string "%Y-%m-%d %H:%M" (current-time)))
+         "\t"
+         (format "%s" (current-ip))
+         (format "%s" (if *fetched-public-ip* " | " ""))
+         (format "%s" (fetched-public-ip))
+         "\t"
          ;; copy the default buffer identification from bindings.el.gz
-         (propertized-buffer-identification "%b")
-         (format "\t[%s, %s, %s]\t"
+         (propertized-buffer-identification " %b\t")
+         ;; - [locked-conf, current-conf, last-conf]
+         (format "[%s, %s, %s]"
                  locked-conf-string
                  ;; the current eb config is active, and with no keymap
                  (propertize current-conf-string 'face 'eyebrowse-mode-line-active
