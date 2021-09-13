@@ -22,6 +22,8 @@
       result))
    (t "")))
 
+(defvar *fetched-public-ip* "")
+
 (defun public-ip ()
   "."
   (interactive)
@@ -33,8 +35,24 @@
            (result (substring result 0 (- (length result) 1))))
       (when current-prefix-arg
         (message "public-ip: %s" result))
+      (when result
+        (setq *fetched-public-ip* result))
       result))
    (t "")))
+
+(defvar *public-ip-fetch-timer* nil)
+
+(defun fetched-public-ip ()
+  "."
+  (when (zerop (length *fetched-public-ip*))
+    (when (not *public-ip-fetch-timer*)
+      (setq *public-ip-fetch-timer*
+            (run-with-timer 1 300
+                            (lambda ()
+                              (when (> (length *fetched-public-ip*) 0)
+                                (setq *fetched-public-ip* ""))
+                              (public-ip))))))
+  *fetched-public-ip*)
 
 (defun switch-proxy (enable)
   "ENABLE's value is t or nil."
