@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.015
-;; Package-Version: 20210908.002
+;; Version: 1.0.016
+;; Package-Version: 20210914.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -403,8 +403,30 @@ With PARSED message and PROC."
   (let ((msg-start (point)))
     (erc-aggregate-next-message)
     (let ((msg-end (point)))
-      (delete-region msg-start msg-end)))
+      (delete-region msg-start msg-end)
+      (erc-debug-message "erc message %s deleted from %S to %S" msg-start msg-end)))
   (read-only-mode 1))
+
+(defun erc-delete-all-channel-message ()
+  "Delete all the channel's message in *erc-aggregate-buffer*."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (let* ((data (car (get-text-property (point) 'erc-data)))
+           (target (cdr data))
+           (channel (and (string-prefix-p "#" target) target)))
+      (erc-debug-message "delete all the channel [%S]'s message" channel)
+      (when channel
+        (goto-char (point-min))
+        (let ((message-data (erc-message-data)))
+          (while data
+            (erc-debug-message "get the message data: [%S]" data)
+            (if (erc-message-channel-p data channel)
+              (progn
+                (erc-debug-message "the message [%S] is matched the channel: %S" data channel)
+                (erc-delete-this-message))
+              (erc-aggregate-next-message))
+            (setq data (erc-message-data))))))))
 
 (defun erc-aggregate-undo ()
   "Undo in the *erc-aggregate-buffer*."
@@ -412,6 +434,17 @@ With PARSED message and PROC."
   (read-only-mode 0)
   (undo)
   (read-only-mode 1))
+
+(defun erc-message-data ()
+  "."
+  (let* ((data (car (get-text-property (point) 'erc-data))))
+    data))
+
+(defun erc-message-channel-p (message-data channel)
+  "Check the message with MESSAGE-DATA blongs to the CHANNEL."
+  (let* ((target (cdr message-data))
+         (the-channel (and (string-prefix-p "#" target) target)))
+    (string-equal channel the-channel)))
 
 (defun erc-forbidden-this-channel ()
   "Forbidden the channel at this point in *erc-aggregate-buffer*."
@@ -445,6 +478,7 @@ With PARSED message and PROC."
     (define-key map "j" 'erc-jump-this-message)
     (define-key map "r" 'erc-reply-this-message)
     (define-key map "d" 'erc-delete-this-message)
+    (define-key map "D" 'erc-delete-all-channel-message)
     (define-key map "f" 'erc-forbidden-this-channel)
     (define-key map "F" 'erc-unforbidden-this-channel)
     (define-key map "u" 'erc-aggregate-undo)
