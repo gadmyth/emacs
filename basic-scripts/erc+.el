@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.016
-;; Package-Version: 20210914.001
+;; Version: 1.0.017
+;; Package-Version: 20210914.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -413,18 +413,26 @@ With PARSED message and PROC."
   (save-excursion
     (erc-aggregate-current-message)
     (let* ((data (car (get-text-property (point) 'erc-data)))
+           (short-sender (car data))
            (target (cdr data))
-           (channel (and (string-prefix-p "#" target) target)))
-      (erc-debug-message "delete all the channel [%S]'s message" channel)
-      (when channel
+           (channel (and (string-prefix-p "#" target) target))
+           (chat (and (not channel)
+                      (or (and (string-equal target erc-nick) short-sender) target))))
+      (if channel
+          (erc-debug-message "delete all the channel [%S]'s message" channel)
+        (erc-debug-message "delete all the chat [%S]'s message" chat))
+      (when (or channel chat)
         (goto-char (point-min))
         (let ((message-data (erc-message-data)))
           (while data
             (erc-debug-message "get the message data: [%S]" data)
-            (if (erc-message-channel-p data channel)
-              (progn
-                (erc-debug-message "the message [%S] is matched the channel: %S" data channel)
-                (erc-delete-this-message))
+            (if (or (and channel (erc-message-channel-p data channel))
+                    (erc-message-chat-p data chat))
+                (progn
+                  (if channel
+                      (erc-debug-message "the message [%S] is matched the channel: %S" data channel)
+                    (erc-debug-message "the message [%S] is matched the chat: %S" data chat))
+                  (erc-delete-this-message))
               (erc-aggregate-next-message))
             (setq data (erc-message-data))))))))
 
@@ -439,6 +447,16 @@ With PARSED message and PROC."
   "."
   (let* ((data (car (get-text-property (point) 'erc-data))))
     data))
+
+(defun erc-message-chat-p (message-data chat)
+  "Check the message with MESSAGE-DATA blongs to the CHAT."
+  (let* ((short-sender (car message-data))
+         (target (cdr message-data))
+         (channel (and (string-prefix-p "#" target) target))
+         (the-chat (and (not channel)
+                    (or (and (string-equal target erc-nick) short-sender)
+                        target))))
+    (string-equal the-chat chat)))
 
 (defun erc-message-channel-p (message-data channel)
   "Check the message with MESSAGE-DATA blongs to the CHANNEL."
