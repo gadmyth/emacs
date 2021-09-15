@@ -66,6 +66,7 @@
 (require 'scratch+)
 (require 'notifications)
 (require 'lsp-config)
+(require 'youdao-dictionary-conf)
 
 (require-safely 'smartparens (smartparens-global-mode))
 (require-safely 'expand-region (global-set-key (kbd "C-=") 'er/expand-region))

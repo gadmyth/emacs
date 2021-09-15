@@ -1,3 +1,4 @@
+
 ;;; package --- packages.el
 ;;; Commentary:
 ;;; Code:
@@ -79,7 +80,8 @@
         'ac-emoji
         'google-translate
         'jq-mode
-        'look-mode))
+        'look-mode
+        'youdao-dictionary))
 
 (defconst +option-packages+
   (list 'alpha
