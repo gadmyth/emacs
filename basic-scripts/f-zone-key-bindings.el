@@ -70,6 +70,7 @@
 ;; library
 (global-set-key (kbd "<f6>") (toggle-minibuffer 'find-library))
 (global-set-key (kbd "<M-f6>") (toggle-minibuffer 'require-library))
+(global-set-key (kbd "<C-f6>") (toggle-minibuffer 'load-library))
 
 (provide 'f-zone-key-bindings)
 ;;; f-zone-key-bindings.el ends here
