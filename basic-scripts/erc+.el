@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.017
-;; Package-Version: 20210914.002
+;; Version: 1.0.018
+;; Package-Version: 20210916.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -154,10 +154,10 @@ With PARSED message and PROC."
   `(cond ((eval erc-aggregate-refresh)
           (erc-debug-message "no save excursion")
           ,@body)
-        (t
-         (save-excursion
-           (erc-debug-message "save excursion")
-           ,@body))))
+         (t
+          (save-excursion
+            (erc-debug-message "save excursion")
+            ,@body))))
 
 (defun* erc-update-aggregate-buffer (short-sender target msg)
   "Append SENDER and MSG to the *erc-aggregate-buffer*."
@@ -176,7 +176,7 @@ With PARSED message and PROC."
                 (string-equal "表情" (car file-msg)))
         (setq msg "")
         (setq msg-picture-p t)))
-  
+    
     (when (not (buffer-live-p *erc-aggregate-buffer*))
       ;; create buffer if not exists
       (setq *erc-aggregate-buffer*
@@ -404,7 +404,7 @@ With PARSED message and PROC."
     (erc-aggregate-next-message)
     (let ((msg-end (point)))
       (delete-region msg-start msg-end)
-      (erc-debug-message "erc message %s deleted from %S to %S" msg-start msg-end)))
+      (erc-debug-message "erc message deleted from %S to %S"  msg-start msg-end)))
   (read-only-mode 1))
 
 (defun erc-delete-all-channel-message ()
@@ -425,7 +425,7 @@ With PARSED message and PROC."
         (goto-char (point-min))
         (let ((message-data (erc-message-data)))
           (while data
-            (erc-debug-message "get the message data: [%S]" data)
+            (erc-debug-message "get the message data: [%S], channel: [%S], chat: [%S]" data channel chat)
             (if (or (and channel (erc-message-channel-p data channel))
                     (erc-message-chat-p data chat))
                 (progn
@@ -454,15 +454,17 @@ With PARSED message and PROC."
          (target (cdr message-data))
          (channel (and (string-prefix-p "#" target) target))
          (the-chat (and (not channel)
-                    (or (and (string-equal target erc-nick) short-sender)
-                        target))))
-    (string-equal the-chat chat)))
+                        (or (and (string-equal target erc-nick) short-sender)
+                            target))))
+    (erc-debug-message "chat: %S, the-chat: %S" chat the-chat)
+    (and chat (string-equal the-chat chat))))
 
 (defun erc-message-channel-p (message-data channel)
   "Check the message with MESSAGE-DATA blongs to the CHANNEL."
   (let* ((target (cdr message-data))
          (the-channel (and (string-prefix-p "#" target) target)))
-    (string-equal channel the-channel)))
+    (erc-debug-message "channel: %S, the-channel: %S" channel the-channel)
+    (and channel (string-equal channel the-channel))))
 
 (defun erc-forbidden-this-channel ()
   "Forbidden the channel at this point in *erc-aggregate-buffer*."
