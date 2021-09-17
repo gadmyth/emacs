@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.018
-;; Package-Version: 20210916.001
+;; Version: 1.0.019
+;; Package-Version: 20210917.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -46,6 +46,7 @@
 (defvar erc-aggregate-auto-display nil)
 (defvar erc-default-width 100)
 (defvar *erc-forbidden-targets* nil)
+(defconst *erc-forbidden-targets-file-name* (expand-file-name "~/.erc_forbidden_targets"))
 
 (defun erc-toggle-debug ()
   "."
@@ -180,7 +181,8 @@ With PARSED message and PROC."
     (when (not (buffer-live-p *erc-aggregate-buffer*))
       ;; create buffer if not exists
       (setq *erc-aggregate-buffer*
-            (generate-new-buffer "*erc-aggregate-buffer*"))
+            (generate-new-buffer "*erc-aggregate-buffer*")
+            (load-erc-forbidden-targets))
       ;; set the major mode
       (with-current-buffer *erc-aggregate-buffer*
         (erc-aggregate-mode)))
@@ -487,8 +489,43 @@ With PARSED message and PROC."
            (target (cdr data))
            (channel (and (string-prefix-p "#" target) target)))
       (when channel
-        (delete channel *erc-forbidden-targets*)
+        (setq *erc-forbidden-targets* (delete channel *erc-forbidden-targets*))
         (message "The channel %s is unforbbiden now." channel)))))
+
+
+(defun erc-unforbidden-target ()
+  "Unforbidden the channel at this point in *erc-aggregate-buffer*."
+  (interactive)
+  (when-let ((channel (completing-read "unforbidden the channel: "
+                                       *erc-forbidden-targets* nil t nil nil nil)))
+    (setq *erc-forbidden-targets* (delete channel *erc-forbidden-targets*))
+    (message "The channel %s is unforbbiden now." channel)))
+
+(defun load-erc-forbidden-targets ()
+  "Load *erc-forbidden-targets* from file."
+  (interactive)
+  (let ((file-name *erc-forbidden-targets-file-name*))
+    (cond
+     ((not (file-exists-p file-name))
+      (message "Can't load %s file, for it does not exist!" file-name))
+     (t
+      (message "Loading *erc-forbidden-targets* from file %S ..." file-name)
+      (with-temp-buffer
+        (insert-file-contents file-name)
+        (goto-char (point-min))
+        (let ((content (read (current-buffer))))
+          (message "content: %S" content)
+          (setq *erc-forbidden-targets* content)))))))
+
+(defun save-erc-forbidden-targets ()
+  "Save *erc-forbidden-targets* to file."
+  (interactive)
+  (let ((file-name *erc-forbidden-targets-file-name*))
+    (message "Saving *erc-forbidden-targets* to file %S ..." file-name)
+    (let ((content (format "%S" *erc-forbidden-targets*)))
+      (with-temp-file file-name
+        (insert content)))))
+
 
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
@@ -501,6 +538,7 @@ With PARSED message and PROC."
     (define-key map "D" 'erc-delete-all-channel-message)
     (define-key map "f" 'erc-forbidden-this-channel)
     (define-key map "F" 'erc-unforbidden-this-channel)
+    (define-key map "U" 'erc-unforbidden-target)
     (define-key map "u" 'erc-aggregate-undo)
     (define-key map "q" 'quit-window)
     (define-key map (kbd "<mouse-3>") 'erc-right-click)
