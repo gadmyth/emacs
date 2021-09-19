@@ -14,8 +14,8 @@
 (add-to-list-if-not-exist 'package-archives `("gnu" . ,(concat package-host "/gnu/")))
 (add-to-list-if-not-exist 'package-archives `("org" . ,(concat package-host "/org/")))
 (add-to-list-if-not-exist 'package-archives `("melpa" . ,(concat package-host "/melpa/")))
-(add-to-list-if-not-exist 'package-archives `("melpa-stable" . ,(concat package-host "/melpa-stable/")))
-(add-to-list-if-not-exist 'package-archives `("marmalade" . ,(concat package-host "/marmalade/")))
+(add-to-list-if-not-exist 'package-archives `("melpa-stable" . ,(concat package-host "/stable-melpa/")))
+;(add-to-list-if-not-exist 'package-archives `("marmalade" . ,(concat package-host "/marmalade/")))
 (package-initialize)
 
 ;; the slime should git clone from github
