@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.019
-;; Package-Version: 20210917.001
+;; Version: 1.0.020
+;; Package-Version: 20210920.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -425,7 +425,7 @@ With PARSED message and PROC."
         (erc-debug-message "delete all the chat [%S]'s message" chat))
       (when (or channel chat)
         (goto-char (point-min))
-        (let ((message-data (erc-message-data)))
+        (let ((data (erc-message-data)))
           (while data
             (erc-debug-message "get the message data: [%S], channel: [%S], chat: [%S]" data channel chat)
             (if (or (and channel (erc-message-channel-p data channel))
