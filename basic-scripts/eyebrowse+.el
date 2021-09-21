@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.1.8
-;; Package-Version: 20210921.003
+;; Version: 1.1.9
+;; Package-Version: 20210921.004
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -94,6 +94,12 @@
          (config (eyebrowse-get-config-with-slot slot)))
     config))
 
+(defun eyebrowse-get-last-config ()
+  "."
+  (let* ((slot (eyebrowse--get 'last-slot))
+         (config (eyebrowse-get-config-with-slot slot)))
+    config))
+
 (defun eyebrowse-get-config-with-slot (slot)
   "SLOT: ."
   (let* ((configs (eyebrowse--get 'window-configs))
@@ -152,8 +158,9 @@
 (defun eyebrowse-list-window-configs-with-action (window-configs &optional buffer action)
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
   (let* ((current-config (eyebrowse-get-current-config))
+         (last-config (eyebrowse-get-last-config))
          (current-tag (nth 2 current-config))
-         (default-candidate (eyebrowse-config-string current-config))
+         (default-candidate (eyebrowse-config-string (or last-config current-config)))
          (prompt (format "Select eyebrowse action (%s): " current-tag))
          (collections))
     (dolist (window-config window-configs)
