@@ -43,5 +43,10 @@
 ;; erc
 (add-to-list '*erc-forbidden-targets* "")
 
+;; weathers
+(setq *weather-api-uid* nil)
+(setq *weather-api-key* nil)
+(setq *weather-location* nil)
+
 (provide 'pre-customize)
 ;;; pre-customize.el ends here
