@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.1.9
-;; Package-Version: 20210921.004
+;; Version: 1.2.0
+;; Package-Version: 20210921.005
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,12 @@
 (defvar *eyebrowse-default-configs* nil)
 (defvar eyebrowse-lazy-load-hook nil)
 (defvar *eyebrowse-init-function-swapped* nil)
+
+(defface current-eyebrowse-config-face
+  '((((class color) (background light)) (:foreground "forest green" :weight bold))
+    (((class color) (background dark)) (:foreground "forest green" :weight bold)))
+  "Face for current eyebrowse config text."
+  :group 'eyebrowse+)
 
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\.*\\'" . utf-8))
 
@@ -159,15 +165,18 @@
   "WINDOW-CONFIGS: , BUFFER: , ACTION."
   (let* ((current-config (eyebrowse-get-current-config))
          (last-config (eyebrowse-get-last-config))
+         (current-slot (nth 0 current-config))
          (current-tag (nth 2 current-config))
          (default-candidate (eyebrowse-config-string (or last-config current-config)))
-         (prompt (format "Select eyebrowse action (%s): " current-tag))
+         (prompt "Select eyebrowse action: ")
          (collections))
     (dolist (window-config window-configs)
       (let* ((slot (nth 0 window-config))
              (tag (nth 2 window-config))
              (element (eyebrowse-config-string window-config)))
         (eyebrowse-message "window config: %S" element)
+        (when (= current-slot slot)
+          (setq element (propertize element 'face 'current-eyebrowse-config-face)))
         (push element collections)))
     (setf collections (reverse collections))
     (eyebrowse-message "collections: %S" collections)
