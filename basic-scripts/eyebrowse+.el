@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.1.7
-;; Package-Version: 20210921.002
-;; Package-Requires: eyebrowse, s, dash, network-util
+;; Version: 1.1.8
+;; Package-Version: 20210921.003
+;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL:  https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/eyebrowse+.el
@@ -37,6 +37,7 @@
 (require 's)
 (require 'dash)
 (require 'network-util)
+(require 'weathers)
 
 (defvar *eyebrowse-debug* nil)
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
