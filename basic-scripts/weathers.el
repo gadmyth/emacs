@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20210921.002
+;; Version: 1.0.3
+;; Package-Version: 20210921.003
 ;; Package-Requires: request, hmac-sha1
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -53,6 +53,32 @@
 
 (defvar *weather-fetch-timer* nil)
 
+(defvar *weathers-debug* nil)
+
+(defmacro weathers-debug-message (format-string &rest ARGS)
+  "If debug is open, send message with FORMAT-STRING and ARGS."
+  `(if *weathers-debug*
+       (message ,format-string ,@ARGS)))
+
+(defun weathers-toggle-debug ()
+  "."
+  (interactive)
+  (setq *weathers-debug* (not *weathers-debug*))
+  (message "turn %s the %s"
+           (if *weathers-debug* "on" "off")
+           (symbol-name '*weathers-debug*)))
+
+(defun refresh-weather ()
+  "."
+  (interactive)
+  (message "*** now refresh-weather: %s ***"
+           (timestamp-to-string-with-format (current-timestamp) "%Y-%m-%d %H:%M:%S"))
+  (when (> (length *weather-api-result*) 0)
+    (weathers-debug-message "** *weather-api-result* is: [%S]" *weather-api-result*)
+    (setq *weather-api-result* "")
+    (weathers-debug-message "*weather-api-result* set as: [%S]" *weather-api-result*))
+  (weathers-fetcher-weather))
+
 (defun weathers-fetcher-weather ()
   "."
   (interactive)
@@ -89,7 +115,7 @@
                              (weather (cdr (assoc 'text (cdr now))))
                              (temperature (cdr (assoc 'temperature (cdr now))))
                              (format-result (format "%s:%s(%s)" loc-name weather temperature)))
-                        (message "weather result fetched: %s" format-result)
+                        (weathers-debug-message "weather result fetched: %s" format-result)
                         (setq *weather-api-result* format-result)))))
         :error (function*
                 (lambda (&key error-thrown &allow-other-keys&rest _)
@@ -99,11 +125,22 @@
   "."
   (when (or (null *weather-api-result*)
             (zerop (length *weather-api-result*)))
-    (when *weather-fetch-timer*
-      (cancel-timer *weather-fetch-timer*)
+    (when (not *weather-fetch-timer*)
       (setq *weather-fetch-timer*
-            (run-with-timer 1 300 #'refresh-public-ip))))
+            (run-with-timer 1 300 #'refresh-weather))))
   *weather-api-result*)
+
+(defun reset-weather-fetch-timer ()
+  "."
+  (interactive)
+  (when *weather-fetch-timer*
+    (cancel-timer *weather-fetch-timer*)
+    (weathers-debug-message "*weather-fetch-timer* cancelled")
+    (setq *weather-api-result* "")
+    (weathers-debug-message "*weather-api-result* set to [%S]" *weather-api-result*)
+    (setq *weather-fetch-timer* nil)
+    (weathers-debug-message "*weather-fetch-timer* set to [%S]" *weather-fetch-timer*)
+    ))
 
 (provide 'weathers)
 ;;; weathers.el ends here
