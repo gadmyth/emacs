@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.1
-;; Package-Version: 20210921.006
+;; Version: 1.2.2
+;; Package-Version: 20210921.007
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -545,7 +545,7 @@ COPY from eyebrowse--load-window-config."
          (fetched-weather)
          " | "
          ;; copy the default buffer identification from bindings.el.gz
-         (propertized-buffer-identification " %b")
+         (propertized-buffer-identification "%b")
          " | "
          ;; - [locked-conf, current-conf, last-conf]
          (format "[%s, %s, %s]"
