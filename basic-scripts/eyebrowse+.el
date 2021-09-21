@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.0
-;; Package-Version: 20210921.005
+;; Version: 1.2.1
+;; Package-Version: 20210921.006
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -49,6 +49,12 @@
   '((((class color) (background light)) (:foreground "forest green" :weight bold))
     (((class color) (background dark)) (:foreground "forest green" :weight bold)))
   "Face for current eyebrowse config text."
+  :group 'eyebrowse+)
+
+(defface last-eyebrowse-config-face
+  '((((class color) (background light)) (:foreground "dark slate gray" :weight bold))
+    (((class color) (background dark)) (:foreground "dark slate gray" :weight bold)))
+  "Face for last eyebrowse config text."
   :group 'eyebrowse+)
 
 (add-to-list 'auto-coding-alist '("\\.eyebrowse_save\\.*\\'" . utf-8))
@@ -167,7 +173,9 @@
          (last-config (eyebrowse-get-last-config))
          (current-slot (nth 0 current-config))
          (current-tag (nth 2 current-config))
-         (default-candidate (eyebrowse-config-string (or last-config current-config)))
+         (last-slot (nth 0 last-config))
+         (default-slot (nth 0 (or last-config current-config)))
+         (default-candidate)
          (prompt "Select eyebrowse action: ")
          (collections))
     (dolist (window-config window-configs)
@@ -175,8 +183,12 @@
              (tag (nth 2 window-config))
              (element (eyebrowse-config-string window-config)))
         (eyebrowse-message "window config: %S" element)
-        (when (= current-slot slot)
-          (setq element (propertize element 'face 'current-eyebrowse-config-face)))
+        (cond ((= current-slot slot)
+               (setq element (propertize element 'face 'current-eyebrowse-config-face)))
+              ((= last-slot slot)
+               (setq element (propertize element 'face 'last-eyebrowse-config-face))))
+        (when (= default-slot slot)
+          (setq default-candidate (eyebrowse-config-string (eyebrowse-get-config-with-slot default-slot))))
         (push element collections)))
     (setf collections (reverse collections))
     (eyebrowse-message "collections: %S" collections)
