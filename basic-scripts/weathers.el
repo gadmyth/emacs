@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20210921.001
+;; Version: 1.0.2
+;; Package-Version: 20210921.002
 ;; Package-Requires: request, hmac-sha1
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -48,9 +48,10 @@
 (defcustom *weather-location* nil
   "The location for weather api query, for example: shanghai, beijin.")
 
-(defvar *weather-api-result* nil
+(defvar *weather-api-result* ""
   "The formated short weather api result, for example: shanghai: Sun(29).")
 
+(defvar *weather-fetch-timer* nil)
 
 (defun weathers-fetcher-weather ()
   "."
@@ -93,6 +94,16 @@
         :error (function*
                 (lambda (&key error-thrown &allow-other-keys&rest _)
                   (message "error: %S" error-thrown)))))))
+
+(defun fetched-weather ()
+  "."
+  (when (or (null *weather-api-result*)
+            (zerop (length *weather-api-result*)))
+    (when *weather-fetch-timer*
+      (cancel-timer *weather-fetch-timer*)
+      (setq *weather-fetch-timer*
+            (run-with-timer 1 300 #'refresh-public-ip))))
+  *weather-api-result*)
 
 (provide 'weathers)
 ;;; weathers.el ends here

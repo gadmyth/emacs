@@ -2,9 +2,9 @@
 
 ;; Copyright (C) 2020 gadmyth
 
-;; Author: eyebrowse+.el <gadmyth@gmail.com}>
-;; Version: 1.1.5
-;; Package-Version: 20210919.001
+;; Author: eyebrowse+.el <gadmyth@gmail.com>
+;; Version: 1.1.6
+;; Package-Version: 20210921.001
 ;; Package-Requires: eyebrowse, s, dash, network-util
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -508,11 +508,13 @@ COPY from eyebrowse--load-window-config."
         (list
          " "
          (format-time-string "%Y-%m-%d %H:%M %a" (current-time))
-         "\t"
+         " | "
          (current-ip)
          (if (> (length *fetched-public-ip*) 0) " | " "")
          (fetched-public-ip)
-         "\t"
+         " | "
+         (fetched-weather)
+         " | "
          ;; copy the default buffer identification from bindings.el.gz
          (propertized-buffer-identification " %b\t")
          ;; - [locked-conf, current-conf, last-conf]
