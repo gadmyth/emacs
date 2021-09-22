@@ -22,7 +22,7 @@
     (funcall (and initial-major-mode))
     (setq buffer-offer-save t)))
 
-(defvar *quick-buffer-prefix-list* '("*scratch*" "*Messages*" "*Help*"))
+(defvar *quick-buffer-prefix-list* '("*scratch*" "*Messages*" "*Help*" "*terminal"))
 
 (defun switch-scratch-buffers (&rest _)
   "NAME: ."
