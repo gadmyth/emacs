@@ -29,9 +29,9 @@
         (message "current-ip: %s" result))
       result))
    ((eq window-system 'ns)
-    (let* ((ruby-command-string "print Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }.ip_address")
-           (shell-command-string (format "ruby -r socket -e \"%s\"" ruby-command-string))
-           (result (shell-command-to-string shell-command-string)))
+    (let* ((shell-command-string "ifconfig $(route -n get default | grep interface | awk '{print $2}' | head -n 1) | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2'}")
+           (result (shell-command-to-string shell-command-string))
+           (result (substring result 0 (- (length result) 1))))
       (when current-prefix-arg
         (message "current-ip: %s" result))
       result))
