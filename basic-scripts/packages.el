@@ -49,6 +49,7 @@
         'eyebrowse
         'annotate
         'goto-last-point
+        'request
         'exwm
         ;'vkill
         ))
