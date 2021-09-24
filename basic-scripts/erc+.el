@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.020
-;; Package-Version: 20210920.001
+;; Version: 1.0.021
+;; Package-Version: 20210924.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -47,6 +47,8 @@
 (defvar erc-default-width 100)
 (defvar *erc-forbidden-targets* nil)
 (defconst *erc-forbidden-targets-file-name* (expand-file-name "~/.erc_forbidden_targets"))
+(defconst *erc-forbidden-targets-actions* '(("jump" . erc-jump-to-buffer)
+                                            ("unforbidden" . erc-unforbidden-target)))
 
 (defun erc-toggle-debug ()
   "."
@@ -264,11 +266,16 @@ With PARSED message and PROC."
                           (and (string-equal target erc-nick) short-sender)
                           target)))
     (erc-debug-message "nick click, data: %s, short-sender: %s, channel: %s, buffer-name: %s" data short-sender channel buffer-name)
-    (let* ((buffer (get-buffer buffer-name))
-           (window (get-buffer-window buffer)))
-      (display-buffer buffer)
-      (if (and window (window-live-p window))
-          (select-window window)))))
+    (erc-jump-to-buffer buffer-name)))
+
+(defun erc-jump-to-buffer (buffer-name)
+  "Jump to the buffer of BUFFER-NAME."
+  (interactive)
+  (let* ((buffer (get-buffer buffer-name))
+         (window (get-buffer-window buffer)))
+    (display-buffer buffer)
+    (if (and window (window-live-p window))
+        (select-window window))))
 
 (defun erc-reply-message (data)
   "Reply message to target with content which are wrapped in DATA."
@@ -493,13 +500,16 @@ With PARSED message and PROC."
         (message "The channel %s is unforbbiden now." channel)))))
 
 
-(defun erc-unforbidden-target ()
+(defun erc-action-on-forbidden-target ()
   "Unforbidden the channel at this point in *erc-aggregate-buffer*."
   (interactive)
-  (when-let ((channel (completing-read "unforbidden the channel: "
-                                       *erc-forbidden-targets* nil t nil nil nil)))
-    (setq *erc-forbidden-targets* (delete channel *erc-forbidden-targets*))
-    (message "The channel %s is unforbbiden now." channel)))
+  (let* ((channel (completing-read "Choose the channel: "
+                                   *erc-forbidden-targets* nil t nil nil nil))
+         (action (completing-read (format "Choose the action for the channel %s:"  channel)
+                                  *erc-forbidden-targets-actions* nil t nil nil nil))
+         (fn (cdr (assoc action *erc-forbidden-targets-actions*))))
+    (when (and channel fn)
+      (funcall fn channel))))
 
 (defun load-erc-forbidden-targets ()
   "Load *erc-forbidden-targets* from file."
@@ -526,6 +536,12 @@ With PARSED message and PROC."
       (with-temp-file file-name
         (insert content)))))
 
+(defun delete-erc-forbidden-targets (target)
+  "Delete a TARGET from *erc-forbidden-targets*."
+  (interactive)
+  (message "Deleting the target %s from *erc-forbidden-targets* ..." target)
+  (setq *erc-forbidden-targets* (delete target *erc-forbidden-targets*))
+  (message "The target %s is deleted now." target))
 
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
@@ -538,7 +554,7 @@ With PARSED message and PROC."
     (define-key map "D" 'erc-delete-all-channel-message)
     (define-key map "f" 'erc-forbidden-this-channel)
     (define-key map "F" 'erc-unforbidden-this-channel)
-    (define-key map "U" 'erc-unforbidden-target)
+    (define-key map "U" 'erc-action-on-forbidden-target)
     (define-key map "u" 'erc-aggregate-undo)
     (define-key map "q" 'quit-window)
     (define-key map (kbd "<mouse-3>") 'erc-right-click)
