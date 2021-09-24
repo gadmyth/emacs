@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.021
-;; Package-Version: 20210924.001
+;; Version: 1.0.022
+;; Package-Version: 20210924.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -273,9 +273,10 @@ With PARSED message and PROC."
   (interactive)
   (let* ((buffer (get-buffer buffer-name))
          (window (get-buffer-window buffer)))
-    (display-buffer buffer)
-    (if (and window (window-live-p window))
-        (select-window window))))
+    (when buffer
+      (display-buffer buffer)
+      (if (and window (window-live-p window))
+          (select-window window)))))
 
 (defun erc-reply-message (data)
   "Reply message to target with content which are wrapped in DATA."
