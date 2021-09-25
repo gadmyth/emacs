@@ -3,9 +3,9 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20210921.003
-;; Package-Requires: request, hmac-sha1
+;; Version: 1.0.4
+;; Package-Version: 20210925.001
+;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/
@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'request)
+(require 'dates)
 (require 'hmac-sha1)
 
 
@@ -71,8 +72,7 @@
 (defun refresh-weather ()
   "."
   (interactive)
-  (message "*** now refresh-weather: %s ***"
-           (timestamp-to-string-with-format (current-timestamp) "%Y-%m-%d %H:%M:%S"))
+  (message "*** now refresh-weather: %s ***" (current-time-normal-string))
   (when (> (length *weather-api-result*) 0)
     (weathers-debug-message "** *weather-api-result* is: [%S]" *weather-api-result*)
     (setq *weather-api-result* "")
@@ -90,7 +90,7 @@
            (key *weather-api-key*)
            (location *weather-location*)
            (ts (current-timestamp))
-           (str (concat "ts=" ts "&uid=" uid))
+           (str (format "ts=%S&uid=%s" ts uid))
            (signature (base64-encode-string
                        (hmac-sha1
                         (encode-coding-string key 'utf-8 t)

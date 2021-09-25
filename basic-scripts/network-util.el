@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'dates)
+
 (defvar *network-util-debug* nil)
 
 (defmacro network-util-debug-message (format-string &rest ARGS)
@@ -25,14 +27,14 @@
     (let* ((shell-command-string "ifconfig $(route -n | grep ^0.0.0.0 | awk '{print $NF}') | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2'}")
            (result (shell-command-to-string shell-command-string))
            (result (substring result 0 (- (length result) 1))))
-      (when current-prefix-arg
+      (when (eq current-prefix-arg 8)
         (message "current-ip: %s" result))
       result))
    ((eq window-system 'ns)
     (let* ((shell-command-string "ifconfig $(route -n get default | grep interface | awk '{print $2}' | head -n 1) | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2'}")
            (result (shell-command-to-string shell-command-string))
            (result (substring result 0 (- (length result) 1))))
-      (when current-prefix-arg
+      (when (eq current-prefix-arg 8)
         (message "current-ip: %s" result))
       result))
    (t "")))
@@ -48,7 +50,7 @@
     (let* ((shell-command-string "curl -s cip.cc | grep IP | cut -f2 -d ':' | awk '{ gsub(/^[ \t]+|[ \t]+$/, \"\"); print }'")
            (result (shell-command-to-string shell-command-string))
            (result (substring result 0 (- (length result) 1))))
-      (when current-prefix-arg
+      (when (eq current-prefix-arg 8)
         (message "public-ip: %s" result))
       (when result
         (network-util-debug-message "public ip fetched: [%S]" result)
@@ -62,8 +64,7 @@
 (defun refresh-public-ip ()
   "."
   (interactive)
-  (message "*** now refresh-public-ip: %s ***"
-           (timestamp-to-string-with-format (current-timestamp) "%Y-%m-%d %H:%M:%S"))
+  (message "*** now refresh-public-ip: %s ***" (current-time-normal-string))
   (when (> (length *fetched-public-ip*) 0)
     (network-util-debug-message "*fetched-public-ip* is: [%S]" *fetched-public-ip*)
     (setq *fetched-public-ip* "")
