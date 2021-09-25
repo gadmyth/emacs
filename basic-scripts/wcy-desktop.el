@@ -6,8 +6,8 @@
 ;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
 
-;; Version: 2.0.0
-;; Package-Version: 20200826.001
+;; Version: 2.0.1
+;; Package-Version: 2021925.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -56,18 +56,20 @@
                    (cond ((buffer-file-name b)
                           (list :type 'file
                                 :directory default-directory
-                                :path buffer-file-name))
+                                :name (buffer-name b)
+                                :path buffer-file-name
+                                :major-mode major-mode))
                          ((get-buffer-process b)
                           (let* ((process (get-buffer-process b))
-                                 (command (process-command process))
-                                 (buffer-major-mode major-mode))
+                                 (command (process-command process)))
                             (list :type 'process
                                   :command command
                                   :name (buffer-name b)
-                                  :major-mode buffer-major-mode)))
+                                  :major-mode major-mode)))
                          (t
                           (list :type 'buffer
-                                :name (buffer-name b))))))
+                                :name (buffer-name b)
+                                :major-mode major-mode)))))
              (buffer-list))
      (current-buffer))))
 
@@ -83,23 +85,30 @@
       (insert-file-contents wcy-desktop-file-name)
       (goto-char (point-min))
       (dolist (x (read (current-buffer)))
-        (let ((type (plist-get x :type)))
-          (message "wcy desktop open last opened files, type: %s, %s" type (type-of type))
+        (let ((type (plist-get x :type))
+              (buffer-name (plist-get x :name))
+              (buffer-major-mode (plist-get x :major-mode)))
+          (message "wcy desktop open last opened files, buffer name: %s, type: %s, major mode: %s"
+                   buffer-name type buffer-major-mode)
           (cond
            ((eq type 'file)
             (let* ((directory (plist-get x :directory))
                    (file-name (plist-get x :path)))
               (wcy-desktop-prepare-buffer directory file-name)))
            ((eq type 'process)
-            (let ((buffer-major-mode (plist-get x :major-mode)))
-              (cond ((eq buffer-major-mode "Eshell")
-                     (message "The type is eshell process, TODO"))
-                    ((eq buffer-major-mode "Term")
-                     (message "The type is term process, TODO"))
-                    (t
-                     (message "The type is process, TODO")))))
+            (cond ((eq buffer-major-mode 'term-mode)
+                   (message "wcy new create multi-term...")
+                   (multi-term))
+                  (t
+                   (message "The type is process, TODO"))))
            ((eq type 'buffer)
-            (message "The type is buffer, TODO"))
+            (when (eq buffer-major-mode 'eshell-mode)
+              (message "wcy now should create eshell...")
+              (eshell))
+            (let ((buffer (get-buffer buffer-name)))
+              (when (and buffer (buffer-live-p buffer))
+                (when (string-equal "*Message*" buffer-name)
+                  (switch-to-buffer buffer)))))
            (t
             (message "Unrecognized type: %S" type))))))))
 
