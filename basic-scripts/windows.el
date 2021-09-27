@@ -29,9 +29,11 @@
 (global-set-key (kbd "H-s") 'swap-window-in-current-frame)
 (global-set-key (kbd "H-c") 'copy-window-in-current-frame)
 (global-set-key (kbd "<H-return>") 'swap-to-main-window)
-(global-set-key (kbd "H-k") #'goto-previous-window)
+(global-set-key (kbd "<H-backspace>") #'goto-last-window)
 (global-set-key (kbd "H-j") #'goto-next-window)
+(global-set-key (kbd "H-k") #'goto-previous-window)
 (global-set-key (kbd "<H-tab>") #'goto-next-window)
+(global-set-key (kbd "<H-iso-lefttab>") #'goto-previous-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
 
 
@@ -101,15 +103,21 @@ Copied some codes from window-numbering.el."
     (when window
       (swap-window window))))
 
-(defun goto-next-window()
+(defun goto-next-window ()
   "."
   (interactive)
   (select-window (next-window)))
 
-(defun goto-previous-window()
+(defun goto-previous-window ()
   "."
   (interactive)
   (select-window (previous-window)))
+
+(defun goto-last-window ()
+  "."
+  (interactive)
+  (let ((window (get-mru-window t t t)))
+    (select-window window)))
 
 (defun swap-window-in-current-frame ()
   "."
