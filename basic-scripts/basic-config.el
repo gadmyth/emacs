@@ -7,7 +7,7 @@
 (put 'upcase-region 'disabled nil)
 (put 'set-goal-column 'disabled nil)
 (global-unset-key (kbd "C-SPC"))
-
+(setq x-alt-keysym 'meta)
 (setq inhibit-startup-message t)
 
 ;; when kill emacs, should be confirmed by hand
