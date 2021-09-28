@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'abbrev)
+(require 'package)
 
 (setq save-abbrevs t)
 
@@ -29,10 +30,11 @@
 (defun add-abbrev-hook (major-mode-name abbrev-alist)
   "When a MAJOR-MODE-NAME is loaded, define the abbrevs with ABBREV-ALIST in the major mode hook."
   (mapc (lambda (pair)
-  (let* ((table-name (format "%s-abbrev-table" major-mode-name))
-         (table-sym (intern table-name))
-         (table (symbol-value table-sym)))
-    (define-abbrev table (car pair) (cdr pair))))
+          (let* ((table-name (format "%s-abbrev-table" major-mode-name))
+                 (table-sym (intern table-name))
+                 (table (symbol-value table-sym)))
+            (define-abbrev table (car pair) (cdr pair))
+            (message "%s-abbrev-table defined!" major-mode-name)))
         abbrev-alist))
 
 (defvar *abbrev-default-directory* (expand-file-name "abbrevs" +emacs-context-directory+))
@@ -57,12 +59,15 @@
         (insert-file-contents file-full-path)
         (goto-char (point-min))
         (let* ((content (read (current-buffer)))
-               (alist content))
-          (when (or
-                 (featurep major-mode-package)
-                 (package-installed-p major-mode-package))
-            (require major-mode-package)
-            (add-abbrev-hook major-mode-name alist)))))))
+               (alist content)
+               (featured (featurep major-mode-package))
+               (installed (package-installed-p major-mode-package)))
+          (message "Package is featured: [%S], is installed: [%S]." featured installed)
+          (if (or featured installed)
+              (progn
+                (require major-mode-package)
+                (add-abbrev-hook major-mode-name alist))
+            (message "abbrev for %s is not loaded!" major-mode-name)))))))
 
 (setq save-abbrevs nil)
 
