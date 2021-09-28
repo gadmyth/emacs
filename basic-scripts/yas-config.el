@@ -7,14 +7,19 @@
 (require 'dash)
 (require 'abbrev)
 
-(defadvice yas-expand (around expand-abbrev-when-word-p)
-  (interactive)
-  (let ((word (thing-at-point 'word t)))
-    (when word
-      (expand-abbrev)))
-  ad-do-it)
+(advice-add 'yas-maybe-expand-abbrev-key-filter :filter-return #'yas-maybe-expand-compensate)
 
-(ad-activate 'yas-expand)
+(defun yas-maybe-expand-compensate (cmd)
+  "When the CMD is nil, return the compensation expand function."
+  (or cmd (yas-expand-compensate)))
+
+(defun yas-expand-compensate ()
+  "."
+  (interactive)
+  (if (not (expand-abbrev))
+      (comint-dynamic-complete-filename))
+  ;; return nil forever
+  nil)
 
 (add-hook
  'yas-global-mode-hook
