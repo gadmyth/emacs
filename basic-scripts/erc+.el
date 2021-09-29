@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.025
-;; Package-Version: 20210929.001
+;; Version: 1.0.026
+;; Package-Version: 20210929.002
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -88,6 +88,8 @@ With PARSED message and PROC."
     (erc-debug-message "erc message: %s, %s: %s" short-sender tgt msg)
     (cond ((not (member tgt *erc-forbidden-targets*))
            (erc-update-aggregate-buffer short-sender tgt msg))
+          ((get-buffer-window tgt)
+           (erc-reset-forbidden-taget-unread-count tgt))
           (t
            (erc-increase-forbidden-target-unread-count tgt)))
     ;; return nil, to exec the next function in the hook's list
@@ -277,7 +279,7 @@ With PARSED message and PROC."
   (let* ((buffer (get-buffer buffer-name))
          (window (get-buffer-window buffer)))
     (when (assoc (intern buffer-name) *erc-forbidden-targets-unread-count*)
-      (setf (alist-get (intern buffer-name) *erc-forbidden-targets-unread-count*) 0))
+      (erc-reset-forbidden-taget-unread-count buffer-name))
     (when buffer
       (display-buffer buffer)
       (if (and window (window-live-p window))
@@ -512,6 +514,13 @@ With PARSED message and PROC."
     (let* ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*)))
            (count (if count (+ 1 count) 1)))
       (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) count))))
+
+(defun erc-reset-forbidden-taget-unread-count (target)
+  "Reset the forbidden TARGET's unread message count to zero."
+  (when target
+    (let ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*))))
+      (when (and count (> count 0))
+        (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) 0)))))
 
 (defun erc-action-on-forbidden-target ()
   "Unforbidden the channel at this point in *erc-aggregate-buffer*."
