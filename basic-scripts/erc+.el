@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.024
-;; Package-Version: 20210928.002
+;; Version: 1.0.025
+;; Package-Version: 20210929.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -46,6 +46,7 @@
 (defvar erc-aggregate-auto-display nil)
 (defvar erc-default-width 100)
 (defvar *erc-forbidden-targets* nil)
+(defvar *erc-forbidden-targets-unread-count* nil)
 (defconst *erc-forbidden-targets-file-name* (expand-file-name "~/.erc_forbidden_targets"))
 (defconst *erc-forbidden-targets-actions* '(("jump" . erc-jump-to-buffer)
                                             ("unforbidden" . erc-unforbidden-target)))
@@ -85,8 +86,10 @@ With PARSED message and PROC."
          (msg (erc-response.contents parsed))
          (short-sender (erc-short-sender sender-spec)))
     (erc-debug-message "erc message: %s, %s: %s" short-sender tgt msg)
-    (when (not (member tgt *erc-forbidden-targets*))
-      (erc-update-aggregate-buffer short-sender tgt msg))
+    (cond ((not (member tgt *erc-forbidden-targets*))
+           (erc-update-aggregate-buffer short-sender tgt msg))
+          (t
+           (erc-increase-forbidden-target-unread-count tgt)))
     ;; return nil, to exec the next function in the hook's list
     nil))
 
@@ -273,10 +276,13 @@ With PARSED message and PROC."
   (interactive)
   (let* ((buffer (get-buffer buffer-name))
          (window (get-buffer-window buffer)))
+    (when (assoc (intern buffer-name) *erc-forbidden-targets-unread-count*)
+      (setf (alist-get (intern buffer-name) *erc-forbidden-targets-unread-count*) 0))
     (when buffer
       (display-buffer buffer)
       (if (and window (window-live-p window))
           (select-window window)))))
+
 
 (defun erc-reply-message (data)
   "Reply message to target with content which are wrapped in DATA."
@@ -500,13 +506,26 @@ With PARSED message and PROC."
         (setq *erc-forbidden-targets* (delete channel *erc-forbidden-targets*))
         (message "The channel %s is unforbbiden now." channel)))))
 
+(defun erc-increase-forbidden-target-unread-count (target)
+  "Increase the forbidden TARGET's unread message count."
+  (when target
+    (let* ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*)))
+           (count (if count (+ 1 count) 1)))
+      (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) count))))
 
 (defun erc-action-on-forbidden-target ()
   "Unforbidden the channel at this point in *erc-aggregate-buffer*."
   (interactive)
   (let* ((channel (completing-read "Choose the channel: "
-                                   *erc-forbidden-targets* nil t nil nil nil))
-         (action (completing-read (format "Choose the action for the channel %s:"  channel)
+                                   (mapcar (lambda (target)
+                                             (let ((unread-count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*))))
+                                               (if (and unread-count (> unread-count 0))
+                                                   (format "%s (%d)" target unread-count)
+                                                 target)))
+                                           *erc-forbidden-targets*)
+                                   nil t nil nil nil))
+         (channel (replace-regexp-in-string " (.*)" "" channel))
+         (action (completing-read (format "Choose the action for the channel %s:" channel)
                                   *erc-forbidden-targets-actions* nil t nil nil nil))
          (fn (cdr (assoc action *erc-forbidden-targets-actions*))))
     (when (and channel fn)
@@ -533,9 +552,9 @@ With PARSED message and PROC."
   (interactive)
   (let ((file-name *erc-forbidden-targets-file-name*))
     (message "Saving *erc-forbidden-targets* to file %S ..." file-name)
-    (let ((content (format "%S" *erc-forbidden-targets*)))
+    (let ((content *erc-forbidden-targets*))
       (with-temp-file file-name
-        (insert content)))))
+        (print content (current-buffer))))))
 
 (defun delete-erc-forbidden-targets (target)
   "Delete a TARGET from *erc-forbidden-targets*."
