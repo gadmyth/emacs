@@ -82,7 +82,8 @@
         'google-translate
         'jq-mode
         'look-mode
-        'youdao-dictionary))
+        'youdao-dictionary
+        'nov))
 
 (defconst +option-packages+
   (list 'alpha
