@@ -100,8 +100,8 @@
                              templates
                              "Choose a snippet template to expand: ")
                             (car templates))))
-         (name (yas--template-name template))
-         (snippet (yas-lookup-snippet name mode)))
+         (name (and template (yas--template-name template)))
+         (snippet (and name (yas-lookup-snippet name mode))))
     (if snippet (yas-expand-snippet snippet)
       (message "No snippets tables active!"))))
   
