@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.0
-;; Package-Version: 20200801.001
-;; Package-Requires: ivy
+;; Version: 1.0.1
+;; Package-Version: 20210929.001
+;; Package-Requires: ivy, counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-script/customer-dir.el
@@ -39,19 +39,28 @@
 ;;; customized-dir.el ends here
 
 (require 'ivy)
+(require 'counsel)
 
+(defmacro wrap-function-with-default-directory (func)
+  "Call the FUNC with `default-directory as DIR."
+  `(lambda (dir)
+     (let ((default-directory dir))
+       (call-interactively ,func))))
 
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
   (ivy-read "Switch to dir: " *customized-dir*
             :action (lambda (dir)
-                      (ivy-read "Choose the action:" (list (cons "dir" 'dired)
-                                                           (cons "vc-dir" 'vc-dir)
-                                                           (cons "remove-customerized-dir"
-                                                                 '(lambda (dir)
-                                                                    (let ((default-directory dir))
-                                                                      (call-interactively #'remove-customized-dir)))))
+                      (ivy-read "Choose the action:"
+                                `(("dir" . dired)
+                                  ("vc-dir" . vc-dir)
+                                  ("counsel-git" .
+                                   ,(wrap-function-with-default-directory #'counsel-git))
+                                  ("counsel-git-grep" .
+                                   ,(wrap-function-with-default-directory #'counsel-git-grep))
+                                  ("remove-customerized-dir" .
+                                   (wrap-function-with-default-directory #'remove-customized-dir)))
                                 :action (lambda (pair)
                                           (let ((f (cdr pair)))
                                             (funcall f dir)))))))
