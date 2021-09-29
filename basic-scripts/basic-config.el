@@ -9,6 +9,8 @@
 (global-unset-key (kbd "C-SPC"))
 (setq x-alt-keysym 'meta)
 (setq inhibit-startup-message t)
+(setq max-specpdl-size 1024)
+(setq max-lisp-eval-depth 1024)
 
 ;; when kill emacs, should be confirmed by hand
 (setq confirm-kill-emacs 'yes-or-no-p)
