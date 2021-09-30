@@ -10,6 +10,7 @@
 (setq dired-recursive-copies 'always)
 (setq dired-recursive-deletes 'always)
 (setq dired-dwim-target t)
+(setq dired-listing-switches "-lFaGh1v --group-directories-first -t")
 
 (eval-after-load 'dired
   '(progn
