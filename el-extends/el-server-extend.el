@@ -113,7 +113,6 @@
 (defun elnode-url-encoder ()
   "."
   (lambda (httpcon)
-    (require 'redis-config)
     (let ((content (elnode-http-param httpcon "content")))
       (message "elnode-url-encoder, content: %S" content)
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
@@ -122,7 +121,6 @@
 (defun elnode-url-decoder ()
   "."
   (lambda (httpcon)
-    (require 'redis-config)
     (let ((content (elnode-http-param httpcon "content")))
       (message "elnode-url-decoder, content: %S" content)
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
@@ -145,17 +143,18 @@
   "DOCROOT: , PORT: , HOST: . Make a redis cache server."
   (lambda (httpcon)
     (require 'redis-config)
+    (r-connect-local)
     (let* ((cache-key (elnode-http-param httpcon "key"))
            (value (r-get cache-key)))
       (message "elnode-cache-server, cache-key: %S" cache-key)
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
-      (kill-new value)
-      (elnode-http-return httpcon value))))
+      (elnode-http-return httpcon (format "The value for %s is %S" cache-key value)))))
 
 (defun elnode-cache-setter ()
   "DOCROOT: , PORT: , HOST: . Make a redis cache server."
   (lambda (httpcon)
     (require 'redis-config)
+    (r-connect-local)
     (let* ((cache-key (elnode-http-param httpcon "key"))
            (value (elnode-http-param httpcon "value")))
       (message "elnode-cache-server, cache-key: %S, value: %S" cache-key value)
@@ -168,14 +167,16 @@
   (lambda (httpcon)
     (require 'redis-config)
     (r-connect-local)
-    (message "elnode-cache-server, get keys.")
-    (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
-    (elnode-http-return httpcon (format "keys:\n%s" (s-join "\n"(r-keys))))))
+    (let ((regexp (elnode-http-param httpcon "regexp")))
+      (message "elnode-cache-server, get keys: %S" regexp)
+      (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
+      (elnode-http-return httpcon (format "keys:\n%s" (s-join "\n" (r-keys regexp)))))))
 
 (defun elnode-cache-delete ()
   "DOCROOT: , PORT: , HOST: . Make a redis cache server."
   (lambda (httpcon)
     (require 'redis-config)
+    (r-connect-local)
     (let* ((cache-key (elnode-http-param httpcon "key")))
       (message "elnode-cache-server, delete key: %S" cache-key)
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
@@ -185,6 +186,7 @@
   "DOCROOT: , PORT: , HOST: . Make a redis cache server."
   (lambda (httpcon)
     (require 'redis-config)
+    (r-connect-local)
     (message "elnode-cache-server, cache-save")
     (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
     (elnode-http-return httpcon (r-save))))

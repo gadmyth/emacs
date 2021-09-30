@@ -7,7 +7,8 @@
 (defun r-connect-local ()
   "."
   (interactive)
-  (eredis-connect "localhost" 6379))
+  (unless eredis--current-process
+    (eredis-connect "localhost" 6379)))
 
 (defun r-get (key)
   "KEY."
@@ -21,10 +22,10 @@
   (interactive"sKey: \nsValue: \n")
   (eredis-set key value))
 
-(defun r-keys ()
-  "."
+(defun r-keys (&optional regexp)
+  "Get all the keys match the REGEXP if exists."
   (interactive)
-  (eredis-keys "*"))
+  (eredis-keys (or regexp "*")))
 
 (defun r-del (key)
   "KEY: ."
