@@ -135,6 +135,24 @@
       (goto-char end)
       (insert "\n" (string-join lines-with-action ",") "\n"))))
 
+(defun lower-camel-case (start end)
+  "Replace the string from START to END of region with lower camel case format."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (lower-camel-string (s-lower-camel-case region-string)))
+      (delete-region start end)
+      (insert lower-camel-string))))
+
+(defun snake-case (start end)
+  "Replace the string from START to END of region with snake case format."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (snake-case-string (s-snake-case region-string)))
+      (delete-region start end)
+      (insert snake-case-string))))
+
 ;; ------ line editor -------
 
 (defun kill-to-beginning-of-line ()
