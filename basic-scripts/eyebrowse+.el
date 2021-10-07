@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.2
-;; Package-Version: 20210921.007
+;; Version: 1.2.03
+;; Package-Version: 20211007.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -551,13 +551,13 @@ COPY from eyebrowse--load-window-config."
          (format "[%s, %s, %s]"
                  locked-conf-string
                  ;; the current eb config is active, and with no keymap
-                 (propertize current-conf-string 'face 'eyebrowse-mode-line-active
+                 (propertize current-conf-string 'face 'current-eyebrowse-config-face
                              'mouse-face 'mode-line-highlight
                              'slot (car current-conf)
                              'local-map nil
                              'help-echo help-echo)
                  ;; last-conf can be clicked to the last eb config
-                 (propertize last-conf-string 'face 'eyebrowse-mode-line-inactive
+                 (propertize last-conf-string 'face 'last-eyebrowse-config-faceh
                              'mouse-face 'mode-line-highlight
                              'slot (car last-conf)
                              'local-map (make-keymap (car last-conf))
