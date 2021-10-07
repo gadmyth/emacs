@@ -36,7 +36,7 @@
         (message "string-at-point is [%s]" word)
         (swiper word)))))
 
-(global-set-key "\C-s" 'swiper-with-word-at-point)
+;(global-set-key "\C-s" 'swiper-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
