@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.03
-;; Package-Version: 20211007.001
+;; Version: 1.2.04
+;; Package-Version: 20211008.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,12 @@
 (defvar *eyebrowse-default-configs* nil)
 (defvar eyebrowse-lazy-load-hook nil)
 (defvar *eyebrowse-init-function-swapped* nil)
+
+(defface eyebrowse-time-face
+  '((((class color) (background light)) (:foreground "sea green" :weight bold))
+    (((class color) (background dark)) (:foreground "SteelBlue3" :weight bold)))
+  "Face for eyebrowse time."
+  :group 'eyebrowse+)
 
 (defface current-eyebrowse-config-face
   '((((class color) (background light)) (:foreground "forest green" :weight bold))
@@ -536,7 +542,12 @@ COPY from eyebrowse--load-window-config."
         ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
         (list
          " "
-         (format-time-string "%Y-%m-%d %H:%M %a" (current-time))
+         (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
+                (time-string-list (s-split " " time-string))
+                (date-string (car time-string-list))
+                (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
+                (week-string (caddr time-string-list)))
+           (list date-string " " time-string " " week-string))
          " | "
          (current-ip)
          (if (> (length *fetched-public-ip*) 0) " | " "")
