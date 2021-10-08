@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.04
-;; Package-Version: 20211008.001
+;; Version: 1.2.05
+;; Package-Version: 20211008.002
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -568,7 +568,7 @@ COPY from eyebrowse--load-window-config."
                              'local-map nil
                              'help-echo help-echo)
                  ;; last-conf can be clicked to the last eb config
-                 (propertize last-conf-string 'face 'last-eyebrowse-config-faceh
+                 (propertize last-conf-string 'face 'last-eyebrowse-config-face
                              'mouse-face 'mode-line-highlight
                              'slot (car last-conf)
                              'local-map (make-keymap (car last-conf))
