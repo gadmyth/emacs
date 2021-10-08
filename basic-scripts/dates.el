@@ -4,16 +4,21 @@
 
 (defconst +date-command+ (if (eq window-system 'ns) "gdate" "date"))
 
+(defun quick-on-timesmap (timestamp)
+  "Do some quick actions on TIMESTAMP."
+  (cond ((equal current-prefix-arg '(4))
+         (message "current-timestamp: %S" timestamp))
+        ((equal current-prefix-arg 1)
+         (insert (number-to-string timestamp)))
+        ((equal current-prefix-arg 2)
+         (kill-new (number-to-string timestamp))
+         (message "current-timestamp: [%S] yanked." timestamp))))
+
 (defun current-timestamp ()
   "."
   (interactive)
   (let ((timestamp (time-convert nil 'integer)))
-    (cond ((equal current-prefix-arg '(4))
-           (message "current-timestamp: %S" timestamp))
-          ((eq current-prefix-arg 3)
-           (kill-new (number-to-string timestamp))
-           (message "current-timestamp: [%S] yanked." timestamp))
-          )
+    (quick-on-timesmap timestamp)
     timestamp))
 
 (defun system-current-timestamp ()
@@ -30,12 +35,7 @@
   (let* ((list-time (parse-time-string date-str))
          (emacs-time (encode-time list-time))
          (timestamp (time-convert emacs-time 'integer)))
-    (cond ((equal current-prefix-arg '(4))
-           (message "timestamp parsed from %s: [%S]" date-str timestamp))
-          ((eq current-prefix-arg 3)
-           (kill-new (number-to-string timestamp))
-           (message "current-timestamp: [%S] yanked." timestamp))
-          )
+    (quick-on-timesmap timestamp)
     timestamp))
 
 (defun system-string-to-timestamp (date-str)
@@ -70,11 +70,11 @@
     (when prefix-arg
       (cond ((equal prefix-arg '(4))
              (message "current time normal string is: [%s]" time-string))
-            ((eq prefix-arg 3)
+            ((eq prefix-arg 1)
+             (insert time-string))
+            ((eq prefix-arg 2)
              (kill-new time-string)
              (message "current time normal string: [%S] yanked." time-string))
-            ((eq prefix-arg 8)
-             (insert time-string))
             ))
     time-string))
 
