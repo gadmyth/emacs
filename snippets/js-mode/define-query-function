@@ -1,0 +1,10 @@
+# key: define-query-function
+# name: define-query-function
+# --
+export function ${1:function-name}(data) {
+  return http({
+    url: '${2:/brokerOps/${3:api-path}}?' + data,
+    method: 'post',
+    data: {}
+  });
+}
