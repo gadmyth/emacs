@@ -4,6 +4,8 @@
 
 (require-packages-safely
  '(web-mode)
+ (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
+ (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
  (add-hook 'web-mode-hook
            (lambda ()
              ; web-mode, html tag
