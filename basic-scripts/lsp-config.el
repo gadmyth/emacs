@@ -23,6 +23,7 @@
   (require 'dap-java)
   (require 'dap-mode)
   (dap-auto-configure-mode)
+  (global-set-key (kbd "M-'") 'lsp-find-implementation)
   )
 
 (provide 'lsp-config)
