@@ -96,7 +96,7 @@
   (interactive "Senable? ")
   (let ((proxy
 		 (if enable
-			 "127.0.0.1:8087"
+			 "127.0.0.1:8118"
 		   nil)))
 	(setenv "http_proxy"  proxy)
 	(setenv "https_proxy" proxy)))
