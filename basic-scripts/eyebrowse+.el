@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.05
-;; Package-Version: 20211008.002
+;; Version: 1.2.06
+;; Package-Version: 20211011.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -592,8 +592,24 @@ COPY from eyebrowse--load-window-config."
         (eyebrowse-message "set-eyebrowse-header-line-format, buffer: %s" (current-buffer))
         (setq-local header-line-format eyebrowse-buffer-name-format)))))
 
+(defvar eyebrowse-plus-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "H-0") 'eyebrowse-switch-to-window-config-0)
+    (define-key map (kbd "H-1") 'eyebrowse-switch-to-window-config-1)
+    (define-key map (kbd "H-2") 'eyebrowse-switch-to-window-config-2)
+    (define-key map (kbd "H-3") 'eyebrowse-switch-to-window-config-3)
+    (define-key map (kbd "H-4") 'eyebrowse-switch-to-window-config-4)
+    (define-key map (kbd "H-5") 'eyebrowse-switch-to-window-config-5)
+    (define-key map (kbd "H-6") 'eyebrowse-switch-to-window-config-6)
+    (define-key map (kbd "H-7") 'eyebrowse-switch-to-window-config-7)
+    (define-key map (kbd "H-8") 'eyebrowse-switch-to-window-config-8)
+    (define-key map (kbd "H-9") 'eyebrowse-switch-to-window-config-9)
+    map)
+  "Initial key map for `eyebrowse-plus-mode'.")
+
 (define-minor-mode eyebrowse-plus-mode
   "Toggle `eyebrowse-plus-mode."
+  :keymap eyebrowse-plus-mode-map
   :global t
   (if eyebrowse-plus-mode
       (progn
