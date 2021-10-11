@@ -14,7 +14,9 @@
      (when (eq system-type 'darwin)
        (require 'ls-lisp)
        (setq ls-lisp-use-insert-directory-program nil)
-       (add-to-list 'dired-omit-extensions ".DS_Store"))
+       (require-package
+        'dired-x
+        (add-to-list 'dired-omit-extensions ".DS_Store")))
 
      ;; create file use \c keymap
      (defun dired-create-new-file (file)
