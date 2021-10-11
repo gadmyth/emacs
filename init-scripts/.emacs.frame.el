@@ -68,6 +68,7 @@
 (require 'lsp-config)
 (require 'youdao-dictionary-conf)
 (require 'nov-config)
+(require 'nov-config)
 (require 'vc-config)
 
 (require-safely 'smartparens (smartparens-global-mode))
