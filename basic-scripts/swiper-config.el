@@ -18,14 +18,14 @@
 (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
 (define-key swiper-map [escape] 'minibuffer-keyboard-quit)
 
-(defun swiper-with-word-at-point ()
-  "If region is activate, swiper the word in the region from START to END."
-  "Otherwise, swiper the word at point, if current-prefix-arg is not null, toggle the superword-mode."
+(defun counsel-grep-with-word-at-point ()
+  "If region is activate, counsel-grep the word in the region from START to END."
+  "Otherwise, counsel-grep the word at point, if current-prefix-arg is not null, toggle the superword-mode."
   (interactive)
   (if (and (mark) (region-active-p))
       (progn
         (deactivate-mark)
-        (swiper (buffer-substring-no-properties (region-beginning) (region-end))))
+        (counsel-grep (buffer-substring-no-properties (region-beginning) (region-end))))
     (let* ((should-toggle (not (null current-prefix-arg)))
            (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
            (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
@@ -34,9 +34,9 @@
         (if should-toggle (superword-mode origin-value))
         (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
         (message "string-at-point is [%s]" word)
-        (swiper word)))))
+        (counsel-grep word)))))
 
-;(global-set-key "\C-s" 'swiper-with-word-at-point)
+(global-set-key "\C-s" 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
@@ -46,9 +46,9 @@
 ;;(global-set-key (kbd "<f1> l") 'counsel-load-library)
 ;;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
 ;;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-(global-set-key (kbd "C-c C-g") 'counsel-git)
-(global-set-key (kbd "C-c C-u") 'counsel-git-grep)
-(global-set-key (kbd "C-c k") 'counsel-ag)
+(global-set-key (kbd "C-c g g") 'counsel-git)
+(global-set-key (kbd "C-c g u") 'counsel-git-grep)
+(global-set-key (kbd "C-c g k") 'counsel-ag)
 ;;(global-set-key (kbd "C-x l") 'counsel-locate)
 ;;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
 ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
