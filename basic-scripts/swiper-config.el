@@ -22,19 +22,20 @@
   "If region is activate, counsel-grep the word in the region from START to END."
   "Otherwise, counsel-grep the word at point, if current-prefix-arg is not null, toggle the superword-mode."
   (interactive)
-  (if (and (mark) (region-active-p))
-      (progn
-        (deactivate-mark)
-        (counsel-grep (buffer-substring-no-properties (region-beginning) (region-end))))
-    (let* ((should-toggle (not (null current-prefix-arg)))
-           (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
-           (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
-      (if should-toggle (superword-mode toggle-value))
-      (let ((word (word-at-point t)))
-        (if should-toggle (superword-mode origin-value))
-        (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
-        (message "string-at-point is [%s]" word)
-        (counsel-grep word)))))
+  (let ((func (if (not (buffer-file-name (current-buffer))) #'swiper #'counsel-grep)))
+    (if (and (mark) (region-active-p))
+        (progn
+          (deactivate-mark)
+          (funcall func (buffer-substring-no-properties (region-beginning) (region-end))))
+      (let* ((should-toggle (not (null current-prefix-arg)))
+             (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
+             (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
+        (if should-toggle (superword-mode toggle-value))
+        (let ((word (word-at-point t)))
+          (if should-toggle (superword-mode origin-value))
+          (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
+          (message "string-at-point is [%s]" word)
+          (funcall func word))))))
 
 (global-set-key "\C-s" 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
