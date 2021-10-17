@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.06
-;; Package-Version: 20211011.001
+;; Version: 1.2.07
+;; Package-Version: 20211017.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -516,6 +516,17 @@ COPY from eyebrowse--load-window-config."
         (eyebrowse--set 'window-configs configs)
         (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
 
+(defun eyebrowse-make-keymap (slot)
+  "SLOT."
+  (let ((map (make-sparse-keymap)))
+    ;; the mode-line event
+    ;(define-key map (kbd "<mode-line><mouse-1>")
+    (define-key map (kbd "<header-line><mouse-1>")
+      `(lambda (_e)
+         (interactive "e")
+         (eyebrowse-switch-to-window-config ,slot)))
+    map))
+
 (defvar eyebrowse-buffer-name-format
   '(:eval
     (let* ((buffer (current-buffer))
@@ -528,52 +539,71 @@ COPY from eyebrowse--load-window-config."
            (last-conf (eyebrowse-get-last-config))
            (last-conf-string (eyebrowse-config-string last-conf))
            (help-echo "mouse-1: Switch to indicated workspace"))
-      ;; make a keymap with a eyebrowse config slot paramter
-      (flet ((make-keymap
-              (slot)
-              (let ((map (make-sparse-keymap)))
-                ;; the mode-line event
-                ;(define-key map (kbd "<mode-line><mouse-1>")
-                (define-key map (kbd "<header-line><mouse-1>")
-                  `(lambda (_e)
-                     (interactive "e")
-                     (eyebrowse-switch-to-window-config ,slot)))
-                map)))
-        ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
-        (list
-         " "
-         (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
-                (time-string-list (s-split " " time-string))
-                (date-string (car time-string-list))
-                (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
-                (week-string (caddr time-string-list)))
-           (list date-string " " time-string " " week-string))
-         " | "
-         (current-ip)
-         (if (> (length *fetched-public-ip*) 0) " | " "")
-         (fetched-public-ip)
-         " | "
-         (fetched-weather)
-         " | "
-         ;; copy the default buffer identification from bindings.el.gz
-         (propertized-buffer-identification "%b")
-         " | "
-         ;; - [locked-conf, current-conf, last-conf]
-         (format "[%s, %s, %s]"
-                 locked-conf-string
-                 ;; the current eb config is active, and with no keymap
-                 (propertize current-conf-string 'face 'current-eyebrowse-config-face
-                             'mouse-face 'mode-line-highlight
-                             'slot (car current-conf)
-                             'local-map nil
-                             'help-echo help-echo)
-                 ;; last-conf can be clicked to the last eb config
-                 (propertize last-conf-string 'face 'last-eyebrowse-config-face
-                             'mouse-face 'mode-line-highlight
-                             'slot (car last-conf)
-                             'local-map (make-keymap (car last-conf))
-                             'help-echo help-echo)
-                 ))))))
+      ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
+      (list
+       " "
+       (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
+              (time-string-list (s-split " " time-string))
+              (date-string (car time-string-list))
+              (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
+              (week-string (caddr time-string-list)))
+         (list date-string " " time-string " " week-string))
+       " | "
+       (current-ip)
+       (if (> (length *fetched-public-ip*) 0) " | " "")
+       (fetched-public-ip)
+       " | "
+       (fetched-weather)
+       " | "
+       ;; copy the default buffer identification from bindings.el.gz
+       (propertized-buffer-identification "%b")
+       " | "
+       ;; - [locked-conf, current-conf, last-conf]
+       (format "[%s, %s, %s]"
+               locked-conf-string
+               ;; the current eb config is active, and with no keymap
+               (propertize current-conf-string 'face 'current-eyebrowse-config-face
+                           'mouse-face 'mode-line-highlight
+                           'slot (car current-conf)
+                           'local-map nil
+                           'help-echo help-echo)
+               ;; last-conf can be clicked to the last eb config
+               (propertize last-conf-string 'face 'last-eyebrowse-config-face
+                           'mouse-face 'mode-line-highlight
+                           'slot (car last-conf)
+                           'local-map (eyebrowse-make-keymap (car last-conf))
+                           'help-echo help-echo)
+               )))))
+
+(defvar eyebrowse-config-format
+  '(:eval
+    (list
+     " "
+     "["
+     (-interpose
+      ", "
+      (let ((current-slot (eyebrowse--get 'current-slot))
+            (last-slot (eyebrowse--get 'last-slot))
+            (help-echo "mouse-1: Switch to indicated workspace"))
+        (mapcar (lambda (config)
+                  (let ((slot (car config))
+                        (config-string (eyebrowse-config-string config))
+                        (face)
+                        (local-map))
+                    (cond ((eq slot current-slot)
+                           (setq face 'current-eyebrowse-config-face))
+                          ((eq slot last-slot)
+                           (setq face 'last-eyebrowse-config-face)
+                           (setq local-map (eyebrowse-make-keymap (car config))))
+                          (t
+                           (setq local-map (eyebrowse-make-keymap (car config)))))
+                    (propertize config-string 'face face
+                                'mouse-face 'mode-line-highlight
+                                'slot slot
+                                'local-map local-map
+                                'help-echo help-echo)))
+                (eyebrowse--get 'window-configs))))
+     "]")))
 
 (defmacro walk-all-frame-windows (&rest body)
   "Walk all windows in all frame for each execute the BODY."
@@ -590,11 +620,26 @@ COPY from eyebrowse--load-window-config."
     (when (window-live-p (get-buffer-window))
       (with-current-buffer (current-buffer)
         (eyebrowse-message "set-eyebrowse-header-line-format, buffer: %s" (current-buffer))
-        (setq-local header-line-format eyebrowse-buffer-name-format)))))
+        (setq-local header-line-format eyebrowse-config-format)))))
+
+(defun reset-eyebrowse-header-line-format ()
+  "."
+  (interactive)
+  (message "reset %S" (eyebrowse--get 'current-slot))
+  (when (not (equal header-line-format eyebrowse-config-format))
+    (setq-local header-line-format eyebrowse-config-format)))
+
+(defun switch-header-line-format ()
+  "."
+  (interactive)
+  (with-current-buffer (current-buffer)
+    (if (equal header-line-format eyebrowse-buffer-name-format)
+        (setq-local header-line-format eyebrowse-config-format)
+      (setq-local header-line-format eyebrowse-buffer-name-format))))
 
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "H-0") 'eyebrowse-switch-to-window-config-0)
+    (define-key map (kbd "H-~") 'switch-header-line-format)
     (define-key map (kbd "H-1") 'eyebrowse-switch-to-window-config-1)
     (define-key map (kbd "H-2") 'eyebrowse-switch-to-window-config-2)
     (define-key map (kbd "H-3") 'eyebrowse-switch-to-window-config-3)
@@ -623,6 +668,7 @@ COPY from eyebrowse--load-window-config."
         ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
         (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
         (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
+        (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
         (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
@@ -630,6 +676,7 @@ COPY from eyebrowse--load-window-config."
       ;; header-line-format hook
       (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
       (remove-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
+      (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
       (walk-all-frame-windows
        (setq-local header-line-format nil))
       (eyebrowse-mode 0))))
