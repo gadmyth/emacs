@@ -511,7 +511,7 @@ COPY from eyebrowse--load-window-config."
           ((eq frame-index 6) "➐")
           ((eq frame-index 7) "➑")
           ((eq frame-index 8) "➒")
-          ((eq frame-index 8) "❿")
+          ((eq frame-index 9) "❿")
           (t ""))))
 
 
