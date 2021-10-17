@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.10
-;; Package-Version: 20211017.004
+;; Version: 1.2.11
+;; Package-Version: 20211017.005
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -445,6 +445,18 @@ If FRAME is nil, update the current frame."
         (eyebrowse-load-certain-config default-config)
       (message "no default config to restore config %S" slot))))
 
+(defun eyebrowse-config-the-only-config ()
+  "."
+  (interactive)
+  (let* ((window-configs (eyebrowse--get 'window-configs))
+         (first-config (car window-configs))
+         (tag (nth 2 first-config)))
+    (when (and (= (length window-configs) 1)
+               (zerop (length tag)))
+      (eyebrowse-message "rename first eyebrowse config as \"default\"")
+      (eyebrowse-rename-window-config 1 "default")
+      (force-reset-eyebrowse-header-line-format))))
+
 (defun eyebrowse-load-certain-config (config)
   "Restore the window config from the certain CONFIG.
 COPY from eyebrowse--load-window-config."
@@ -462,9 +474,6 @@ COPY from eyebrowse--load-window-config."
     (cond
      ((not (file-exists-p file-name))
       (message "Can't load %s file, for it does not exist!" file-name)
-      (eyebrowse-rename-window-config 1 "default")
-      (force-reset-eyebrowse-header-line-format)
-      (eyebrowse-message "rename first eyebrowse config as \"default\"")
       ;; set loading-success-p to t, for the reason of it's at the very beginnig
       (setq loading-success-p t))
      (t
@@ -473,9 +482,12 @@ COPY from eyebrowse--load-window-config."
         (insert-file-contents file-name)
         (goto-char (point-min))
         (let ((content (read (current-buffer))))
-          (eyebrowse--set 'window-configs content)
-          (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))
+          (when (> (length content) 0)
+            (eyebrowse--set 'window-configs content)
+            (eyebrowse--load-window-config (eyebrowse--get 'current-slot)))))
       (setq loading-success-p t)))
+    ;; set the only config's tag
+    (eyebrowse-config-the-only-config)
     ;; return the loading result
     loading-success-p))
 
