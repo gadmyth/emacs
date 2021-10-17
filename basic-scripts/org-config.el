@@ -200,6 +200,9 @@
 ;;; inline image size
 (setq org-image-actual-width nil)
 
+;;; return to open link
+(setq org-return-follows-link t)
+
 ;;; superscripts
 (setq-default org-use-sub-superscripts '{})
 (setq-default org-export-with-sub-superscripts '{})
