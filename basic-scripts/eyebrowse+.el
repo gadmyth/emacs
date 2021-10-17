@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.08
-;; Package-Version: 20211017.002
+;; Version: 1.2.09
+;; Package-Version: 20211017.003
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -72,8 +72,6 @@
   "Initialize Eyebrowse for the current FRAME."
   (message "*** eyebrowse-init-from-config ***")
   (unless (eyebrowse--get 'window-configs frame)
-    (eyebrowse-init-original frame)
-    (eyebrowse-rename-window-config 1 "default")
     (eyebrowse-lazy-load-config)))
 
 (defun eyebrowse-swap-init-function()
@@ -460,9 +458,13 @@ COPY from eyebrowse--load-window-config."
   (interactive)
   (let ((loading-success-p)
         (file-name (eyebrowse-file-name)))
+    (eyebrowse-init-original)
     (cond
      ((not (file-exists-p file-name))
       (message "Can't load %s file, for it does not exist!" file-name)
+      (eyebrowse-rename-window-config 1 "default")
+      (force-reset-eyebrowse-header-line-format)
+      (eyebrowse-message "rename first eyebrowse config as \"default\"")
       ;; set loading-success-p to t, for the reason of it's at the very beginnig
       (setq loading-success-p t))
      (t
@@ -477,15 +479,23 @@ COPY from eyebrowse--load-window-config."
     ;; return the loading result
     loading-success-p))
 
-(defun eyebrowse-file-name ()
+(defun frame-index ()
   "."
-  (interactive)
   (let* ((frames (frame-list))
          (current-frame (window-frame (get-buffer-window)))
          (max-index (- (length frames) 1))
          (index (- max-index (-elem-index current-frame frames))))
-    (if index
-        (format "%s.%d" +eyebrowse-file-name+ index)
+    index))
+
+(defun eyebrowse-file-name ()
+  "."
+  (interactive)
+  (let ((frame-index (frame-parameter nil 'eyebrowse-frame-index)))
+    (unless frame-index
+      (setq frame-index (frame-index))
+      (set-frame-parameter nil 'eyebrowse-frame-index frame-index))
+    (if frame-index
+        (format "%s.%d" +eyebrowse-file-name+ frame-index)
       +eyebrowse-file-name+)))
   
 
@@ -621,6 +631,11 @@ COPY from eyebrowse--load-window-config."
   (interactive)
   (when (not (equal header-line-format eyebrowse-config-format))
     (setq-local header-line-format eyebrowse-config-format)))
+
+(defun force-reset-eyebrowse-header-line-format ()
+  "."
+  (interactive)
+  (setq-local header-line-format eyebrowse-config-format))
 
 (defun switch-header-line-format ()
   "."
