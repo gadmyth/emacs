@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.07
-;; Package-Version: 20211017.001
+;; Version: 1.2.08
+;; Package-Version: 20211017.002
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -103,12 +103,6 @@
 (defun eyebrowse-get-current-config ()
   "."
   (let* ((slot (eyebrowse--get 'current-slot))
-         (config (eyebrowse-get-config-with-slot slot)))
-    config))
-
-(defun eyebrowse-get-last-config ()
-  "."
-  (let* ((slot (eyebrowse--get 'last-slot))
          (config (eyebrowse-get-config-with-slot slot)))
     config))
 
@@ -636,9 +630,16 @@ COPY from eyebrowse--load-window-config."
         (setq-local header-line-format eyebrowse-config-format)
       (setq-local header-line-format eyebrowse-buffer-name-format))))
 
+(defun eyebrowse-switch-to-last-config ()
+  "."
+  (interactive)
+  (when-let ((last-slot (eyebrowse--get 'last-slot)))
+    (eyebrowse-switch-to-window-config last-slot)))
+
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "H-~") 'switch-header-line-format)
+    (define-key map (kbd "H-`") 'eyebrowse-switch-to-last-config)
     (define-key map (kbd "H-1") 'eyebrowse-switch-to-window-config-1)
     (define-key map (kbd "H-2") 'eyebrowse-switch-to-window-config-2)
     (define-key map (kbd "H-3") 'eyebrowse-switch-to-window-config-3)
