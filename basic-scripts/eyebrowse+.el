@@ -625,7 +625,6 @@ COPY from eyebrowse--load-window-config."
 (defun reset-eyebrowse-header-line-format ()
   "."
   (interactive)
-  (message "reset %S" (eyebrowse--get 'current-slot))
   (when (not (equal header-line-format eyebrowse-config-format))
     (setq-local header-line-format eyebrowse-config-format)))
 
