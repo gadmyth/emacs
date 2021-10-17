@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.09
-;; Package-Version: 20211017.003
+;; Version: 1.2.10
+;; Package-Version: 20211017.004
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -487,6 +487,22 @@ COPY from eyebrowse--load-window-config."
          (index (- max-index (-elem-index current-frame frames))))
     index))
 
+(defun frame-index-string ()
+  "Use number unicode for frame index from https://unicode-table.com."
+  (let ((frame-index (frame-parameter nil 'eyebrowse-frame-index)))
+    (cond ((eq frame-index 0) "➊")
+          ((eq frame-index 1) "➋")
+          ((eq frame-index 2) "➌")
+          ((eq frame-index 3) "➍")
+          ((eq frame-index 4) "➎")
+          ((eq frame-index 5) "➏")
+          ((eq frame-index 6) "➐")
+          ((eq frame-index 7) "➑")
+          ((eq frame-index 8) "➒")
+          ((eq frame-index 8) "❿")
+          (t ""))))
+
+
 (defun eyebrowse-file-name ()
   "."
   (interactive)
@@ -546,6 +562,8 @@ COPY from eyebrowse--load-window-config."
       ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
       (list
        " "
+       (let ((index (frame-index-string)))
+       (if index (list index " ") ""))
        (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
               (time-string-list (s-split " " time-string))
               (date-string (car time-string-list))
@@ -583,6 +601,8 @@ COPY from eyebrowse--load-window-config."
   '(:eval
     (list
      " "
+     (let ((index (frame-index-string)))
+       (if index (list index " ") ""))
      "["
      (-interpose
       ", "
