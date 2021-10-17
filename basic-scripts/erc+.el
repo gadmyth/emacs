@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.026
-;; Package-Version: 20210929.002
+;; Version: 1.0.027
+;; Package-Version: 20211016.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -86,6 +86,16 @@ With PARSED message and PROC."
          (msg (erc-response.contents parsed))
          (short-sender (erc-short-sender sender-spec)))
     (erc-debug-message "erc message: %s, %s: %s" short-sender tgt msg)
+    ;; load forbidden targets
+    (when (not (buffer-live-p *erc-aggregate-buffer*))
+      ;; create buffer if not exists
+      (setq *erc-aggregate-buffer*
+            (generate-new-buffer "*erc-aggregate-buffer*"))
+      (load-erc-forbidden-targets)
+      ;; set the major mode
+      (with-current-buffer *erc-aggregate-buffer*
+        (erc-aggregate-mode)))
+    ;; forbidden or update
     (cond ((not (member tgt *erc-forbidden-targets*))
            (erc-update-aggregate-buffer short-sender tgt msg))
           ((get-buffer-window tgt)
@@ -184,15 +194,6 @@ With PARSED message and PROC."
                 (string-equal "表情" (car file-msg)))
         (setq msg "")
         (setq msg-picture-p t)))
-    
-    (when (not (buffer-live-p *erc-aggregate-buffer*))
-      ;; create buffer if not exists
-      (setq *erc-aggregate-buffer*
-            (generate-new-buffer "*erc-aggregate-buffer*"))
-      (load-erc-forbidden-targets)
-      ;; set the major mode
-      (with-current-buffer *erc-aggregate-buffer*
-        (erc-aggregate-mode)))
 
     ;; parse the link
     (when-let ((index (string-match "\\(https?://[^\s]*\\)" msg)))
