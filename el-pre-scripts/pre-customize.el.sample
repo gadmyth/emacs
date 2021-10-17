@@ -15,10 +15,10 @@
 ;; set emacs customize file
 (setq custom-file (expand-file-name ".emacs-custom.el" user-emacs-directory))
 
-(defvar +tool-bar-mode+ t)
-(defvar +menu-bar-mode+ t)
+(defvar +tool-bar-mode+ nil)
+(defvar +menu-bar-mode+ nil)
 (defvar +blink-cursor-mode+ t)
-(defvar +scroll-bar-mode+ t)
+(defvar +scroll-bar-mode+ nil)
 
 (setq *mac-scale-amount* 0
       *linux-scale-amount* 0)
