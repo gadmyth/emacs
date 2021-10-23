@@ -23,8 +23,8 @@
 ;; window operation
 (global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
 (global-set-key (kbd "C-x 3") #'split-window-right-with-ratio)
-(global-set-key (kbd "C-x @") #'(lambda () (interactive) (split-window-below-with-ratio t)))
-(global-set-key (kbd "C-x #") #'(lambda () (interactive) (split-window-right-with-ratio t)))
+(global-set-key (kbd "C-x C-2") #'(lambda () (interactive) (split-window-below-with-ratio t)))
+(global-set-key (kbd "C-x C-3") #'(lambda () (interactive) (split-window-right-with-ratio t)))
 (global-set-key (kbd "H-m") 'goto-main-window)
 (global-set-key (kbd "H-s") 'swap-window-in-current-frame)
 (global-set-key (kbd "H-c") 'copy-window-in-current-frame)
@@ -35,7 +35,22 @@
 (global-set-key (kbd "<H-tab>") #'goto-next-window)
 (global-set-key (kbd "<H-iso-lefttab>") #'goto-previous-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
+(global-set-key (kbd "H-e") 'scroll-line-up)
+(global-set-key (kbd "H-y") 'scroll-line-down)
 
+(defun scroll-line-up (count)
+  "Scrolls the window COUNT lines upwards."
+  "Copied from evil-commands.el."
+  (interactive "p")
+  (let ((scroll-preserve-screen-position nil))
+    (scroll-up count)))
+
+(defun scroll-line-down (count)
+  "Scrolls the window COUNT lines forwards."
+  "Copied from evil-commands.el."
+  (interactive "p")
+  (let ((scroll-preserve-screen-position nil))
+    (scroll-down count)))
 
 (defun split-window-below-with-ratio (&optional switch-to-scratch-buffer-p)
   "Split window below with ratio that the user selected, if SWITCH-TO-SCRATCH-BUFFER-P, change the new buffer to *scratch* buffer."
