@@ -22,7 +22,9 @@
   "If region is activate, counsel-grep the word in the region from START to END."
   "Otherwise, counsel-grep the word at point, if current-prefix-arg is not null, toggle the superword-mode."
   (interactive)
-  (let ((func (if (not (buffer-file-name (current-buffer))) #'swiper #'counsel-grep)))
+  (let* ((file-name (buffer-file-name (current-buffer)))
+         (func (cond ((not file-name) #'swiper)
+                     (t #'counsel-grep))))
     (if (and (mark) (region-active-p))
         (progn
           (deactivate-mark)
@@ -35,7 +37,13 @@
           (if should-toggle (superword-mode origin-value))
           (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
           (message "string-at-point is [%s]" word)
-          (funcall func word))))))
+          (let ((counsel-grep-base-command))
+            (when file-name
+              (cond ((equal ".gz" (ffap-file-suffix file-name))
+                     (setq counsel-grep-base-command "zgrep -E -n -e %s %s"))
+                    (t
+                     (setq counsel-grep-base-command "grep -E -n -e %s %s"))))
+            (funcall func word)))))))
 
 (global-set-key (kbd "C-S-s") 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
