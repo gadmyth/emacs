@@ -37,7 +37,7 @@
           (message "string-at-point is [%s]" word)
           (funcall func word))))))
 
-(global-set-key "\C-s" 'counsel-grep-with-word-at-point)
+(global-set-key (kbd "C-S-s") 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
