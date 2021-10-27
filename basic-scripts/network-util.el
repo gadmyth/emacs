@@ -24,7 +24,7 @@
   (interactive)
   (cond
    ((eq window-system 'x)
-    (let* ((shell-command-string "ifconfig $(route -n | grep ^0.0.0.0 | awk '{print $NF}') | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2'}")
+    (let* ((shell-command-string "ifconfig $(route -n | grep ^0.0.0.0 | awk '{print $NF}' | head -n 1) | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2'}")
            (result (shell-command-to-string shell-command-string))
            (result (substring result 0 (- (length result) 1))))
       (when (equal current-prefix-arg 17)
