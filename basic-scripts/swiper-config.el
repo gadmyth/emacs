@@ -5,6 +5,7 @@
 (require 'swiper)
 (require 'counsel)
 (require 'thingatpt)
+(require 'ffap)
 
 (ivy-mode 1)
 
