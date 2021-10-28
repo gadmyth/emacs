@@ -9,7 +9,8 @@
 (let* ((command (format "%s; echo $PATH" +LOAD-SHELL-PROFILE+))
        (path (shell-command-to-string command)))
   (setenv "PATH" path)
-  (setq exec-path (append (split-string-and-unquote path ":") exec-path)))
+  (dolist (p (split-string-and-unquote (getenv "PATH") path-separator))
+    (add-to-list 'exec-path p)))
 
 ;; The following will cause the bash problem: "bash: shell_session_update: command not found"
 ;; (setq shell-command-switch "-ic")
