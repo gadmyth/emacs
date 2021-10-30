@@ -6,9 +6,11 @@
 
 (defmacro require-safely (package &rest body)
   "PACKAGE, BODY."
-  `(if (package-installed-p ,package)
-       (require-package ,package ,@body)
-     (message "%S not installed!" ,package)))
+  `(cond ((or (package-installed-p ,package)
+              (ignore-errors (find-library-name (symbol-name ,package))))
+          (require-package ,package ,@body))
+         (t
+          (message "%S not installed!" ,package))))
 
 (defmacro require-package (package &rest body)
   "Require PACKAGE and execute the BODY."
@@ -61,6 +63,14 @@
   (message "install-packages-if-needed: %S" *sync-package*)
   (if *sync-package*
       (mapcar #'install-package package-list)))
+
+(defun set-pair-to-alist (list key value)
+  "Set KEY, VALUE pair to LIST."
+  (let ((old-value (cdr (assoc key (symbol-value list))))
+        (new-value value))
+    (when (or (not old-value)
+              (not (equal old-value new-value)))
+      (setf (alist-get key (symbol-value list) nil t 'equal) new-value))))
 
 (provide 'package-tools)
 ;;; package-tools.el ends here

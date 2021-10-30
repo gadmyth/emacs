@@ -4,14 +4,7 @@
 ;;; Code:
 
 (require 'package)
-
-(defun set-pair-to-alist (list key value)
-  "Set KEY, VALUE pair to LIST."
-  (let ((old-value (cdr (assoc key (symbol-value list))))
-        (new-value value))
-    (when (or (not old-value)
-              (not (equal old-value new-value)))
-      (setf (alist-get key (symbol-value list) nil t 'equal) new-value))))
+(require 'package-tools)
 
 (setq package-archives nil)
 (defvar package-archives-host "http://elpa.emacs-china.org")
@@ -20,8 +13,6 @@
 (set-pair-to-alist 'package-archives "org" (concat package-archives-host "/org/"))
 (set-pair-to-alist 'package-archives "melpa" (concat package-archives-host "/melpa/"))
 (set-pair-to-alist 'package-archives "melpa-stable" (concat package-archives-host "/stable-melpa/"))
-
-(package-initialize)
 
 ;; the slime should git clone from github
 (add-to-list 'load-path (expand-file-name "elpa/slime" user-emacs-directory))

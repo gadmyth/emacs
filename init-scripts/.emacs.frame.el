@@ -9,13 +9,15 @@
 (add-to-list 'load-path (expand-file-name "el-post-scripts" +emacs-context-directory+))
 
 ;; load script files at first
-(require 'script-extends)
-(load-pre-script-files)
+(require-safely
+ 'script-extends
+ (load-pre-script-files))
 
 ;; insall packages
-(require 'package-tools)
-(require 'packages)
-(install-packages-if-needed +required-packages+)
+(require-safely
+ 'packages
+ (package-initialize)
+ (install-packages-if-needed +required-packages+))
 
 ;; load configs
 (require 'loading-config)
