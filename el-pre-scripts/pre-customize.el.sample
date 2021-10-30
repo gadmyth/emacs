@@ -5,12 +5,7 @@
 
 (require 'package)
 
-(setq package-archives nil)
-(add-to-list 'package-archives '("gnu" . "/opt/elpa/gnu/"))
-(add-to-list 'package-archives '("org" . "/opt/elpa/org/"))
-(add-to-list 'package-archives '("melpa" . "/opt/elpa/melpa/"))
-(add-to-list 'package-archives '("melpa-stable" . "/opt/elpa/melpa-stable/"))
-(add-to-list 'package-archives '("marmalade" . "/opt/elpa/marmalade/"))
+(setq package-archives-host "http://elpa.emacs-china.org")
 
 ;; set emacs customize file
 (setq custom-file (expand-file-name ".emacs-custom.el" user-emacs-directory))

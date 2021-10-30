@@ -5,17 +5,22 @@
 
 (require 'package)
 
-(defun add-to-list-if-not-exist (list element)
-  "LIST: , ELEMENT: ."
-  (add-to-list list element nil (lambda (ele1 ele2) (equal (car ele1) (car ele2)))))
+(defun set-pair-to-alist (list key value)
+  "Set KEY, VALUE pair to LIST."
+  (let ((old-value (cdr (assoc key (symbol-value list))))
+        (new-value value))
+    (when (or (not old-value)
+              (not (equal old-value new-value)))
+      (setf (alist-get key (symbol-value list) nil t 'equal) new-value))))
 
-(defconst package-host "http://elpa.emacs-china.org")
+(setq package-archives nil)
+(defvar package-archives-host "http://elpa.emacs-china.org")
 
-(add-to-list-if-not-exist 'package-archives `("gnu" . ,(concat package-host "/gnu/")))
-(add-to-list-if-not-exist 'package-archives `("org" . ,(concat package-host "/org/")))
-(add-to-list-if-not-exist 'package-archives `("melpa" . ,(concat package-host "/melpa/")))
-(add-to-list-if-not-exist 'package-archives `("melpa-stable" . ,(concat package-host "/stable-melpa/")))
-;(add-to-list-if-not-exist 'package-archives `("marmalade" . ,(concat package-host "/marmalade/")))
+(set-pair-to-alist 'package-archives "gnu" (concat package-archives-host "/gnu/"))
+(set-pair-to-alist 'package-archives "org" (concat package-archives-host "/org/"))
+(set-pair-to-alist 'package-archives "melpa" (concat package-archives-host "/melpa/"))
+(set-pair-to-alist 'package-archives "melpa-stable" (concat package-archives-host "/stable-melpa/"))
+
 (package-initialize)
 
 ;; the slime should git clone from github
