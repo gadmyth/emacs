@@ -4,7 +4,6 @@
 ;;; Code:
 
 (require 'package)
-(require 'package-tools)
 
 (setq package-archives nil)
 (defvar package-archives-host "http://elpa.emacs-china.org")

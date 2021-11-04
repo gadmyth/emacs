@@ -3,14 +3,21 @@
 ;;; Code:
 
 (require 'package)
+(require 'find-func)
 
 (defmacro require-safely (package &rest body)
   "PACKAGE, BODY."
-  `(cond ((or (package-installed-p ,package)
-              (ignore-errors (find-library-name (symbol-name ,package))))
-          (require-package ,package ,@body))
-         (t
-          (message "%S not installed!" ,package))))
+  `(let ((should-require))
+     (if (and (not should-require)
+	          (not (package-installed-p ,package)))
+	     (message "package [%S] is not installed!" ,package)
+       (setq should-require t))
+     (if (and (not should-require)
+	          (not (ignore-errors (find-library-name (symbol-name ,package)))))
+	     (message "package [%S] is not found in load-path!" ,package)
+       (setq should-require t))
+     (when should-require
+       (require-package ,package ,@body))))
 
 (defmacro require-package (package &rest body)
   "Require PACKAGE and execute the BODY."
@@ -21,11 +28,11 @@
   `(let ((all-package-featurep t))
      (dolist (p ,dependencies)
        (when (not (featurep p))
-         (message "%S is not a feature, can't install package %S!" p ,package)
+         (message "package [%S] is not a feature, can't install!" p ,package)
          (setq all-package-featurep nil)))
      (when all-package-featurep
        (require ,package)
-       (message "%S required!" ,package)
+       (message "package [%S] is required!" ,package)
        (progn ,@body))))
 
 (defmacro require-packages-safely (packages &rest body)
@@ -33,7 +40,7 @@
   `(let ((all-package-installed t))
      (dolist (p ,packages)
        (when (not (package-installed-p p))
-         (message "%S not installed!" p)
+         (message "package [%S] is not installed!" p)
          (setq all-package-installed nil)))
      (when all-package-installed
        (dolist (p ,packages)
@@ -51,7 +58,7 @@
   (if (package-installed-p package min-version)
       t
     (progn
-      (message "Should install-package: %S" package)
+      (message "Should install-package: [%S]" package)
       (if (or (assoc package package-archive-contents) no-refresh)
           (package-install package)
         (progn
@@ -60,7 +67,7 @@
 
 (defun install-packages-if-needed (package-list)
   "Install packages if not existed, PACKAGE-LIST."
-  (message "install-packages-if-needed: %S" *sync-package*)
+  (message "install-packages-if-needed: [%S]" *sync-package*)
   (if *sync-package*
       (mapcar #'install-package package-list)))
 

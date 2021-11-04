@@ -8,6 +8,8 @@
 (add-to-list 'load-path (expand-file-name "el-extends" +emacs-context-directory+))
 (add-to-list 'load-path (expand-file-name "el-post-scripts" +emacs-context-directory+))
 
+(require 'package-tools)
+
 ;; load script files at first
 (require-safely
  'script-extends
