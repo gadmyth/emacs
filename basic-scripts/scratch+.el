@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: scratch+.el <gadmyth@gmail.com}>
-;; Version: 1.0
-;; Package-Version: 20200329.001
+;; Version: 1.0.001
+;; Package-Version: 20211106.001
 ;; Package-Requires:
 ;; Keywords: scratch, auto save
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -158,7 +158,7 @@
       (setq *scratch-last-saved-time* now)
       ;; unlock the status
       (scratch-reset-autosave-status)
-      (message "**** *scratch* buffer saved to file %s [%s], lasted saved time: [%s] ****" +default-scratch-file-name+ now last-saved-time)))))
+      (message "**** *scratch* buffer saved to file %s [%s], last saved time: [%s] ****" +default-scratch-file-name+ now last-saved-time)))))
 
 (add-hook 'emacs-startup-hook
           #'(lambda ()
