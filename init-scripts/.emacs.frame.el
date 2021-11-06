@@ -24,6 +24,7 @@
 ;; load configs
 (require 'loading-config)
 (require 'basic-config)
+(require 'proced-config)
 (require 'utility)
 (require 'servers)
 (require 'frames)
