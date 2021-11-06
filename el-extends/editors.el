@@ -153,6 +153,15 @@
       (delete-region start end)
       (insert snake-case-string))))
 
+(defun dash-case (start end)
+  "Replace the string from START to END of region with snake case format."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (dash-case-string (s-dashed-words region-string)))
+      (delete-region start end)
+      (insert dash-case-string))))
+
 ;; ------ line editor -------
 
 (defun kill-to-beginning-of-line ()
@@ -192,6 +201,13 @@
         (kill-ring-save begin end)
         (message "*** line copied ***")))))
 
+(defun mark-the-whole-line ()
+  "."
+  (interactive)
+  (beginning-of-visual-line)
+  (push-mark-command nil)
+  (end-of-visual-line))
+
 (defun parse-mybatis-column-property-string ()
   "."
   (interactive)
@@ -219,6 +235,7 @@
 (global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
 (global-set-key (kbd "C-S-k") 'kill-the-whole-line)
 (global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
+(global-set-key (kbd "C-S-l") 'mark-the-whole-line)
 
 (provide 'editors)
 ;;; editors.el ends here
