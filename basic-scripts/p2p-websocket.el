@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.0
-;; Package-Version: 20210910.001
+;; Version: 0.2.1
+;; Package-Version: 20211115.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -87,9 +87,9 @@
     (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
     (p2p-update-websocket-buffer ws frame)
     (cond ((equal "hello" message)
-           (websocket-send-text ws "world"))
+           (p2p-ws-do-send-text ws "world" t))
           ((equal "ping" message)
-           (websocket-send-text ws "pong")))))
+           (p2p-ws-do-send-text ws "pong" t)))))
 
 ;; -*- websocket client -*-
 
@@ -133,9 +133,9 @@
    (let ((message (completing-read
                    (format "Please input the message to send %s: " (websocket-remote-name-with-nickname ws))
                    nil nil t)))
-     (p2p-ws-do-send-text message ws))))
+     (p2p-ws-do-send-text ws message t))))
 
-(defun p2p-ws-do-send-text (message ws)
+(defun p2p-ws-do-send-text (ws message local-p)
   "Do send the MESSAGE to WS."
   ;; check the websocket is opened or not
   (when (not (websocket-openp ws))
@@ -145,7 +145,8 @@
   ;; recheck and send the message
   (when (websocket-openp ws)
     (p2p-ws-debug-message "send message to %s" (websocket-remote-name-with-nickname ws))
-    (websocket-send-text ws message)))
+    (websocket-send-text ws message)
+    (p2p-do-update-websocket-buffer (websocket-local-name ws) message local-p)))
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
@@ -175,6 +176,35 @@
                                 (fourth remote-info))))
         (p2p-ws-debug-message "remote-ip: %s" remote-ip)
         remote-ip)))
+
+(defun websocket-local-name (ws)
+  "Get the WS's sender of local."
+  (if (websocket-p ws)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (local-info (mapcar 'identity (plist-get conn-info :local)))
+             (sender (format "%s.%s.%s.%s:%s"
+                             (first local-info)
+                             (second local-info)
+                             (third local-info)
+                             (fourth local-info)
+                             (fifth local-info))))
+        (p2p-ws-debug-message "local-name: %s" sender)
+        sender)))
+
+(defun websocket-local-ip (ws)
+  "Get the WS's sender of local."
+  (if (websocket-p ws)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (local-info (mapcar 'identity (plist-get conn-info :local)))
+             (local-ip (format "%s.%s.%s.%s"
+                                (first local-info)
+                                (second local-info)
+                                (third local-info)
+                                (fourth local-info))))
+        (p2p-ws-debug-message "local-ip: %s" local-ip)
+        local-ip)))
 
 (defun websocket-remote-name-with-nickname (ws)
   "Get the websocket remote-name and it's nickname of WS."
@@ -270,6 +300,12 @@ above them."
   :type 'face
   :group 'p2p-websocket-faces)
 
+(defface p2p-websocket-local-face
+  '((((class color) (min-colors 88)) :foreground "sea green" :weight bold)
+    (t :weight bold))
+  "p2p websocket local face."
+  :group 'p2p-websokcet-faces)
+
 (defface p2p-websocket-button-face '((t :weight bold))
   "p2p websocket button face."
   :group 'p2p-websokcet-faces)
@@ -314,23 +350,30 @@ call it with the value of the `pp2-websocket-data' text property."
     (mouse-set-point event)
     (p2p-websocket-button-press-button)))
 
-(defun p2p-update-websocket-buffer (ws frame)
-  "Parse the websocket WS's FRAME message and update *p2p-websocket-buffer*."
+(defun ensure-p2p-websocket-buffer ()
   (when (not (buffer-live-p *p2p-websocket-buffer*))
     ;; create buffer if not exists
     (setq *p2p-websocket-buffer*
           (generate-new-buffer "*p2p-websocket-buffer*"))
     ;; set the major mode
     (with-current-buffer *p2p-websocket-buffer*
-      (p2p-websocket-aggregate-mode)))
-  
+      (p2p-websocket-aggregate-mode))))
+
+(defun p2p-update-websocket-buffer (ws frame)
+  "Parse the websocket WS's FRAME message and update *p2p-websocket-buffer*."
+  (let ((sender (websocket-remote-name-with-nickname ws))
+        (msg (websocket-frame-text frame)))
+    (p2p-do-update-websocket-buffer sender msg nil)))
+
+(defun p2p-do-update-websocket-buffer (sender msg local-p)
+  ;; ensure buffer
+  (ensure-p2p-websocket-buffer)
+  ;; update buffer
   (with-current-buffer *p2p-websocket-buffer*
     (read-only-mode 0)
     (save-excursion
       (goto-char (point-max))
       (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-             (sender (websocket-remote-name-with-nickname ws))
-             (msg (websocket-frame-text frame))
              (content (format "%s [%s]:\n%s\n\n" sender now msg))
              (new-msg-start (point-max))
              (sender-start new-msg-start)
@@ -338,11 +381,12 @@ call it with the value of the `pp2-websocket-data' text property."
              (time-start (- (s-index-of now content) 1))
              (time-end (+ time-start (length now) 2))
              (msg-start (+ time-end 2))
-             (msg-end (+ msg-start (length msg))))
+             (msg-end (+ msg-start (length msg)))
+             (sender-face (if local-p 'p2p-websocket-local-face 'p2p-websocket-button-face)))
         
         ;; add the sender property
         (put-text-property 0 (length sender)
-                           'font-lock-face 'p2p-websocket-button-face content)
+                           'font-lock-face sender-face content)
         ;; add the time property
         (put-text-property time-start time-end
                            'font-lock-face 'p2p-websocket-notice-face content)
@@ -373,7 +417,7 @@ call it with the value of the `pp2-websocket-data' text property."
       (if (> (length ws-list) 0)
           (let ((ws (car ws-list))
                 (message (read-from-minibuffer "Please input the message to send: ")))
-            (p2p-ws-do-send-text message ws))))))
+            (p2p-ws-do-send-text ws message t))))))
 
 (defun p2p-websocket-header-p ()
   "."
