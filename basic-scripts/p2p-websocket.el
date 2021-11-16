@@ -4,8 +4,8 @@
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
 ;; Version: 0.2.2
-;; Package-Version: 20211116.001
-;; Package-Requires: websocket
+;; Package-Version: 20211116.002
+;; Package-Requires: websocket, uuid
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/p2p-websocket.el
@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'websocket)
+(require 'uuid)
 
 (defvar *p2p-ws-debug* nil)
 (defvar *p2p-ws-server* nil)
@@ -73,12 +74,26 @@
   (interactive)
   (websocket-server-close *p2p-ws-server*))
 
-(defun websocket-message-loop-check (ws message)
+(defun websocket-handle-message (ws message)
   "Check the MESSAGE and loop back the certain response to WS."
-  (cond ((equal "hello" message)
-         (p2p-ws-do-send-text ws "world" t))
-        ((equal "ping" message)
-         (p2p-ws-do-send-text ws "pong" t))))
+  (let* ((data (read message)))
+    (cond
+     ((consp data)
+      (let ((action (alist-get 'action data))
+            (content (alist-get 'content data)))
+        (pcase action
+          ('send-buffer
+           (let* ((buffer-name (alist-get 'buffer-name data))
+                  (uuid-string (replace-regexp-in-string "-" "" (uuid-string)))
+                  (buffer-name (format "%s_%s" buffer-name uuid-string)))
+             (with-current-buffer (get-buffer-create buffer-name)
+               (insert (format "%s" content))))))))
+     ((equal "ping" message)
+      (p2p-update-websocket-buffer ws message)
+      (p2p-ws-do-send-text ws "pong" t))
+     ((equal "hello" message)
+      (p2p-update-websocket-buffer ws message)
+      (p2p-ws-do-send-text ws "world" t)))))
 
 (defun websocket-server-open-handler (ws)
   "Handle the websocket WS's open event."
@@ -90,10 +105,10 @@
 
 (defun websocket-server-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
-  (let ((message (websocket-frame-text frame)))
-    (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
-    (p2p-update-websocket-buffer ws frame)
-    (websocket-message-loop-check ws message)))
+  (when (eq (websocket-frame-opcode frame) 'text)
+    (let ((message (websocket-frame-text frame)))
+      (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
+      (websocket-handle-message ws message))))
 
 ;; -*- websocket client -*-
 
@@ -116,10 +131,10 @@
 
 (defun websocket-client-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
-  (let ((message (websocket-frame-text frame)))
-    (p2p-ws-debug-message "websocket client received message from: %s" (websocket-url ws))
-    (p2p-update-websocket-buffer ws frame)
-    (websocket-message-loop-check ws message)))
+  (when (eq (websocket-frame-opcode frame) 'text)
+    (let ((message (websocket-frame-text frame)))
+      (p2p-ws-debug-message "websocket client received message from: %s" (websocket-url ws))
+      (websocket-handle-message ws message))))
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
@@ -321,6 +336,7 @@ above them."
     (define-key map "n" 'p2p-websocket-next-message)
     (define-key map "p" 'p2p-websocket-previous-message)
     (define-key map "r" 'p2p-websocket-reply-this-message)
+    (define-key map "b" 'p2p-websocket-send-buffer-this-message)
     (define-key map "d" 'p2p-websocket-delete-this-message)
     (define-key map "u" 'p2p-websocket-undo)
     (define-key map "q" 'quit-window)
@@ -364,11 +380,10 @@ call it with the value of the `pp2-websocket-data' text property."
     (with-current-buffer *p2p-websocket-buffer*
       (p2p-websocket-aggregate-mode))))
 
-(defun p2p-update-websocket-buffer (ws frame)
-  "Parse the websocket WS's FRAME message and update *p2p-websocket-buffer*."
-  (let ((sender (websocket-remote-name-with-nickname ws))
-        (msg (websocket-frame-text frame)))
-    (p2p-do-update-websocket-buffer sender msg nil)))
+(defun p2p-update-websocket-buffer (ws message)
+  "Parse the websocket WS's MESSAGE and update *p2p-websocket-buffer*."
+  (let ((sender (websocket-remote-name-with-nickname ws)))
+    (p2p-do-update-websocket-buffer sender message nil)))
 
 (defun p2p-do-update-websocket-buffer (sender msg local-p)
   ;; ensure buffer
@@ -416,13 +431,17 @@ call it with the value of the `pp2-websocket-data' text property."
 
 (defun p2p-websocket-sender-callback (data)
   "Callback of the p2p websocket sender button with DATA as args."
+  (let ((ws (p2p-websocket-parse-from-data data))
+        (message (read-from-minibuffer "Please input the message to send: ")))
+    (p2p-ws-do-send-text ws message t)))
+
+(defun p2p-websocket-parse-from-data (data)
+  "Callback of the p2p websocket sender button with DATA as args."
   (when (and data (> (length data) 0))
     (let* ((remote-name data)
            (ws-list (websocket-inbound-filter-with-url remote-name)))
-      (if (> (length ws-list) 0)
-          (let ((ws (car ws-list))
-                (message (read-from-minibuffer "Please input the message to send: ")))
-            (p2p-ws-do-send-text ws message t))))))
+      (when (> (length ws-list) 0)
+          (car ws-list)))))
 
 (defun p2p-websocket-header-p ()
   "."
@@ -456,12 +475,24 @@ call it with the value of the `pp2-websocket-data' text property."
         do (previous-line)))
 
 (defun p2p-websocket-reply-this-message ()
-  "."
-    "Reply this current message."
+  "Reply this current message."
   (interactive)
   (save-excursion
     (p2p-websocket-current-message)
     (p2p-websocket-button-press-button)))
+
+(defun p2p-websocket-send-buffer-this-message ()
+  "Reply this current message with buffer."
+  (interactive)
+  (save-excursion
+    (p2p-websocket-current-message)
+    (let* ((data (get-text-property (point) 'p2p-websocket-data))
+           (ws (p2p-websocket-parse-from-data (car data)))
+           (buffer (completing-read "Choose to buffer: " #'internal-complete-buffer nil t))
+           (buffer-content (with-current-buffer buffer
+                             (buffer-substring-no-properties (point-min) (point-max))))
+           (message (format "%s" `((action . send-buffer) (content . ,buffer-content)))))
+      (p2p-ws-do-send-text ws message t))))
 
 (defun p2p-websocket-delete-this-message ()
   "Delete the message in *p2p-websocket--buffer*."
