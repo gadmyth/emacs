@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.1
-;; Package-Version: 20211115.001
+;; Version: 0.2.2
+;; Package-Version: 20211116.001
 ;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -73,6 +73,13 @@
   (interactive)
   (websocket-server-close *p2p-ws-server*))
 
+(defun websocket-message-loop-check (ws message)
+  "Check the MESSAGE and loop back the certain response to WS."
+  (cond ((equal "hello" message)
+         (p2p-ws-do-send-text ws "world" t))
+        ((equal "ping" message)
+         (p2p-ws-do-send-text ws "pong" t))))
+
 (defun websocket-server-open-handler (ws)
   "Handle the websocket WS's open event."
   (p2p-ws-debug-message "*** websocket server opened %s ***" (websocket-remote-name-with-nickname ws)))
@@ -86,10 +93,7 @@
   (let ((message (websocket-frame-text frame)))
     (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
     (p2p-update-websocket-buffer ws frame)
-    (cond ((equal "hello" message)
-           (p2p-ws-do-send-text ws "world" t))
-          ((equal "ping" message)
-           (p2p-ws-do-send-text ws "pong" t)))))
+    (websocket-message-loop-check ws message)))
 
 ;; -*- websocket client -*-
 
@@ -114,7 +118,8 @@
   "Handle the websocket WS's FRAME."
   (let ((message (websocket-frame-text frame)))
     (p2p-ws-debug-message "websocket client received message from: %s" (websocket-url ws))
-    (p2p-update-websocket-buffer ws frame)))
+    (p2p-update-websocket-buffer ws frame)
+    (websocket-message-loop-check ws message)))
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
@@ -146,7 +151,7 @@
   (when (websocket-openp ws)
     (p2p-ws-debug-message "send message to %s" (websocket-remote-name-with-nickname ws))
     (websocket-send-text ws message)
-    (p2p-do-update-websocket-buffer (websocket-local-name ws) message local-p)))
+    (p2p-do-update-websocket-buffer (websocket-remote-name-with-nickname ws) message local-p)))
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
