@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.2
-;; Package-Version: 20211116.002
+;; Version: 0.2.3
+;; Package-Version: 20211119.001
 ;; Package-Requires: websocket, uuid
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -76,18 +76,20 @@
 
 (defun websocket-handle-message (ws message)
   "Check the MESSAGE and loop back the certain response to WS."
-  (let* ((data (read message)))
+  (let ((data (read message)))
     (cond
      ((consp data)
-      (let ((action (alist-get 'action data))
+      (let ((msg-type (alist-get 'msg-type data))
             (content (alist-get 'content data)))
-        (pcase action
-          ('send-buffer
+        (pcase msg-type
+          ('buffer
            (let* ((buffer-name (alist-get 'buffer-name data))
                   (uuid-string (replace-regexp-in-string "-" "" (uuid-string)))
                   (buffer-name (format "%s_%s" buffer-name uuid-string)))
              (with-current-buffer (get-buffer-create buffer-name)
-               (insert (format "%s" content))))))))
+               (insert (base64-decode-string-as-multibyte (format "%s" content))))
+             (let ((rich-message (format "%s" `((msg-type . buffer) (buffer-name . ,buffer-name)))))
+               (p2p-update-websocket-buffer ws rich-message)))))))
      ((equal "ping" message)
       (p2p-update-websocket-buffer ws message)
       (p2p-ws-do-send-text ws "pong" t))
@@ -330,6 +332,10 @@ above them."
   "p2p websocket button face."
   :group 'p2p-websokcet-faces)
 
+(defface p2p-websocket-buffer-name-face '((t :weight bold))
+  "p2p websocket buffer name face."
+  :group 'p2p-websokcet-faces)
+
 (defvar p2p-websocket-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map text-mode-map)
@@ -393,14 +399,31 @@ call it with the value of the `pp2-websocket-data' text property."
     (read-only-mode 0)
     (save-excursion
       (goto-char (point-max))
-      (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
+      (let* ((type "string")
+             (data (read msg))
+             (msg (cond
+                   ((consp data)
+                    (let ((msg-type (alist-get 'msg-type data)))
+                      (pcase msg-type
+                        ('buffer
+                         (setq type "buffer")
+                         ;; message is buffers.elfer-name of data
+                         (if local-p
+                             (format "send buffer: %s" (alist-get 'buffer-name data))
+                           (format "received buffer: %s" (alist-get 'buffer-name data))))
+                        (_
+                         ;; message is content of data
+                         (alist-get 'content data)))))
+                   (t
+                    msg)))
+             (now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
              (content (format "%s [%s]:\n%s\n\n" sender now msg))
              (new-msg-start (point-max))
              (sender-start new-msg-start)
              (sender-end (+ sender-start (length sender)))
              (time-start (- (s-index-of now content) 1))
              (time-end (+ time-start (length now) 2))
-             (msg-start (+ time-end 2))
+             (msg-start (+ new-msg-start time-end 2))
              (msg-end (+ msg-start (length msg)))
              (sender-face (if local-p 'p2p-websocket-local-face 'p2p-websocket-button-face)))
         
@@ -414,6 +437,10 @@ call it with the value of the `pp2-websocket-data' text property."
         (insert content)
         ;; add sender button
         (p2p-websocket-add-target-button sender-start sender-end sender)
+        ;; add content button
+        (cond
+         ((equal type "buffer")
+          (p2p-websocket-add-buffer-button msg-start msg-end (format "%s" (alist-get 'buffer-name data)))))
         ))
     (read-only-mode t))
   
@@ -423,17 +450,37 @@ call it with the value of the `pp2-websocket-data' text property."
   "Add a button property to from START to END with target SENDER."
   (add-text-properties
    start end
-   (nconc (list 'mouse-face p2p-websocket-button-mouse-face)
-          (list 'p2p-websocket-button-callback #'p2p-websocket-sender-callback)
-          (list 'keymap p2p-websocket-button-keymap)
-          (list 'rear-nonsticky t)
-          (list 'p2p-websocket-data (list sender)))))
+   (nconc
+    (list 'keymap p2p-websocket-button-keymap)
+    (list 'p2p-websocket-button-callback #'p2p-websocket-sender-callback)
+    (list 'p2p-websocket-data (list sender))
+    (list 'mouse-face p2p-websocket-button-mouse-face)
+    (list 'rear-nonsticky t))))
+
+(defun p2p-websocket-add-buffer-button (start end buffer-name)
+  "Add a buffer property to from START to END with BUFFER-NAME."
+  (add-text-properties
+   start end
+   (nconc
+    (list 'keymap p2p-websocket-button-keymap)
+    (list 'p2p-websocket-button-callback #'p2p-websocket-buffer-callback)
+    (list 'p2p-websocket-data (list buffer-name))
+    (list 'mouse-face p2p-websocket-button-mouse-face)
+    (list 'rear-nonsticky t))))
 
 (defun p2p-websocket-sender-callback (data)
   "Callback of the p2p websocket sender button with DATA as args."
   (let ((ws (p2p-websocket-parse-from-data data))
         (message (read-from-minibuffer "Please input the message to send: ")))
     (p2p-ws-do-send-text ws message t)))
+
+(defun p2p-websocket-buffer-callback (data)
+  "Callback of the p2p websocket buffer button with DATA as args."
+  (message "callback: %S" (type-of data))
+  (let* ((buffer-name data)
+         (buffer (get-buffer buffer-name)))
+    (when buffer
+      (switch-to-buffer buffer))))
 
 (defun p2p-websocket-parse-from-data (data)
   "Callback of the p2p websocket sender button with DATA as args."
@@ -491,7 +538,8 @@ call it with the value of the `pp2-websocket-data' text property."
            (buffer (completing-read "Choose to buffer: " #'internal-complete-buffer nil t))
            (buffer-content (with-current-buffer buffer
                              (buffer-substring-no-properties (point-min) (point-max))))
-           (message (format "%s" `((action . send-buffer) (content . ,buffer-content)))))
+           (buffer-content (base64-encode-string-of-multibyte buffer-content))
+           (message (format "%s" `((msg-type . buffer) (content . ,buffer-content) (buffer-name . ,buffer)))))
       (p2p-ws-do-send-text ws message t))))
 
 (defun p2p-websocket-delete-this-message ()
