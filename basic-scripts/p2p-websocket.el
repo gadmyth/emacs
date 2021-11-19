@@ -4,8 +4,8 @@
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
 ;; Version: 0.2.4
-;; Package-Version: 20211119.002
-;; Package-Requires: websocket, uuid
+;; Package-Version: 20211119.003
+;; Package-Requires: websocket
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/p2p-websocket.el
@@ -34,7 +34,6 @@
 ;;; Code:
 
 (require 'websocket)
-(require 'uuid)
 
 (defvar *p2p-ws-debug* nil)
 (defvar *p2p-ws-server* nil)
@@ -84,8 +83,8 @@
         (pcase msg-type
           ('buffer
            (let* ((buffer-name (alist-get 'buffer-name data))
-                  (uuid-string (replace-regexp-in-string "-" "" (uuid-string)))
-                  (buffer-name (format "%s_%s" buffer-name uuid-string)))
+                  (timestamp-string (number-to-string (time-convert nil 'integer)))
+                  (buffer-name (format "%s_%s" buffer-name timestamp-string)))
              (with-current-buffer (get-buffer-create buffer-name)
                (insert (base64-decode-string-as-multibyte (format "%s" content))))
              (let ((rich-message (format "%s" `((msg-type . buffer) (buffer-name . ,buffer-name)))))
