@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.3
-;; Package-Version: 20211119.001
+;; Version: 0.2.4
+;; Package-Version: 20211119.002
 ;; Package-Requires: websocket, uuid
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -95,7 +95,9 @@
       (p2p-ws-do-send-text ws "pong" t))
      ((equal "hello" message)
       (p2p-update-websocket-buffer ws message)
-      (p2p-ws-do-send-text ws "world" t)))))
+      (p2p-ws-do-send-text ws "world" t))
+     (t
+      (p2p-update-websocket-buffer ws message)))))
 
 (defun websocket-server-open-handler (ws)
   "Handle the websocket WS's open event."
@@ -109,7 +111,7 @@
   "Handle the websocket WS's FRAME."
   (when (eq (websocket-frame-opcode frame) 'text)
     (let ((message (websocket-frame-text frame)))
-      (p2p-ws-debug-message "*** websocket server received message from %s ***" (websocket-remote-name-with-nickname ws))
+      (p2p-ws-debug-message ">>> websocket server received message [%s] from %s" message (websocket-remote-name-with-nickname ws))
       (websocket-handle-message ws message))))
 
 ;; -*- websocket client -*-
@@ -135,7 +137,7 @@
   "Handle the websocket WS's FRAME."
   (when (eq (websocket-frame-opcode frame) 'text)
     (let ((message (websocket-frame-text frame)))
-      (p2p-ws-debug-message "websocket client received message from: %s" (websocket-url ws))
+      (p2p-ws-debug-message ">>> websocket client received message [%s] from: %s" message (websocket-url ws))
       (websocket-handle-message ws message))))
 
 (defun websocket-client-close-handler (ws)
@@ -166,7 +168,7 @@
     (setq ws (websocket-ensure-connected ws)))
   ;; recheck and send the message
   (when (websocket-openp ws)
-    (p2p-ws-debug-message "send message to %s" (websocket-remote-name-with-nickname ws))
+    (p2p-ws-debug-message "<<< send message [%s] to %s" message (websocket-remote-name-with-nickname ws))
     (websocket-send-text ws message)
     (p2p-do-update-websocket-buffer (websocket-remote-name-with-nickname ws) message local-p)))
 
