@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4
-;; Package-Version: 20211119.003
-;; Package-Requires: websocket
+;; Version: 0.2.4.1
+;; Package-Version: 20211122.001
+;; Package-Requires: websocket, s
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/p2p-websocket.el
@@ -73,7 +73,7 @@
   (interactive)
   (websocket-server-close *p2p-ws-server*))
 
-(defun websocket-handle-message (ws message)
+(defun websocket-handle-received-message (ws message)
   "Check the MESSAGE and loop back the certain response to WS."
   (let ((data (read message)))
     (cond
@@ -88,7 +88,58 @@
              (with-current-buffer (get-buffer-create buffer-name)
                (insert (base64-decode-string-as-multibyte (format "%s" content))))
              (let ((rich-message (format "%s" `((msg-type . buffer) (buffer-name . ,buffer-name)))))
-               (p2p-update-websocket-buffer ws rich-message)))))))
+               (p2p-update-websocket-buffer ws rich-message))))
+          ('file
+           (let* ((file-path (alist-get 'file-path data))
+                  (file-size (alist-get 'file-size data))
+                  (saved-file-path (alist-get 'saved-file-path data))
+                  (saved-file-length (alist-get 'saved-file-length data))
+                  (sender-p (alist-get 'sender-p data)))
+             (p2p-ws-debug-message "received file content: %s" content)
+             (message "received file: %s, %d, %s, %d, %S" file-path file-size saved-file-path saved-file-length sender-p)
+             (cond
+              ;; received the message from file sender
+              (sender-p
+               ;; choose the directory to save the file and create a random file name
+               (unless saved-file-path
+                 (let* ((file-path (format "%s" file-path))
+                        (directory (file-name-directory file-path))
+                        (file-name (file-relative-name file-path directory))
+                        (timestamp-string (number-to-string (time-convert nil 'integer)))
+                        (file-name (format "%s_%s" file-name timestamp-string))
+                        (saving-directory (read-directory-name (format "Choose the directory to save file %s: " file-name))))
+                   (setq saved-file-path (expand-file-name file-name saving-directory))))
+               (setq saved-file-path (format "%s" saved-file-path))
+               ;; check the saved file length
+               (when (and (file-exists-p saved-file-path)
+                          (not (= saved-file-length (file-size saved-file-path))))
+                 (message "The save file length [%d] is not equal to [%d], stop saving file." saved-file-length (file-size saved-file-path)))
+               ;; write file part
+               (let ((file-part-begin (alist-get 'file-part-begin data))
+                     (file-part-length (alist-get 'file-part-length data))
+                     (content (base64-decode-string-as-multibyte (format "%s" content))))
+                 ;; check the file part length
+                 (if (not (= file-part-length (length content)))
+                     (message "The file part length [%d] is not equal to [%d], stop saving file." file-part-length (length content))
+                   (progn
+                     (message "Now write part of file into %s, file part length: %d" saved-file-path file-part-length)
+                     (write-region content nil saved-file-path 'append)
+                     ;; send back the message
+                     (let* ((saved-file-length (file-size saved-file-path))
+                            (msg (format "%s" `((msg-type . file)
+                                                (file-path . ,file-path)
+                                                (saved-file-path . ,saved-file-path)
+                                                (saved-file-length . ,saved-file-length)
+                                                (sender-p . ,(not sender-p))))))
+                       (message "Save part of file succeed, now notify back...")
+                       (p2p-ws-do-send-text ws msg nil))))))
+              (t
+               (message "sending file continue: %s, %s" file-path saved-file-path)
+               ;; received the message from file receiver, and then send the next file part
+               (let* ((file-path (format "%s" file-path))
+                      (saved-file-length (file-size (format "%s" saved-file-path)))
+                      (begin saved-file-length))
+                 (p2p-websocket-send-file-part file-path begin saved-file-path saved-file-length)))))))))
      ((equal "ping" message)
       (p2p-update-websocket-buffer ws message)
       (p2p-ws-do-send-text ws "pong" t))
@@ -111,7 +162,7 @@
   (when (eq (websocket-frame-opcode frame) 'text)
     (let ((message (websocket-frame-text frame)))
       (p2p-ws-debug-message ">>> websocket server received message [%s] from %s" message (websocket-remote-name-with-nickname ws))
-      (websocket-handle-message ws message))))
+      (websocket-handle-received-message ws message))))
 
 ;; -*- websocket client -*-
 
@@ -137,7 +188,7 @@
   (when (eq (websocket-frame-opcode frame) 'text)
     (let ((message (websocket-frame-text frame)))
       (p2p-ws-debug-message ">>> websocket client received message [%s] from: %s" message (websocket-url ws))
-      (websocket-handle-message ws message))))
+      (websocket-handle-received-message ws message))))
 
 (defun websocket-client-close-handler (ws)
   "Handle the websocket WS's close event."
@@ -343,7 +394,8 @@ above them."
     (define-key map "n" 'p2p-websocket-next-message)
     (define-key map "p" 'p2p-websocket-previous-message)
     (define-key map "r" 'p2p-websocket-reply-this-message)
-    (define-key map "b" 'p2p-websocket-send-buffer-this-message)
+    (define-key map "b" 'p2p-websocket-send-buffer-to-this-message)
+    (define-key map "f" 'p2p-websocket-send-file-to-this-message)
     (define-key map "d" 'p2p-websocket-delete-this-message)
     (define-key map "u" 'p2p-websocket-undo)
     (define-key map "q" 'quit-window)
@@ -412,6 +464,15 @@ call it with the value of the `pp2-websocket-data' text property."
                          (if local-p
                              (format "send buffer: %s" (alist-get 'buffer-name data))
                            (format "received buffer: %s" (alist-get 'buffer-name data))))
+                        ('file
+                         (setq type "file")
+                         ;; message is buffers.elfer-name of data
+                         (let* ((file-path (format "%s" (alist-get 'file-path data)))
+                                (directory (file-name-directory file-path))
+                                (file-name (file-relative-name file-path directory)))
+                           (if local-p
+                               (format "send file: %s" file-name)
+                             (format "received file: %s" file-name))))
                         (_
                          ;; message is content of data
                          (alist-get 'content data)))))
@@ -529,19 +590,57 @@ call it with the value of the `pp2-websocket-data' text property."
     (p2p-websocket-current-message)
     (p2p-websocket-button-press-button)))
 
-(defun p2p-websocket-send-buffer-this-message ()
+(defun p2p-websocket-send-buffer-to-this-message ()
   "Reply this current message with buffer."
   (interactive)
   (save-excursion
     (p2p-websocket-current-message)
     (let* ((data (get-text-property (point) 'p2p-websocket-data))
            (ws (p2p-websocket-parse-from-data (car data)))
-           (buffer (completing-read "Choose to buffer: " #'internal-complete-buffer nil t))
+           (buffer (completing-read "Choose the buffer: " #'internal-complete-buffer nil t))
            (buffer-content (with-current-buffer buffer
                              (buffer-substring-no-properties (point-min) (point-max))))
            (buffer-content (base64-encode-string-of-multibyte buffer-content))
            (message (format "%s" `((msg-type . buffer) (content . ,buffer-content) (buffer-name . ,buffer)))))
       (p2p-ws-do-send-text ws message t))))
+
+(defun p2p-websocket-send-file-to-this-message ()
+  "Reply this current message with buffer."
+  (interactive)
+  (save-excursion
+    (p2p-websocket-current-message)
+    (let* ((data (get-text-property (point) 'p2p-websocket-data))
+           (ws (p2p-websocket-parse-from-data (car data)))
+           (file-path (completing-read "Choose the file: " #'read-file-name-internal nil t)))
+      (p2p-websocket-send-file-part file-path 0 nil 0))))
+
+(defun file-size (file-path)
+  "Get the file size of FILE-PATH."
+  (with-temp-buffer
+    (when (= 0 (call-process "/usr/bin/stat" nil t nil "-c %s" file-path))
+      (string-to-number (s-trim (buffer-string))))))
+
+(defun p2p-websocket-send-file-part (file-path begin saved-file-path saved-file-length)
+  "."
+  (let* ((file-size (file-size file-path))
+         (end (min file-size (+ begin 4096))))
+    (when (> end begin)
+      (let* ((file-part-content (with-temp-buffer
+                                  (insert-file-contents file-path nil begin end)
+                                  (buffer-string)))
+             (length (length file-part-content))
+             (file-part-content (base64-encode-string-of-multibyte file-part-content))
+             (msg (format "%s" `((msg-type . file)
+                                 (file-path . ,file-path)
+                                 (file-size . ,file-size)
+                                 (file-part-begin . ,begin)
+                                 (file-part-length . ,length)
+                                 (content . ,file-part-content)
+                                 (saved-file-path . ,saved-file-path)
+                                 (saved-file-length . ,saved-file-length)
+                                 (sender-p . t)))))
+        (message "sending file part length: %d" length)
+        (p2p-ws-do-send-text ws msg t)))))
 
 (defun p2p-websocket-delete-this-message ()
   "Delete the message in *p2p-websocket--buffer*."
