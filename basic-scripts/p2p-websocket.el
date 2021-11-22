@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.2
+;; Version: 0.2.4.3
 ;; Package-Version: 20211122.001
-;; Package-Requires: websocket, s
+;; Package-Requires: websocket, s, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/p2p-websocket.el
@@ -94,19 +94,22 @@
                   (file-size (alist-get 'file-size data))
                   (saved-file-path (alist-get 'saved-file-path data))
                   (saved-file-length (alist-get 'saved-file-length data))
+                  (file-coding-system (alist-get 'file-coding-system data))
                   (sender-p (alist-get 'sender-p data)))
-             (p2p-ws-debug-message "received file content: %s" content)
-             (message "received file: %s, %d, %s, %d, %S" file-path file-size saved-file-path saved-file-length sender-p)
+             (p2p-ws-debug-message "received file: %S, %S, %S, %S, %S, %S" file-path file-size saved-file-path saved-file-length file-coding-system sender-p)
              (cond
               ;; received the message from file sender
               (sender-p
+               (p2p-ws-debug-message "received file content: %s" content)
                ;; choose the directory to save the file and create a random file name
                (unless saved-file-path
                  (let* ((file-path (format "%s" file-path))
                         (directory (file-name-directory file-path))
                         (file-name (file-relative-name file-path directory))
+                        (file-name-non-ext (file-name-sans-extension file-name))
+                        (ext (file-name-extension file-name))
                         (timestamp-string (number-to-string (time-convert nil 'integer)))
-                        (file-name (format "%s_%s" file-name timestamp-string))
+                        (file-name (format "%s_%s.%s" file-name-non-ext timestamp-string ext))
                         (saving-directory (read-directory-name (format "Choose the directory to save file %s: " file-name))))
                    (setq saved-file-path (expand-file-name file-name saving-directory))))
                (setq saved-file-path (format "%s" saved-file-path))
@@ -117,13 +120,14 @@
                ;; write file part
                (let ((file-part-begin (alist-get 'file-part-begin data))
                      (file-part-length (alist-get 'file-part-length data))
-                     (content (base64-decode-string-as-multibyte (format "%s" content))))
+                     (content (base64-decode-string-as-multibyte (symbol-name content) file-coding-system)))
                  ;; check the file part length
                  (if (not (= file-part-length (length content)))
                      (message "The file part length [%d] is not equal to [%d], stop saving file." file-part-length (length content))
                    (progn
                      (message "Now write part of file into %s, file part length: %d" saved-file-path file-part-length)
-                     (write-region content nil saved-file-path 'append)
+                     (let ((coding-system-for-write file-coding-system))
+                       (write-region content nil saved-file-path 'append))
                      ;; send back the message
                      (let* ((saved-file-length (file-size saved-file-path))
                             (msg (format "%s" `((msg-type . file)
@@ -131,7 +135,7 @@
                                                 (saved-file-path . ,saved-file-path)
                                                 (saved-file-length . ,saved-file-length)
                                                 (sender-p . ,(not sender-p))))))
-                       (message "Save part of file succeed, now notify back...")
+                       (p2p-ws-debug-message "Save part of file succeed, length: %S, now notify back..." saved-file-length)
                        (p2p-ws-do-send-text ws msg nil))))))
               (t
                (message "sending file continue: %s, %s" file-path saved-file-path)
@@ -187,7 +191,7 @@
   "Handle the websocket WS's FRAME."
   (when (eq (websocket-frame-opcode frame) 'text)
     (let ((message (websocket-frame-text frame)))
-      (p2p-ws-debug-message ">>> websocket client received message [%s] from: %s" message (websocket-url ws))
+      (p2p-ws-debug-message ">>> websocket client received message [%s] from: %s" (substring message 0 (min 200 (length message))) (websocket-url ws))
       (websocket-handle-received-message ws message))))
 
 (defun websocket-client-close-handler (ws)
@@ -218,7 +222,7 @@
     (setq ws (websocket-ensure-connected ws)))
   ;; recheck and send the message
   (when (websocket-openp ws)
-    (p2p-ws-debug-message "<<< send message [%s] to %s" message (websocket-remote-name-with-nickname ws))
+    (p2p-ws-debug-message "<<< send message [%s] to %s" (substring message 0 (min (length message) 100)) (websocket-remote-name-with-nickname ws))
     (websocket-send-text ws message)
     (p2p-do-update-websocket-buffer (websocket-remote-name-with-nickname ws) message local-p)))
 
@@ -538,7 +542,6 @@ call it with the value of the `pp2-websocket-data' text property."
 
 (defun p2p-websocket-buffer-callback (data)
   "Callback of the p2p websocket buffer button with DATA as args."
-  (message "callback: %S" (type-of data))
   (let* ((buffer-name data)
          (buffer (get-buffer buffer-name)))
     (when buffer
@@ -629,20 +632,25 @@ call it with the value of the `pp2-websocket-data' text property."
   (let* ((file-size (file-size file-path))
          (end (min file-size (+ begin 4096))))
     (when (> end begin)
-      (let* ((file-part-content (with-temp-buffer
+      (p2p-ws-debug-message "file-size: %S, saved-file-length: %S, begin: %S, end: %S" file-size saved-file-length begin end)
+      (let* ((file-coding-system)
+             (file-part-content (with-temp-buffer
                                   (insert-file-contents file-path nil begin end)
+                                  (setq file-coding-system buffer-file-coding-system)
                                   (buffer-string)))
              (length (length file-part-content))
-             (file-part-content (base64-encode-string-of-multibyte file-part-content))
+             (file-part-content (base64-encode-string-of-multibyte file-part-content file-coding-system))
              (msg (format "%s" `((msg-type . file)
                                  (file-path . ,file-path)
                                  (file-size . ,file-size)
                                  (file-part-begin . ,begin)
                                  (file-part-length . ,length)
+                                 (file-coding-system . ,file-coding-system)
                                  (content . ,file-part-content)
                                  (saved-file-path . ,saved-file-path)
                                  (saved-file-length . ,saved-file-length)
                                  (sender-p . t)))))
+        (p2p-ws-debug-message "sending file part: %S" length)
         (p2p-ws-do-send-text ws msg t)))))
 
 (defun p2p-websocket-delete-this-message ()

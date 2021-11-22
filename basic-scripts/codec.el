@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: codec.el <gadmyth@gmail.com}>
-;; Version: 1.0
-;; Package-Version: 20200317.001
+;; Version: 1.1
+;; Package-Version: 20211122.001
 ;; Package-Requires:
 ;; Keywords: codec, md5, base64, encode, decode
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -72,13 +72,13 @@
         (setq str (concat str (make-string padding-number ?=))))
     str))
 
-(defun base64-encode-string-of-multibyte (string &optional line-break)
+(defun base64-encode-string-of-multibyte (string &optional coding-system line-break)
   "Base64 encode the multibyte STRING, LINE-BREAK mean weather the encoded string has link-break."
-  (base64-encode-string (encode-coding-string string 'utf-8) (not line-break)))
+  (base64-encode-string (encode-coding-string string (or coding-system 'utf-8)) (not line-break)))
 
-(defun base64-decode-string-as-multibyte (string)
+(defun base64-decode-string-as-multibyte (string &optional coding-system)
   "Base64 encode the multibyte STRING."
-  (decode-coding-string (base64-decode-string string) 'utf-8))
+  (decode-coding-string (base64-decode-string string) (or coding-system 'utf-8)))
 
 (defun base64-encode-region-of-multibyte (beg end)
   "Base64 encode multibyte string with region from BEG to END."
