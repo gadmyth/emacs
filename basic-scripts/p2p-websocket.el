@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.1
+;; Version: 0.2.4.2
 ;; Package-Version: 20211122.001
 ;; Package-Requires: websocket, s
 ;; Keywords: p2p-websocket.el
@@ -616,9 +616,13 @@ call it with the value of the `pp2-websocket-data' text property."
 
 (defun file-size (file-path)
   "Get the file size of FILE-PATH."
-  (with-temp-buffer
-    (when (= 0 (call-process "/usr/bin/stat" nil t nil "-c %s" file-path))
-      (string-to-number (s-trim (buffer-string))))))
+  (when-let ((command (pcase window-system
+                        ('ns "/usr/local/bin/gstat")
+                        ('x "/usr/bin/stat")
+                        (_ nil))))
+    (with-temp-buffer
+      (when (= 0 (call-process command nil t nil "-c %s" file-path))
+        (string-to-number (s-trim (buffer-string)))))))
 
 (defun p2p-websocket-send-file-part (file-path begin saved-file-path saved-file-length)
   "."
@@ -639,7 +643,6 @@ call it with the value of the `pp2-websocket-data' text property."
                                  (saved-file-path . ,saved-file-path)
                                  (saved-file-length . ,saved-file-length)
                                  (sender-p . t)))))
-        (message "sending file part length: %d" length)
         (p2p-ws-do-send-text ws msg t)))))
 
 (defun p2p-websocket-delete-this-message ()
