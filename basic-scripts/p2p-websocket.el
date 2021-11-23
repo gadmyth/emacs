@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.3
-;; Package-Version: 20211122.001
+;; Version: 0.2.4.4
+;; Package-Version: 20211123.001
 ;; Package-Requires: websocket, s, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -125,7 +125,7 @@
                  (if (not (= file-part-length (length content)))
                      (message "The file part length [%d] is not equal to [%d], stop saving file." file-part-length (length content))
                    (progn
-                     (message "Now write part of file into %s, file part length: %d" saved-file-path file-part-length)
+                     (p2p-ws-debug-message "Now write part of file into %s, file part begin: %d, file part length: %d" saved-file-path file-part-begin file-part-length)
                      (let ((coding-system-for-write file-coding-system))
                        (write-region content nil saved-file-path 'append))
                      ;; send back the message
@@ -134,11 +134,13 @@
                                                 (file-path . ,file-path)
                                                 (saved-file-path . ,saved-file-path)
                                                 (saved-file-length . ,saved-file-length)
+                                                (file-part-begin . ,file-part-begin)
+                                                (file-path . ,file-path)
                                                 (sender-p . ,(not sender-p))))))
                        (p2p-ws-debug-message "Save part of file succeed, length: %S, now notify back..." saved-file-length)
                        (p2p-ws-do-send-text ws msg nil))))))
               (t
-               (message "sending file continue: %s, %s" file-path saved-file-path)
+               (p2p-ws-debug-message "sending file continue: %s, %s" file-path saved-file-path)
                ;; received the message from file receiver, and then send the next file part
                (let* ((file-path (format "%s" file-path))
                       (saved-file-length (file-size (format "%s" saved-file-path)))
@@ -457,59 +459,63 @@ call it with the value of the `pp2-websocket-data' text property."
     (save-excursion
       (goto-char (point-max))
       (let* ((type "string")
-             (data (read msg))
-             (msg (cond
-                   ((consp data)
-                    (let ((msg-type (alist-get 'msg-type data)))
-                      (pcase msg-type
-                        ('buffer
-                         (setq type "buffer")
-                         ;; message is buffers.elfer-name of data
-                         (if local-p
+             (data (read msg)))
+        (when (consp data)
+          (let ((msg-type (alist-get 'msg-type data)))
+            (pcase msg-type
+              ('buffer
+               (setq type "buffer")
+               ;; message is buffers.elfer-name of data
+               (setq msg (if local-p
                              (format "send buffer: %s" (alist-get 'buffer-name data))
-                           (format "received buffer: %s" (alist-get 'buffer-name data))))
-                        ('file
-                         (setq type "file")
-                         ;; message is buffers.elfer-name of data
-                         (let* ((file-path (format "%s" (alist-get 'file-path data)))
-                                (directory (file-name-directory file-path))
-                                (file-name (file-relative-name file-path directory)))
-                           (if local-p
-                               (format "send file: %s" file-name)
-                             (format "received file: %s" file-name))))
-                        (_
-                         ;; message is content of data
-                         (alist-get 'content data)))))
-                   (t
-                    msg)))
-             (now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
-             (content (format "%s [%s]:\n%s\n\n" sender now msg))
-             (new-msg-start (point-max))
-             (sender-start new-msg-start)
-             (sender-end (+ sender-start (length sender)))
-             (time-start (- (s-index-of now content) 1))
-             (time-end (+ time-start (length now) 2))
-             (msg-start (+ new-msg-start time-end 2))
-             (msg-end (+ msg-start (length msg)))
-             (sender-face (if local-p 'p2p-websocket-local-face 'p2p-websocket-button-face)))
-        
-        ;; add the sender property
-        (put-text-property 0 (length sender)
-                           'font-lock-face sender-face content)
-        ;; add the time property
-        (put-text-property time-start time-end
-                           'font-lock-face 'p2p-websocket-notice-face content)
-        ;; insert the whole message
-        (insert content)
-        ;; add sender button
-        (p2p-websocket-add-target-button sender-start sender-end sender)
-        ;; add content button
-        (cond
-         ((equal type "buffer")
-          (p2p-websocket-add-buffer-button msg-start msg-end (format "%s" (alist-get 'buffer-name data)))))
+                           (format "received buffer: %s" (alist-get 'buffer-name data)))))
+              ('file
+               (setq type "file")
+               ;; message is buffers.elfer-name of data
+               (let ((file-part-begin (alist-get 'file-part-begin data))
+                     (sender-p (alist-get 'sender-p data)))
+                 (cond
+                  ((= file-part-begin 0)
+                   (let* ((file-path (format "%s" (alist-get 'file-path data)))
+                          (directory (file-name-directory file-path))
+                          (file-name (file-relative-name file-path directory)))
+                     (setq msg (if sender-p
+                                   (format "send file: %s" file-name)
+                                 (format "received file: %s" file-name)))))
+                  (t
+                   (setq msg nil)))))
+              (_
+               ;; message is content of data
+               (setq msg (alist-get 'content data))))))
+        ;; insert content
+        (when (> (length msg) 0)
+          (let* ((now (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time)))
+                 (content (format "%s [%s]:\n%s\n\n" sender now msg))
+                 (new-msg-start (point-max))
+                 (sender-start new-msg-start)
+                 (sender-end (+ sender-start (length sender)))
+                 (time-start (- (s-index-of now content) 1))
+                 (time-end (+ time-start (length now) 2))
+                 (msg-start (+ new-msg-start time-end 2))
+                 (msg-end (+ msg-start (length msg)))
+                 (sender-face (if local-p 'p2p-websocket-local-face 'p2p-websocket-button-face)))
+            ;; add the sender property
+            (put-text-property 0 (length sender)
+                               'font-lock-face sender-face content)
+            ;; add the time property
+            (put-text-property time-start time-end
+                               'font-lock-face 'p2p-websocket-notice-face content)
+            ;; insert the whole message
+            (insert content)
+            ;; add sender button
+            (p2p-websocket-add-target-button sender-start sender-end sender)
+            ;; add content button
+            (cond
+             ((equal type "buffer")
+              (p2p-websocket-add-buffer-button msg-start msg-end (format "%s" (alist-get 'buffer-name data)))))))
         ))
     (read-only-mode t))
-  
+  ;; display buffer
   (display-buffer *p2p-websocket-buffer*))
 
 (defun p2p-websocket-add-target-button (start end sender)
