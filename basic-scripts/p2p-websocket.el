@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.4
-;; Package-Version: 20211123.001
+;; Version: 0.2.4.5
+;; Package-Version: 20211124.001
 ;; Package-Requires: websocket, s, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -143,7 +143,6 @@
                (p2p-ws-debug-message "sending file continue: %s, %s" file-path saved-file-path)
                ;; received the message from file receiver, and then send the next file part
                (let* ((file-path (format "%s" file-path))
-                      (saved-file-length (file-size (format "%s" saved-file-path)))
                       (begin saved-file-length))
                  (p2p-websocket-send-file-part file-path begin saved-file-path saved-file-length)))))))))
      ((equal "ping" message)
@@ -512,7 +511,13 @@ call it with the value of the `pp2-websocket-data' text property."
             ;; add content button
             (cond
              ((equal type "buffer")
-              (p2p-websocket-add-buffer-button msg-start msg-end (format "%s" (alist-get 'buffer-name data)))))))
+              (p2p-websocket-add-buffer-button msg-start msg-end (format "%s" (alist-get 'buffer-name data))))
+             ((equal type "file")
+              (let* ((sender-p (alist-get 'sender-p data))
+                     (file-path (if sender-p
+                                    (alist-get 'file-path data)
+                                  (alist-get 'saved-file-path data))))
+                (p2p-websocket-add-file-button msg-start msg-end (format "%s" file-path)))))))
         ))
     (read-only-mode t))
   ;; display buffer
@@ -540,6 +545,17 @@ call it with the value of the `pp2-websocket-data' text property."
     (list 'mouse-face p2p-websocket-button-mouse-face)
     (list 'rear-nonsticky t))))
 
+(defun p2p-websocket-add-file-button (start end file-path)
+  "Add a file property to from START to END with FILE-PATH."
+  (add-text-properties
+   start end
+   (nconc
+    (list 'keymap p2p-websocket-button-keymap)
+    (list 'p2p-websocket-button-callback #'p2p-websocket-file-callback)
+    (list 'p2p-websocket-data (list file-path))
+    (list 'mouse-face p2p-websocket-button-mouse-face)
+    (list 'rear-nonsticky t))))
+
 (defun p2p-websocket-sender-callback (data)
   "Callback of the p2p websocket sender button with DATA as args."
   (let ((ws (p2p-websocket-parse-from-data data))
@@ -552,6 +568,19 @@ call it with the value of the `pp2-websocket-data' text property."
          (buffer (get-buffer buffer-name)))
     (when buffer
       (switch-to-buffer buffer))))
+
+(defun p2p-websocket-file-callback (data)
+  "Callback of the p2p websocket file button with DATA as args."
+  (let* ((file-path data)
+         (directory (file-name-directory file-path))
+         (file-name (file-relative-name file-path directory)))
+    (when (> (length directory) 0)
+      (when-let ((dired-buffer (dired directory)))
+        (with-current-buffer dired-buffer
+          (revert-buffer)
+          (goto-char 0)
+          (let ((regexp (format " %s$" file-name)))
+            (re-search-forward regexp nil t)))))))
 
 (defun p2p-websocket-parse-from-data (data)
   "Callback of the p2p websocket sender button with DATA as args."
