@@ -3,8 +3,9 @@
 ;;; Code:
 
 (require-packages-safely
- '(gkroam rg)
+ '(gkroam rg f)
 
+ (defvar *gkroam-default-root-dir* "")
  (let ((dir *gkroam-default-root-dir*))
    (when (and (file-exists-p dir)
               (f-directory-p dir))

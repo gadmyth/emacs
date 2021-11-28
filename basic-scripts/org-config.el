@@ -41,7 +41,7 @@
 
 ;; config files
 (defvar org-agenda-files)
-(defvar *diary-file*)
+(defvar *diary-file* nil)
 (setq org-agenda-diary-file *diary-file*)
 (setq diary-file *diary-file*)
 

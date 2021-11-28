@@ -3,6 +3,8 @@
 ;;; Code:
 
 
+(defvar *load-slime* nil)
+
 (when *load-slime*
   (require 'slime-autoloads)
   (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
