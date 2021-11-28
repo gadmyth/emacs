@@ -44,7 +44,8 @@
          (setq all-package-installed nil)))
      (when all-package-installed
        (dolist (p ,packages)
-         (require-package p ,@body)))))
+         (require-package p))
+       ,@body)))
 
 (defun require-library (library)
   "Require the Emacs Lisp source of LIBRARY."
