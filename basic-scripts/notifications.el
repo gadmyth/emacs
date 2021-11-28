@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20211128.001
+;; Version: 1.0.2
+;; Package-Version: 20211128.002
 ;; Package-Requires: async, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -63,7 +63,6 @@
              (notification `((timestamp . ,timestamp) (message . ,message)))
              (notify-string (base64-encode-string-of-multibyte (format "%s" notification))))
         (add-to-list '*notifications* notification)
-        (save-notifications)
         (do-start-notify notify-string minutes)))))
 
 (defun load-notifications ()
