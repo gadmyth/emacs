@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20211128.002
+;; Version: 1.0.3
+;; Package-Version: 20211129.001
 ;; Package-Requires: async, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -67,20 +67,21 @@
 
 (defun load-notifications ()
   "."
-  (with-temp-buffer
-    (insert-file-contents +notifications-file-name+)
-    (goto-char (point-min))
-    (let ((content (read (current-buffer))))
-      (when (> (length content) 0)
-        (setq *notifications* content)
-        (remove-expired-notifications)
-        (let ((now (current-timestamp)))
-          (dolist (notification *notifications*)
-            (let* ((timestamp (cdr (assq 'timestamp notification)))
-                   (minutes (/ (- timestamp now) 60.0))
-                   (notify-string (base64-encode-string-of-multibyte (format "%s" notification))))
-              (message "start notify: %S" notification)
-              (do-start-notify notify-string minutes)))))))
+  (when (file-exists-p +notifications-file-name+)
+    (with-temp-buffer
+      (insert-file-contents +notifications-file-name+)
+      (goto-char (point-min))
+      (let ((content (read (current-buffer))))
+        (when (> (length content) 0)
+          (setq *notifications* content)
+          (remove-expired-notifications)
+          (let ((now (current-timestamp)))
+            (dolist (notification *notifications*)
+              (let* ((timestamp (cdr (assq 'timestamp notification)))
+                     (minutes (/ (- timestamp now) 60.0))
+                     (notify-string (base64-encode-string-of-multibyte (format "%s" notification))))
+                (message "start notify: %S" notification)
+                (do-start-notify notify-string minutes))))))))
   t)
 
 (defun remove-expired-notifications ()
@@ -137,7 +138,7 @@
               (when (load-notifications)
                 ;; add the save-notifications to 'kill-emacs-hook after load file success,
                 ;;or it will save empty content to file dangerously.
-                (add-hook 'kill-emacs-hook 'save-notifications))))
+                (add-hook 'kill-<emacs-hook 'save-notifications))))
 
 (provide 'notifications)
 ;;; notifications.el ends here
