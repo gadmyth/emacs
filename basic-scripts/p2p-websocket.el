@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.5
-;; Package-Version: 20211124.001
+;; Version: 0.2.4.6
+;; Package-Version: 20211130.001
 ;; Package-Requires: websocket, s, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -598,6 +598,7 @@ call it with the value of the `pp2-websocket-data' text property."
 (defun p2p-websocket-current-message ()
   "Goto the current message's head in *p2p-websocket-buffer*."
   (interactive)
+  (beginning-of-visual-line)
   (loop while (and (not (p2p-websocket-header-p))
                    (not (eq (point) (point-min)))
                    (not (eq (point) (point-max))))
@@ -606,6 +607,7 @@ call it with the value of the `pp2-websocket-data' text property."
 (defun p2p-websocket-next-message ()
   "Goto the next message's head in *p2p-websocket-buffer*."
   (interactive)
+  (beginning-of-visual-line)
   (forward-line)
   (loop while (and (not (p2p-websocket-header-p))
                    (not (eq (point) (point-min)))
@@ -615,6 +617,7 @@ call it with the value of the `pp2-websocket-data' text property."
 (defun p2p-websocket-previous-message ()
   "Goto the previous message's head in *p2p-websocket-buffer*."
   (interactive)
+  (beginning-of-visual-line)
   (previous-line)
   (loop while (and (not (p2p-websocket-header-p))
                    (not (eq (point) (point-min)))
