@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.11
-;; Package-Version: 20211017.005
+;; Version: 1.2.12
+;; Package-Version: 20211201.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -481,10 +481,13 @@ COPY from eyebrowse--load-window-config."
       (with-temp-buffer
         (insert-file-contents file-name)
         (goto-char (point-min))
-        (let ((content (read (current-buffer))))
-          (when (> (length content) 0)
-            (eyebrowse--set 'window-configs content)
-            (eyebrowse--load-window-config (eyebrowse--get 'current-slot)))))
+        (let* ((rich-configs (read (current-buffer)))
+               (eyebrowse-configs (cdr (assq 'eyebrowse rich-configs)))
+               (frame-params (cdr (assq 'frame-params rich-configs))))
+          (when (> (length eyebrowse-configs) 0)
+            (eyebrowse--set 'window-configs eyebrowse-configs)
+            (eyebrowse--load-window-config (eyebrowse--get 'current-slot))
+            (modify-frame-parameters (window-frame) frame-params))))
       (setq loading-success-p t)))
     ;; set the only config's tag
     (eyebrowse-config-the-only-config)
@@ -515,25 +518,35 @@ COPY from eyebrowse--load-window-config."
           (t ""))))
 
 
-(defun eyebrowse-file-name ()
-  "."
+(defun eyebrowse-file-name (&optional frame)
+  "Get the eyebrowse file name of FRAME."
   (interactive)
-  (let ((frame-index (frame-parameter nil 'eyebrowse-frame-index)))
+  (let ((frame-index (frame-parameter frame 'eyebrowse-frame-index)))
     (unless frame-index
       (setq frame-index (frame-index))
       (set-frame-parameter nil 'eyebrowse-frame-index frame-index))
     (if frame-index
         (format "%s.%d" +eyebrowse-file-name+ frame-index)
       +eyebrowse-file-name+)))
-  
+
+(defun eyebrowse-frame-parameters (&optional frame)
+  "Get the FRAME parameters to save or load."
+  (let ((top (frame-parameter frame 'top))
+        (left (frame-parameter frame 'left))
+        (width (frame-parameter frame 'width))
+        (height (frame-parameter frame 'height)))
+    `((top . ,top) (left . ,left) (width . ,width) (height . ,height))))
 
 (defun save-eyebrowse-config (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
-  (let ((file-name (eyebrowse-file-name)))
+  (let ((file-name (eyebrowse-file-name frame)))
     (message "Saving eyebrowse config to file %S ..." file-name)
     (eyebrowse-update-window-config)
-    (let ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" (eyebrowse--get 'window-configs)))))
+    (let* ((eyebrowse-configs (eyebrowse--get 'window-configs))
+           (frame-params (eyebrowse-frame-parameters))
+           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs)))
+           (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" rich-configs))))
       (with-temp-file file-name
         (insert content)))))
 

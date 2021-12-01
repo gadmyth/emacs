@@ -102,8 +102,5 @@
 ;; load script files at last
 (load-post-script-files)
 
-;; maximize the frame
-(toggle-frame-maximized)
-
 (provide '.emacs.frame)
 ;;; .emacs.frame.el ends here
