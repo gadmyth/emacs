@@ -16,10 +16,6 @@
 ;; set mouse autoselect window
 (setq mouse-autoselect-window t)
 
-;; adjust window size
-(global-set-key (kbd "H-h") #'enlarge-window-horizontally)
-(global-set-key (kbd "H-l") #'shrink-window-horizontally)
-
 ;; window operation
 (global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
 (global-set-key (kbd "C-x 3") #'split-window-right-with-ratio)
@@ -30,8 +26,6 @@
 (global-set-key (kbd "H-c") 'copy-window-in-current-frame)
 (global-set-key (kbd "<H-return>") 'swap-to-main-window)
 (global-set-key (kbd "<H-backspace>") #'goto-last-window)
-(global-set-key (kbd "H-j") #'goto-next-window)
-(global-set-key (kbd "H-k") #'goto-previous-window)
 (global-set-key (kbd "<H-tab>") #'goto-next-window)
 (global-set-key (kbd "<H-iso-lefttab>") #'goto-previous-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
@@ -178,8 +172,12 @@ Copied some codes from window-numbering.el."
     (pcase base
       (?\] (enlarge-window-horizontally 5))
       (?\[ (enlarge-window-horizontally -5))
+      (?h (enlarge-window-horizontally 5))
+      (?l (enlarge-window-horizontally -5))
       (?6 (enlarge-window 5))
       (?5 (enlarge-window -5))
+      (?j (enlarge-window 5))
+      (?k (enlarge-window -5))
       (_ nil)))
   (message "Use ctrl-[, ctrl-] for further adjustment")
   (set-transient-map
@@ -194,10 +192,17 @@ Copied some codes from window-numbering.el."
        (lambda () (interactive) (adjust-window-size)))
      map)))
 
+;; adjust window size
 (global-set-key (kbd "C-x C-]") 'adjust-window-size)
 (global-set-key (kbd "C-x C-[") 'adjust-window-size)
 (global-set-key (kbd "C-x C-6") 'adjust-window-size)
 (global-set-key (kbd "C-x C-5") 'adjust-window-size)
+
+(global-set-key (kbd "H-h") 'adjust-window-size)
+(global-set-key (kbd "H-l") 'adjust-window-size)
+(global-set-key (kbd "H-j") 'adjust-window-size)
+(global-set-key (kbd "H-k") 'adjust-window-size)
+
 
 
 (defun delete-other-windows-of-super-window (&optional window)
