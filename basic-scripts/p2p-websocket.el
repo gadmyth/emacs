@@ -2,10 +2,10 @@
 
 ;; Copyright (C) 2020 gadmyth
 
-;; Author: p2p-websocket.el <gadmyth@gmail.com}>
-;; Version: 0.2.4.6
-;; Package-Version: 20211130.001
-;; Package-Requires: websocket, s, codec
+;; Author: p2p-websocket.el <gadmyth@gmail.com>
+;; Version: 0.2.4.7
+;; Package-Version: 20211202.001
+;; Package-Requires: websocket, s, dired-x, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/p2p-websocket.el
@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'websocket)
+(require 'dired-x)
 
 (defvar *p2p-ws-debug* nil)
 (defvar *p2p-ws-server* nil)
@@ -571,16 +572,8 @@ call it with the value of the `pp2-websocket-data' text property."
 
 (defun p2p-websocket-file-callback (data)
   "Callback of the p2p websocket file button with DATA as args."
-  (let* ((file-path data)
-         (directory (file-name-directory file-path))
-         (file-name (file-relative-name file-path directory)))
-    (when (> (length directory) 0)
-      (when-let ((dired-buffer (dired directory)))
-        (with-current-buffer dired-buffer
-          (revert-buffer)
-          (goto-char 0)
-          (let ((regexp (format " %s$" file-name)))
-            (re-search-forward regexp nil t)))))))
+  (let ((file-path data))
+    (dired-jump t file-path)))
 
 (defun p2p-websocket-parse-from-data (data)
   "Callback of the p2p websocket sender button with DATA as args."
