@@ -246,6 +246,21 @@ Copied some codes from window-numbering.el."
       (minibuffer-keyboard-quit)
     (quit-help-windows)))
 
+(defun run-or-raise-next (&optional buffer-filter)
+  "Run or raise next buffer in the buffer list filtered by BUFFER-FILTER."
+  (let* ((current-buffer (current-buffer))
+         (buffers (seq-filter (or buffer-filter #'identity) (buffer-list))))
+    (when (> (length buffers) 0)
+      (switch-to-buffer (car buffers)))))
+
+(defun run-or-raise-next-terminal ()
+  "."
+  (interactive)
+  (run-or-raise-next
+   (lambda (buffer)
+     (and (eq 'term-mode (with-current-buffer buffer major-mode))
+          (not (eq buffer current-buffer))))))
+
 ;; bind keymap additionally, originally bind to C-x 1
 (global-set-key (kbd "C-1") 'delete-other-windows)
 ;; bind keymap additionally, originally bind to C-x 0
@@ -253,6 +268,7 @@ Copied some codes from window-numbering.el."
 ;; originally bind to C-x 9
 (global-set-key (kbd "C-9") 'delete-other-windows-of-super-window)
 (global-set-key (kbd "C-x q") 'quit-temp-windows)
+(global-set-key (kbd "H-t") 'run-or-raise-next-terminal)
 
 (provide 'windows)
 ;;; windows.el ends here
