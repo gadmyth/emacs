@@ -17,10 +17,14 @@
 (setq mouse-autoselect-window t)
 
 ;; window operation
-(global-set-key (kbd "C-x 2") #'split-window-below-with-ratio)
-(global-set-key (kbd "C-x 3") #'split-window-right-with-ratio)
-(global-set-key (kbd "C-x C-2") #'(lambda () (interactive) (split-window-below-with-ratio t)))
-(global-set-key (kbd "C-x C-3") #'(lambda () (interactive) (split-window-right-with-ratio t)))
+;; originally bind to C-x 2, also overwrite the split-window key binding
+(global-set-key (kbd "C-2") #'split-window-below-with-ratio)
+;; originally bind to C-x 3, also overwrite the split-window-vertically key binding
+(global-set-key (kbd "C-3") #'split-window-right-with-ratio)
+;; originally bind to C-x C-2
+(global-set-key (kbd "C-M-2") #'(lambda () (interactive) (split-window-below-with-ratio t)))
+;; originally bind to C-x C-3
+(global-set-key (kbd "C-M-3") #'(lambda () (interactive) (split-window-right-with-ratio t)))
 (global-set-key (kbd "H-m") 'goto-main-window)
 (global-set-key (kbd "H-s") 'swap-window-in-current-frame)
 (global-set-key (kbd "H-c") 'copy-window-in-current-frame)
@@ -242,7 +246,12 @@ Copied some codes from window-numbering.el."
       (minibuffer-keyboard-quit)
     (quit-help-windows)))
 
-(global-set-key (kbd "C-x 9") 'delete-other-windows-of-super-window)
+;; bind keymap additionally, originally bind to C-x 1
+(global-set-key (kbd "C-1") 'delete-other-windows)
+;; bind keymap additionally, originally bind to C-x 0
+(global-set-key (kbd "C-0") 'delete-window)
+;; originally bind to C-x 9
+(global-set-key (kbd "C-9") 'delete-other-windows-of-super-window)
 (global-set-key (kbd "C-x q") 'quit-temp-windows)
 
 (provide 'windows)
