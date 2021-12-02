@@ -162,6 +162,34 @@
       (delete-region start end)
       (insert dash-case-string))))
 
+(defun join-the-line ()
+  "."
+  (interactive)
+  (let* ((ev last-command-event)
+         (base (event-basic-type ev)))
+    (pcase base
+      (?\j (forward-line)
+           (join-line))
+      (?\k (join-line))
+      ('up (forward-line -1))
+      ('down (forward-line))
+      (?\/ (undo))
+      (_ nil)))
+  (message "Use j to join the next line, use k join the previous line")
+  (set-transient-map
+   (let ((map (make-sparse-keymap)))
+     (define-key map (vector (list ?\j))
+       (lambda () (interactive) (join-the-line)))
+     (define-key map (vector (list ?\k))
+       (lambda () (interactive) (join-the-line)))
+     (define-key map (kbd "<up>")
+       (lambda () (interactive) (join-the-line)))
+     (define-key map (kbd "<down>")
+       (lambda () (interactive) (join-the-line)))
+     (define-key map (vector (append '(control) (list ?\/)))
+       (lambda () (interactive) (join-the-line)))
+     map)))
+
 ;; ------ line editor -------
 
 (defun kill-to-beginning-of-line ()
@@ -236,6 +264,11 @@
 (global-set-key (kbd "C-S-k") 'kill-the-whole-line)
 (global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
 (global-set-key (kbd "C-S-l") 'mark-the-whole-line)
+
+;; define the *global-join-map*
+(defvar *global-join-map* (make-sparse-keymap))
+(define-key (current-global-map) (kbd "C-x j j") 'join-the-line)
+(define-key (current-global-map) (kbd "C-x j k") 'join-the-line)
 
 (provide 'editors)
 ;;; editors.el ends here
