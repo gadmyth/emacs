@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20211129.001
+;; Version: 1.0.4
+;; Package-Version: 20211204.001
 ;; Package-Requires: async, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -43,6 +43,45 @@
 (defvar *notifications-buffer* "*notification*")
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
+
+(defun list-notifications ()
+  "."
+  (interactive)
+  (let* ((notifications (mapcar (lambda (notification)
+                                  (let* ((message (cdr (assq 'message notification)))
+                                         (message (base64-decode-string-as-multibyte message))
+                                         (timestamp (cdr (assq 'timestamp notification)))
+                                         (timestr (timestamp-to-normal-string timestamp)))
+                                    (format "%s (%s): %s" timestr (notification-time-diff-description timestamp) message)))
+                                *notifications*))
+         (notifications (sort notifications #'string<))
+         (current-timestr (current-time-normal-string)))
+    (completing-read (format "The notifications (%s): " current-timestr) notifications)))
+
+(defun notification-time-diff-description (timestamp)
+  "Show the time diff description of TIMESTAMP and now."
+  (let* ((now (current-timestamp))
+         (diff (- timestamp now))
+         (seconds (mod diff 60))
+         (minutes (/ diff 60))
+         (hours (/ diff 3600))
+         (days (/ diff 86400))
+         (months (/ diff (* 86400 30)))
+         (years (/ diff (* 86400 365)))
+         (desc ""))
+    (when (>= years 1)
+      (setq desc (s-concat desc (format "%dy" years))))
+    (when (>= months 1)
+      (setq desc (s-concat desc (format "%dm" months))))
+    (when (>= days 1)
+      (setq desc (s-concat desc (format "%dd" days))))
+    (when (>= hours 1)
+      (setq desc (s-concat desc (format "%dh" hours))))
+    (when (>= hours 1)
+      (setq desc (s-concat desc (format "%dm" minutes))))
+    (when (>= seconds 1)
+      (setq desc (s-concat desc (format "%ds" seconds))))
+    desc))
 
 (defun start-notify (message arg2)
   "Show MESSAGE as notification after some minutes or at some certain time of ARG2."

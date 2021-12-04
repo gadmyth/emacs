@@ -56,6 +56,14 @@
          (date-str (format-time-string time-format timestamp)))
     date-str))
 
+(defun timestamp-to-normal-string (timestamp)
+  "TIMESTAMP."
+  (timestamp-to-string-with-format timestamp "%Y-%m-%d %H:%M:%S"))
+
+(defun timestamp-to-short-string (timestamp)
+  "TIMESTAMP."
+  (timestamp-to-string-with-format timestamp "%Y-%m-%d"))
+
 (defun current-time-normal-string ()
   "."
   (interactive)
