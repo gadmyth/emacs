@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20211204.001
+;; Version: 1.0.1
+;; Package-Version: 20211204.002
 ;; Package-Requires: eyebrowse, s, windows
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -51,26 +51,54 @@
       (setq bookmark `((eyebrowse . ,(eyebrowse--get 'current-slot))
                        (buffername . , buffername)
                        (filename . ,filename)
+                       (front-context . ,(if (>= (- (point-max) (point))
+                                                 bookmark-search-size)
+                                             (buffer-substring-no-properties
+                                              (point)
+                                              (+ (point) bookmark-search-size))
+                                           nil))
+                       (rear-context . ,(if (>= (- (point) (point-min))
+                                                bookmark-search-size)
+                                            (buffer-substring-no-properties
+                                             (point)
+                                             (- (point) bookmark-search-size))
+                                          nil))
+                       (description . ,(save-excursion
+                                         (beginning-of-defun)
+                                         (let ((start (point)))
+                                           (end-of-line)
+                                           (let ((end (point)))
+                                             (message "%S, %S" start end)
+                                             (buffer-substring start end)))))
                        (position . ,(point))))
-      (message "%S" bookmark)
       (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) bookmark)
       (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
         `(lambda ()
            (interactive)
-           (eyebrowse-jump-to-bookmark ,bookmark-key))))))
+           (eyebrowse-jump-to-bookmark ,bookmark-key)))
+      (message "Add bookmark %s suceed!" bookmark-key))))
 
 (defun eyebrowse-cover-bookmark (bookmark-key)
   "Cover the exist bookmark of BOOKMARK-KEY."
   (interactive "sPlease input the bookmark key to cover: ")
   (message "cover bookmark: %s" bookmark-key)
-  (eyebrowse-add-bookmark bookmark-key t))
+  (eyebrowse-add-bookmark bookmark-key t)
+  (message "Cover bookmark %s suceed!" bookmark-key))
 
 (defun eyebrowse-delete-bookmark (bookmark-key)
   "Delete the exist bookmark of BOOKMARK-KEY."
   (interactive "sPlease input the bookmark key to delete: ")
   (message "delete bookmark: %s" bookmark-key)
   (let ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
-    (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) nil)))
+    (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) nil)
+    (message "Delete bookmark %s suceed!" bookmark-key)))
+
+(defun eyebrowse-clear-bookmark ()
+  "."
+  (interactive)
+  (when (yes-or-no-p "Clear all the eyebrowse bookmarks?")
+    (setq *eyebrowse-bookmarks* nil)
+    (message "Clear eyebrowse bookmarks suceed!")))
 
 (defun eyebrowse-jump-to-bookmark (bookmark-key)
   "Jump to the eyebrowse bookmark with BOOKMARK-KEY."
@@ -111,7 +139,6 @@
   (interactive)
   (let* ((prompt "Please select the bookmark: ")
          (collections *eyebrowse-bookmarks*)
-         (collections (sort collections (lambda (a b) (string< (car a) (car b)))))
          (collections (mapcar (lambda (bookmark)
                                 (let* ((key (car bookmark))
                                        (body (cdr bookmark))
@@ -119,9 +146,13 @@
                                        (eyebrowse-conf (eyebrowse-get-config-with-slot eyebrowse-slot))
                                        (eyebrowse-conf-string (eyebrowse-config-string eyebrowse-conf))
                                        (buffername (cdr (assq 'buffername body)))
+                                       (front-context (cdr (assq 'front-context body)))
+                                       (rear-context (cdr (assq 'rear-context body)))
+                                       (description (cdr (assq 'description body)))
                                        (position (cdr (assq 'position body))))
-                                  (format "%s: %s\t%s\t%d" key buffername eyebrowse-conf-string position)))
+                                  (format "%s: %s\t%s\t%s\t%d" key buffername description eyebrowse-conf-string position)))
                               collections))
+         (collections (sort collections #'string<))
          (selected (completing-read prompt collections nil t))
          (bookmark-key (substring selected 0 (s-index-of ":" selected))))
     (cond
@@ -137,7 +168,10 @@
     ("delete bookmark" . (lambda ()
                            (interactive)
                            (eyebrowse-list-bookmarks 'eyebrowse-delete-bookmark)))
+    ("clear  bookmark" . eyebrowse-clear-bookmark)
+    ;; TODO
     ("load   bookmark" . eyebrowse-load-bookmark)
+    ;; TODO
     ("save   bookmark" . eyebrowse-save-bookmark)))
 
 (defun eyebrowse-modify-bookmark ()
