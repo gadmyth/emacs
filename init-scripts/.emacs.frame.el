@@ -86,6 +86,7 @@
 (require-package 'auto-complete (global-auto-complete-mode))
 (require-package 'customized-dir (customized-dir-init))
 (require-package 'eyebrowse+ (eyebrowse-plus-mode t))
+(require-package 'eyebrowse-xmonad (eyebrowse-xmonad-mode t))
 (require-package 'wcy-desktop (wcy-desktop-init))
 (require 'exwm-conf)
 

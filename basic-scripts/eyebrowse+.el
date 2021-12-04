@@ -251,7 +251,9 @@
     ("set as default config" . eyebrowse-set-as-default-config)
     ("restore default config" . eyebrowse-restore-default-config)
     ("create config" . eyebrowse-create-window-config-with-tag)
-    ("close config" . eyebrowse-close-window-config)))
+    ("close config" . eyebrowse-close-window-config)
+    ("load config" . load-eyebrowse-config)
+    ("save config" . save-eyebrowse-config)))
 
 (defun eyebrowse-modify-config (&rest _)
   "."
@@ -279,9 +281,8 @@
 
 (defun eyebrowse-list-with-actions (actions &rest args)
   "Select one of ACTIONS, and choose action from eyebrowse configs, call the action with ARGS."
-  (let* ((current-element (eyebrowse-current-config-string))
-         (buffer-name (if (> (length args) 0) (car args) (buffer-name (current-buffer))))
-         (prompt (format "Select eyebrowse action for %s (%s): " buffer-name current-element))
+  (let* ((current-config (eyebrowse-current-config-string))
+         (prompt (format "Select eyebrowse action (%s): " current-config))
          (action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
@@ -333,19 +334,31 @@
          (name-with-config (format "%s%s" name info)))
     name-with-config))
 
+(defun temporary-buffer-p (buffer-name)
+  "Check the buffer of BUFFER-NAME is temporary or not."
+  (or (string-prefix-p " " buffer-name) (string-prefix-p "*" buffer-name)))
+
 (defun eyebrowse-switch-buffer (&rest _)
   "Switch to another buffer."
   (interactive)
-  (let* ((buffer (current-buffer))
-         (last-buffer (other-buffer (current-buffer)))
+  (let* ((current-buffer (current-buffer))
+         (current-buffer-name (eyebrowse-buffer-name-with-config (current-buffer)))
+         (last-buffer (other-buffer (current-buffer) t))
          (last-buffer-name (eyebrowse-buffer-name-with-config last-buffer))
-         (locked-config (eyebrowse-get-lock-buffer-config buffer))
+         (locked-config (eyebrowse-get-lock-buffer-config current-buffer))
          (config-string (eyebrowse-config-string locked-config))
          (info (if (null config-string) "" (format " (%s)" config-string)))
-         (buffer (completing-read (format "Switch to buffer%s: " info)
-                                  (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)) nil t nil nil last-buffer-name)))
-         ;(buffer (completing-read (format "Switch to buffer%s: " info) #'internal-complete-buffer nil t)))
-    (funcall 'eyebrowse-switch-buffer-action-with-config buffer)))
+         (buffer-list (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)))
+         (buffer-list (remove-if #'temporary-buffer-p buffer-list))
+         (current (car buffer-list)))
+    ;; propertize the current buffer
+    (when (equal current-buffer-name current)
+      (setq current (propertize current 'face 'current-eyebrowse-config-face))
+      (setf (car buffer-list) current))
+    ;; show the buffer list
+    (let ((buffer (completing-read (format "Switch to buffer%s: " info) buffer-list nil t nil nil last-buffer-name)))
+      ;;  (buffer (completing-read (format "Switch to buffer%s: " info) #'internal-complete-buffer nil t)))
+      (funcall 'eyebrowse-switch-buffer-action-with-config buffer))))
 
 (defun eyebrowse-switch-buffer-action-with-config (buffer-name-with-config)
   "Switch to buffer may be a string or nil, BUFFER-NAME-WITH-CONFIG."
@@ -420,8 +433,8 @@ The old element is identified by the first element of NEW-ELEMENT."
   "Update window config for the FRAME.
 If FRAME is nil, update the current frame."
   (let* ((current-slot (eyebrowse--get 'current-slot frame))
-	 (window-configs (eyebrowse--get 'window-configs frame))
-	 (current-tag (nth 2 (assoc current-slot window-configs))))
+         (window-configs (eyebrowse--get 'window-configs frame))
+         (current-tag (nth 2 (assoc current-slot window-configs))))
     (eyebrowse--update-window-config-element-with-frame
      (eyebrowse--get-window-config current-slot current-tag (frame-root-window frame)) frame)))
 
@@ -690,25 +703,9 @@ COPY from eyebrowse--load-window-config."
         (setq-local header-line-format eyebrowse-config-format)
       (setq-local header-line-format eyebrowse-buffer-name-format))))
 
-(defun eyebrowse-switch-to-last-config ()
-  "."
-  (interactive)
-  (when-let ((last-slot (eyebrowse--get 'last-slot)))
-    (eyebrowse-switch-to-window-config last-slot)))
-
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "H-~") 'switch-header-line-format)
-    (define-key map (kbd "H-`") 'eyebrowse-switch-to-last-config)
-    (define-key map (kbd "H-1") 'eyebrowse-switch-to-window-config-1)
-    (define-key map (kbd "H-2") 'eyebrowse-switch-to-window-config-2)
-    (define-key map (kbd "H-3") 'eyebrowse-switch-to-window-config-3)
-    (define-key map (kbd "H-4") 'eyebrowse-switch-to-window-config-4)
-    (define-key map (kbd "H-5") 'eyebrowse-switch-to-window-config-5)
-    (define-key map (kbd "H-6") 'eyebrowse-switch-to-window-config-6)
-    (define-key map (kbd "H-7") 'eyebrowse-switch-to-window-config-7)
-    (define-key map (kbd "H-8") 'eyebrowse-switch-to-window-config-8)
-    (define-key map (kbd "H-9") 'eyebrowse-switch-to-window-config-9)
     map)
   "Initial key map for `eyebrowse-plus-mode'.")
 

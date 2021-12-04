@@ -2,16 +2,19 @@
 ;;; Commentary:
 ;;; Code:
 
-(require 'windmove)
-(windmove-default-keybindings)
+(require-safely
+ 'windmove
+ (windmove-default-keybindings))
 
-(require 'window-numbering)
-(window-numbering-mode 1)
+(require-safely
+ 'window-numbering
+ (window-numbering-mode 1))
 
-(require 'winner)
-(winner-mode 1)
-(global-set-key (kbd "<H-up>") #'winner-undo)
-(global-set-key (kbd "<H-down>") #'winner-redo)
+(require-safely
+ 'winner
+ (winner-mode 1)
+ (global-set-key (kbd "<H-up>") #'winner-undo)
+ (global-set-key (kbd "<H-down>") #'winner-redo))
 
 ;; set mouse autoselect window
 (setq mouse-autoselect-window t)
@@ -25,13 +28,6 @@
 (global-set-key (kbd "C-M-2") #'(lambda () (interactive) (split-window-below-with-ratio t)))
 ;; originally bind to C-x C-3
 (global-set-key (kbd "C-M-3") #'(lambda () (interactive) (split-window-right-with-ratio t)))
-(global-set-key (kbd "H-m") 'goto-main-window)
-(global-set-key (kbd "H-s") 'swap-window-in-current-frame)
-(global-set-key (kbd "H-c") 'copy-window-in-current-frame)
-(global-set-key (kbd "<H-return>") 'swap-to-main-window)
-(global-set-key (kbd "<H-backspace>") #'goto-last-window)
-(global-set-key (kbd "<H-tab>") #'goto-next-window)
-(global-set-key (kbd "<H-iso-lefttab>") #'goto-previous-window)
 (global-set-key (kbd "C-c C-f") 'ido-find-file)
 (global-set-key (kbd "H-e") 'scroll-line-up)
 (global-set-key (kbd "H-y") 'scroll-line-down)
@@ -202,12 +198,6 @@ Copied some codes from window-numbering.el."
 (global-set-key (kbd "C-x C-6") 'adjust-window-size)
 (global-set-key (kbd "C-x C-5") 'adjust-window-size)
 
-(global-set-key (kbd "H-h") 'adjust-window-size)
-(global-set-key (kbd "H-l") 'adjust-window-size)
-(global-set-key (kbd "H-j") 'adjust-window-size)
-(global-set-key (kbd "H-k") 'adjust-window-size)
-
-
 
 (defun delete-other-windows-of-super-window (&optional window)
   "WINDOW."
@@ -246,20 +236,26 @@ Copied some codes from window-numbering.el."
       (minibuffer-keyboard-quit)
     (quit-help-windows)))
 
-(defun run-or-raise-next (&optional buffer-filter)
-  "Run or raise next buffer in the buffer list filtered by BUFFER-FILTER."
-  (let* ((current-buffer (current-buffer))
-         (buffers (seq-filter (or buffer-filter #'identity) (buffer-list))))
-    (when (> (length buffers) 0)
-      (switch-to-buffer (car buffers)))))
+(defun run-or-raise-next (&optional buffer-filter run-func)
+  "Run or raise next buffer in the buffer list filtered by BUFFER-FILTER, if buffer list is empty, exec the RUN-FUNC to create one."
+  (let ((buffers (seq-filter (or buffer-filter #'identity) (buffer-list))))
+    (if (> (length buffers) 0)
+        (progn (let ((current-buffer (current-buffer)))
+                 (setq buffers (delq current-buffer buffers))
+                 (when (> (length buffers) 0)
+                   (switch-to-buffer (car buffers)))))
+      (call-interactively run-func))))
 
 (defun run-or-raise-next-terminal ()
   "."
   (interactive)
   (run-or-raise-next
    (lambda (buffer)
-     (and (eq 'term-mode (with-current-buffer buffer major-mode))
-          (not (eq buffer current-buffer))))))
+     (eq 'term-mode (with-current-buffer buffer major-mode)))
+   (lambda ()
+     (interactive)
+     ;; TODO: bash path in different OS, or use multi-term
+     (term "/bin/bash"))))
 
 ;; bind keymap additionally, originally bind to C-x 1
 (global-set-key (kbd "C-1") 'delete-other-windows)
@@ -268,7 +264,6 @@ Copied some codes from window-numbering.el."
 ;; originally bind to C-x 9
 (global-set-key (kbd "C-9") 'delete-other-windows-of-super-window)
 (global-set-key (kbd "C-x q") 'quit-temp-windows)
-(global-set-key (kbd "H-t") 'run-or-raise-next-terminal)
 
 (provide 'windows)
 ;;; windows.el ends here
