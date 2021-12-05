@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.4
-;; Package-Version: 20211204.001
+;; Version: 1.0.5
+;; Package-Version: 20211205.001
 ;; Package-Requires: async, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -77,7 +77,7 @@
       (setq desc (s-concat desc (format "%dd" days))))
     (when (>= hours 1)
       (setq desc (s-concat desc (format "%dh" hours))))
-    (when (>= hours 1)
+    (when (>= minutes 1)
       (setq desc (s-concat desc (format "%dm" minutes))))
     (when (>= seconds 1)
       (setq desc (s-concat desc (format "%ds" seconds))))
