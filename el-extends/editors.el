@@ -253,6 +253,12 @@
          (java-property (format "private String %s;" prop)))
     (kill-new java-property)))
 
+(defun remove-all-text-properties-region (beg end)
+  "Remove all the text properties with region from BEG to END."
+  (interactive "r")
+  (when (region-active-p)
+    (set-text-properties beg end nil)))
+
 ;; ----- global keys for line editor -----
 
 ;; C-k: kill-line from current point to end of line
