@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.5
-;; Package-Version: 20211205.001
+;; Version: 1.0.6
+;; Package-Version: 20211205.002
 ;; Package-Requires: async, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -62,7 +62,7 @@
   "Show the time diff description of TIMESTAMP and now."
   (let* ((now (current-timestamp))
          (diff (- timestamp now))
-         (seconds (mod diff 60))
+         (seconds diff)
          (minutes (/ diff 60))
          (hours (/ diff 3600))
          (days (/ diff 86400))
@@ -72,14 +72,24 @@
     (when (>= years 1)
       (setq desc (s-concat desc (format "%dy" years))))
     (when (>= months 1)
+      (when (> months 12)
+        (setq months (mod months 12)))
       (setq desc (s-concat desc (format "%dm" months))))
     (when (>= days 1)
+      (when (> days 30)
+        (setq days (mod days 30)))
       (setq desc (s-concat desc (format "%dd" days))))
     (when (>= hours 1)
+      (when (> hours 24)
+        (setq hours (mod hours 24)))
       (setq desc (s-concat desc (format "%dh" hours))))
     (when (>= minutes 1)
+      (when (> minutes 60)
+        (setq minutes (mod minutes 60)))
       (setq desc (s-concat desc (format "%dm" minutes))))
     (when (>= seconds 1)
+      (when (> seconds 60)
+        (setq seconds (mod seconds 60)))
       (setq desc (s-concat desc (format "%ds" seconds))))
     desc))
 
