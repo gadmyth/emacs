@@ -3,9 +3,9 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20211205.001
-;; Package-Requires: eyebrowse, s, windows
+;; Version: 1.0.3
+;; Package-Version: 20211205.002
+;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/eyebrowse-xmonad.el
@@ -36,6 +36,7 @@
 
 (require 'eyebrowse)
 (require 'windows)
+(require 'minibuffer+)
 (require 's)
 
 (defvar *eyebrowse-bookmarks* nil)
@@ -51,12 +52,14 @@
       (setq bookmark `((eyebrowse . ,(eyebrowse--get 'current-slot))
                        (buffername . , buffername)
                        (filename . ,filename)
+                       ;; copied from bookmark.el
                        (front-context . ,(if (>= (- (point-max) (point))
                                                  bookmark-search-size)
                                              (buffer-substring-no-properties
                                               (point)
                                               (+ (point) bookmark-search-size))
                                            nil))
+                       ;; copied from bookmark.el
                        (rear-context . ,(if (>= (- (point) (point-min))
                                                 bookmark-search-size)
                                             (buffer-substring-no-properties
@@ -68,25 +71,31 @@
                                          (let ((start (point)))
                                            (end-of-line)
                                            (let ((end (point)))
-                                             (message "%S, %S" start end)
                                              (buffer-substring start end)))))
                        (position . ,(point))))
+      ;; set or append the bookmark of key
       (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) bookmark)
+      ;; define H-<key>, cycle the bookmarks of <key>
       (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
-        `(lambda ()
-           (interactive)
-           (eyebrowse-jump-to-bookmark ,bookmark-key)))
+        (eval `(toggle-minibuffer
+                (lambda ()
+                  (interactive)
+                  (eyebrowse-jump-to-bookmark ,bookmark-key)))))
+      ;; define H-S-<key>, show bookmark list and choose one to delete
       (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" (upcase bookmark-key)))
-        `(lambda ()
-           (interactive)
-           (eyebrowse-list-bookmarks (lambda (bookmark-key)
-                                       (eyebrowse-delete-bookmark bookmark-key)))))
+        (eval `(toggle-minibuffer
+                (lambda ()
+                  (interactive)
+                  (eyebrowse-delete-bookmark ,bookmark-key)))))
+      ;; define H-C-<key>, show bookmark list of <key>
       (define-key eyebrowse-xmonad-mode-map (kbd (format "H-C-%s" bookmark-key))
-        `(lambda ()
-           (interactive)
-           (eyebrowse-list-bookmarks nil (lambda (bookmark)
-                                           (string-equal (car bookmark) ,bookmark-key)))))
-      (message "Add bookmark %s suceed!" bookmark-key))))
+        (eval `(toggle-minibuffer
+                (lambda ()
+                  (interactive)
+                  (eyebrowse-list-bookmarks nil (lambda (bookmark)
+                                                  (string-equal (car bookmark) ,bookmark-key)))))))
+      (when (not cover-p)
+        (message "Add bookmark %s suceed!" bookmark-key)))))
 
 (defun eyebrowse-cover-bookmark (bookmark-key)
   "Cover the exist bookmark of BOOKMARK-KEY."
@@ -137,7 +146,6 @@
          (indice (number-sequence 0 (- (length keys) 1))))
     (seq-doseq (idx indice)
       (let ((key (aref keys idx)))
-        (message "%S" key)
         (define-key eyebrowse-xmonad-mode-map (kbd (format "H-M-%c" key))
           `(lambda ()
              (interactive)
@@ -208,6 +216,13 @@
            (eyebrowse-switch-to-window-config ,slot)
            (eyebrowse-rename-window-config ,slot tag))
        (eyebrowse-switch-to-window-config ,slot))))
+
+(flet ((eyebrowse-cycle-bookmarks
+        (lambda ()
+          (interactive)
+          (eyebrowse-jump-to-bookmark ,bookmark-key))))
+  (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
+    (toggle-minibuffer eyebrowse-cycle-bookmarks)))
 
 (defvar eyebrowse-xmonad-mode-map
   (let ((map (make-sparse-keymap)))
