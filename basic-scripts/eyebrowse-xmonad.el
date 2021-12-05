@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20211204.002
+;; Version: 1.0.2
+;; Package-Version: 20211205.001
 ;; Package-Requires: eyebrowse, s, windows
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -76,6 +76,16 @@
         `(lambda ()
            (interactive)
            (eyebrowse-jump-to-bookmark ,bookmark-key)))
+      (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" (upcase bookmark-key)))
+        `(lambda ()
+           (interactive)
+           (eyebrowse-list-bookmarks (lambda (bookmark-key)
+                                       (eyebrowse-delete-bookmark bookmark-key)))))
+      (define-key eyebrowse-xmonad-mode-map (kbd (format "H-C-%s" bookmark-key))
+        `(lambda ()
+           (interactive)
+           (eyebrowse-list-bookmarks nil (lambda (bookmark)
+                                           (string-equal (car bookmark) ,bookmark-key)))))
       (message "Add bookmark %s suceed!" bookmark-key))))
 
 (defun eyebrowse-cover-bookmark (bookmark-key)
@@ -134,11 +144,12 @@
              (eyebrowse-add-bookmark ,(format "%c" key))))))
     nil))
 
-(defun eyebrowse-list-bookmarks (&optional action)
-  "List the eyebrowse bookmarks, choose one and do ACTION on it."
+(defun eyebrowse-list-bookmarks (&optional action filter)
+  "List the eyebrowse bookmarks with FILTER, choose one and do ACTION on it."
   (interactive)
   (let* ((prompt "Please select the bookmark: ")
          (collections *eyebrowse-bookmarks*)
+         (collections (if filter (seq-filter filter collections) collections))
          (collections (mapcar (lambda (bookmark)
                                 (let* ((key (car bookmark))
                                        (body (cdr bookmark))
