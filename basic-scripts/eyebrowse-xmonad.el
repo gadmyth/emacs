@@ -4,7 +4,7 @@
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
 ;; Version: 1.0.3
-;; Package-Version: 20211205.002
+;; Package-Version: 20211206.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -216,13 +216,6 @@
            (eyebrowse-switch-to-window-config ,slot)
            (eyebrowse-rename-window-config ,slot tag))
        (eyebrowse-switch-to-window-config ,slot))))
-
-(flet ((eyebrowse-cycle-bookmarks
-        (lambda ()
-          (interactive)
-          (eyebrowse-jump-to-bookmark ,bookmark-key))))
-  (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
-    (toggle-minibuffer eyebrowse-cycle-bookmarks)))
 
 (defvar eyebrowse-xmonad-mode-map
   (let ((map (make-sparse-keymap)))
