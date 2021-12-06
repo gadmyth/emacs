@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.12
-;; Package-Version: 20211201.001
+;; Version: 1.2.13
+;; Package-Version: 20211206.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -648,10 +648,14 @@ COPY from eyebrowse--load-window-config."
             (last-slot (eyebrowse--get 'last-slot))
             (help-echo "mouse-1: Switch to indicated workspace"))
         (mapcar (lambda (config)
-                  (let ((slot (car config))
-                        (config-string (eyebrowse-config-string config))
-                        (face)
-                        (local-map))
+                  (let* ((slot (car config))
+                         (config-string (eyebrowse-config-string config))
+                         (config-string (if (and (boundp '*eyebrowse-locked-config-slot*)
+                                                 (eq slot *eyebrowse-locked-config-slot*))
+                                            (format "%s*" config-string)
+                                          config-string))
+                         (face)
+                         (local-map))
                     (cond ((eq slot current-slot)
                            (setq face 'current-eyebrowse-config-face))
                           ((eq slot last-slot)
