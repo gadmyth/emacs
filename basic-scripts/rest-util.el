@@ -5,7 +5,7 @@
 (require 's)
 (require 'url-cookie)
 
-(defun store-browser-cookies (domain &rest cookie-keys)
+(defun store-browser-cookies (domain cookie-keys)
   "Get the browser cookies of DOMAIN whoice key's is COOKIE-KEYS."
   (let* ((param (s-join ":" cookie-keys))
          (scriptlets-dir (expand-file-name "scriptlets" +emacs-context-directory+))
