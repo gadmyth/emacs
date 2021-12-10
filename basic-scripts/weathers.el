@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.4
-;; Package-Version: 20210925.001
+;; Version: 1.0.5
+;; Package-Version: 20211210.001
 ;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -95,31 +95,32 @@
                        (hmac-sha1
                         (encode-coding-string key 'utf-8 t)
                         (encode-coding-string str 'utf-8 t)))))
-      (request
-        api
-        :params `((ts . ,ts)
-                  (uid . ,uid)
-                  (sig . ,signature)
-                  (location . ,location))
-        :parser 'json-read
-        :success (function*
-                  (lambda (&key data &allow-other-keys)
-                    (when (string-equal "results" (car (car data)))
-                      (let* ((results (cdr (assoc 'results data)))
-                             (result (and (vectorp results)
-                                          (> (length results) 0)
-                                          (aref results 0)))
-                             (location (assoc 'location result))
-                             (loc-name (cdr (assoc 'name (cdr location))))
-                             (now (assoc 'now result))
-                             (weather (cdr (assoc 'text (cdr now))))
-                             (temperature (cdr (assoc 'temperature (cdr now))))
-                             (format-result (format "%s:%s(%s)" loc-name weather temperature)))
-                        (weathers-debug-message "weather result fetched: %s" format-result)
-                        (setq *weather-api-result* format-result)))))
-        :error (function*
-                (lambda (&key error-thrown &allow-other-keys&rest _)
-                  (message "error: %S" error-thrown)))))))
+      (let ((request-backend 'curl))
+        (request
+          api
+          :params `((ts . ,ts)
+                    (uid . ,uid)
+                    (sig . ,signature)
+                    (location . ,location))
+          :parser 'json-read
+          :success (function*
+                    (lambda (&key data &allow-other-keys)
+                      (when (string-equal "results" (car (car data)))
+                        (let* ((results (cdr (assoc 'results data)))
+                               (result (and (vectorp results)
+                                            (> (length results) 0)
+                                            (aref results 0)))
+                               (location (assoc 'location result))
+                               (loc-name (cdr (assoc 'name (cdr location))))
+                               (now (assoc 'now result))
+                               (weather (cdr (assoc 'text (cdr now))))
+                               (temperature (cdr (assoc 'temperature (cdr now))))
+                               (format-result (format "%s:%s(%s)" loc-name weather temperature)))
+                          (weathers-debug-message "weather result fetched: %s" format-result)
+                          (setq *weather-api-result* format-result)))))
+          :error (function*
+                  (lambda (&key error-thrown &allow-other-keys&rest _)
+                    (message "error: %S" error-thrown))))))))
 
 (defun fetched-weather ()
   "."
