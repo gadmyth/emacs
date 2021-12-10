@@ -257,6 +257,16 @@ Copied some codes from window-numbering.el."
      ;; TODO: bash path in different OS, or use multi-term
      (term "/bin/bash"))))
 
+(defun switch-to-scratch-buffer ()
+  "."
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*")))
+
+(defun switch-to-message-buffer ()
+  "."
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*Messages*")))
+
 ;; bind keymap additionally, originally bind to C-x 1
 (global-set-key (kbd "C-1") 'delete-other-windows)
 ;; bind keymap additionally, originally bind to C-x 0
