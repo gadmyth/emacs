@@ -47,16 +47,25 @@
   (cond
    ((or (eq window-system 'x)
         (eq window-system 'ns))
-    (let* ((shell-command-string "curl -s cip.cc | grep IP | cut -f2 -d ':' | awk '{ gsub(/^[ \t]+|[ \t]+$/, \"\"); print }'")
-           (result (shell-command-to-string shell-command-string))
-           (result (substring result 0 (- (length result) 1))))
-      (when (eq current-prefix-arg 8)
-        (message "public-ip: %s" result))
-      (when result
-        (network-util-debug-message "public ip fetched: [%S]" result)
-        (setq *fetched-public-ip* result)
-        (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))
-      result))
+    (cond
+     ((eq current-prefix-arg 8)
+      (let* ((shell-command-string "curl -s cip.cc | grep IP | cut -f2 -d ':' | awk '{ gsub(/^[ \t]+|[ \t]+$/, \"\"); print }'")
+             (result (shell-command-to-string shell-command-string))
+             (result (substring result 0 (- (length result) 1))))
+        (message "public-ip: %s" result)))
+     (t
+      (let ((request-backend 'curl))
+        (request
+          "http://cip.cc"
+          :parser 'buffer-string
+          :success (cl-function
+                    (lambda (&key data &allow-other-keys)
+                      (when (> (length data) 0)
+                        (let* ((ip-line (car (split-string data "\n")))
+                               (ip (string-trim (cadr (split-string ip-line ":")))))
+                          (network-util-debug-message "public ip fetched: [%S]" ip)
+                          (setq *fetched-public-ip* ip)
+                          (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))))))))))
    (t "")))
 
 (defvar *public-ip-fetch-timer* nil)
