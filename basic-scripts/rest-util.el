@@ -4,6 +4,20 @@
 
 (require 'url-cookie)
 
+(defun url-retrieve-utf8-json-parser ()
+  (with-current-buffer (current-buffer)
+    (let ((content (decode-coding-string (buffer-string) 'utf-8)))
+      (delete-region (point) (point-min))
+      (insert content)
+      (json-read))))
+
+(defun url-retrieve-utf8-parser ()
+  (with-current-buffer (current-buffer)
+    (let ((content (decode-coding-string (buffer-string) 'utf-8)))
+      (delete-region (point) (point-min))
+      (insert content)
+      (buffer-string))))
+
 (defun refresh-cookies (domain cookie-keys)
   "Get the browser cookies of DOMAIN whoice key's is COOKIE-KEYS."
   (url-cookie-delete-cookies domain)
