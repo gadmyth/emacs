@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20211206.001
+;; Version: 1.0.4
+;; Package-Version: 20211210.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -142,7 +142,7 @@
 
 (defun define-eyebrowse-bookmarks-keymap ()
   "."
-  (let* ((keys "abdefginopqruvwxyz")
+  (let* ((keys "abdfginopqruvwxz")
          (indice (number-sequence 0 (- (length keys) 1))))
     (seq-doseq (idx indice)
       (let ((key (aref keys idx)))
