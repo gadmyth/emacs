@@ -36,6 +36,7 @@
 (setq *socks5-proxy-port* 1080)
 
 ;; erc
+(defvar *erc-forbidden-targets* nil)
 (add-to-list '*erc-forbidden-targets* "")
 
 ;; weathers
