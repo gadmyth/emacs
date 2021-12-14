@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.7
-;; Package-Version: 20211213.001
+;; Version: 1.0.8
+;; Package-Version: 20211214.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -117,6 +117,7 @@
                                 ("m" (* 60 repeat-duration-number))
                                 ("h" (* 60 60 repeat-duration-number))
                                 ("d" (* 24 60 60 repeat-duration-number))
+                                ("w" (* 7 24 60 60 repeat-duration-number))
                                 ("M" (* 30 24 60 60 repeat-duration-number))
                                 (_ repeat-duration-number)))
              (id (replace-regexp-in-string "-" "" (uuid-string)))
@@ -124,9 +125,7 @@
                              (fire-time . ,fire-time)
                              (message . ,message)
                              (repeat-duration . ,repeat-duration))))
-        (message "a")
         (update-notification notification)
-        (message "%S" notification)
         (do-schedule-notification id seconds)))))
 
 (defun load-notifications ()
@@ -199,7 +198,6 @@
          (repeat-duration (alist-get 'repeat-duration notification))
          (fired (alist-get 'fired notification))
          (now (current-timestamp)))
-    (message "AA: fire-time: %S, repeat-duration: %S, fired: %S" fire-time repeat-duration fired)
     (when (and fired
                (>= now fire-time)
                repeat-duration
