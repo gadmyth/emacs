@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.8
-;; Package-Version: 20211214.001
+;; Version: 1.0.9
+;; Package-Version: 20211215.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -156,8 +156,13 @@
          (scheduled (alist-get 'scheduled notification))
          (now (current-timestamp))
          (fire-time (alist-get 'fire-time notification)))
-    (when (and (not scheduled)
-               (> fire-time now))
+    (when (or
+           ;; scheduled and not fired in the past
+           (and scheduled
+                (< fired-time now))
+           ;; not scheduled and should be fired in the future
+           (and (not scheduled)
+                (>= fire-time now)))
       (let ((seconds (- fire-time now)))
         (message "now schedule the notification: %S" notification)
         (do-schedule-notification id seconds)))))
@@ -206,6 +211,8 @@
              (new-fire-time (+ fire-time (* (+ multiple 1) repeat-duration))))
         ;; refresh the new fire time
         (set-notify-property notification 'fire-time new-fire-time)
+        ;; reset the scheduled mark
+        (set-notify-property notification 'scheduled nil)
         ;; reset the fired mark
         (set-notify-property notification 'fired nil)
         ;; update notification back to list
@@ -222,29 +229,33 @@
 
 (defun do-schedule-notification (id seconds)
   "Show notification message which id is ID after some SECONDS."
-  (run-with-timer
-   seconds
-   nil
-   `(lambda ()
-      (let ((notification (get-notification ,id)))
-        (message "received notification: %S" notification)
-        (let* ((message (format "%s" (alist-get 'message notification)))
-               (message (base64-decode-string-as-multibyte message))
-               (id (alist-get 'id notification))
-               (fire-time (alist-get 'fire-time notification))
-               (buffer (get-buffer-create *notifications-buffer*)))
-          (with-current-buffer buffer
-            (read-only-mode 0)
-            (goto-char (point-max))
-            (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message "\n\n")
-            (read-only-mode t))
-          (display-buffer buffer)
-          ;; mark as fired
-          (set-notify-property notification 'fired t)
-          (update-notification notification)
-          ;; re-schedule repeatable notification
-          (refresh-repeatable-notification id)
-          (remove-fired-notifications))))))
+  (when (run-with-timer
+         seconds
+         nil
+         `(lambda ()
+            (let ((notification (get-notification ,id)))
+              (message "received notification: %S" notification)
+              (let* ((message (format "%s" (alist-get 'message notification)))
+                     (message (base64-decode-string-as-multibyte message))
+                     (id (alist-get 'id notification))
+                     (fire-time (alist-get 'fire-time notification))
+                     (buffer (get-buffer-create *notifications-buffer*)))
+                (with-current-buffer buffer
+                  (read-only-mode 0)
+                  (goto-char (point-max))
+                  (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message "\n\n")
+                  (read-only-mode t))
+                (display-buffer buffer)
+                ;; mark as fired
+                (set-notify-property notification 'fired t)
+                (update-notification notification)
+                ;; re-schedule repeatable notification
+                (refresh-repeatable-notification id)
+                (remove-fired-notifications)))))
+    (let ((notification (get-notification ,id)))
+      (set-notify-property notification 'scheduled t)
+      (update-notification notification)
+      (message "scheduled notification: %S" notification))))
 
 (defun update-notification (notification)
   "NOTIFICATION."
