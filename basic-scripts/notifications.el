@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.2
-;; Package-Version: 20211217.003
+;; Version: 1.1.3
+;; Package-Version: 20211217.004
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -141,12 +141,13 @@
     (with-temp-buffer
       (insert-file-contents +notifications-file-name+)
       (goto-char (point-min))
-      (let ((content (read (current-buffer))))
-        (when (> (length content) 0)
+      (let ((list (read (current-buffer))))
+        (when (> (length list) 0)
           (remove-expired-notifications)
           (let ((now (current-timestamp)))
-            (dolist (notification content)
-              (load-notification notification)))))))
+            (dolist (element list)
+              (let ((notification (cdr element)))
+                (load-notification notification))))))))
   t)
 
 (defun load-notification (notification)
