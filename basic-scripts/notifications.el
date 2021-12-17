@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.0
-;; Package-Version: 20211217.001
+;; Version: 1.1.1
+;; Package-Version: 20211217.002
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -63,6 +63,8 @@
   "Show the time diff description of FIRE-TIME and now."
   (let* ((now (current-timestamp))
          (diff (- fire-time now))
+         (sign (if (> diff 0) "+" "-"))
+         (diff (abs diff))
          (seconds diff)
          (minutes (/ diff 60))
          (hours (/ diff 3600))
@@ -92,6 +94,7 @@
       (when (> seconds 60)
         (setq seconds (mod seconds 60)))
       (setq desc (s-concat desc (format "%ds" seconds))))
+    (setq desc (format "%s%s" sign desc))
     desc))
 
 (defun start-notify (message arg2 arg3)
