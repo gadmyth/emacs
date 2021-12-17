@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.4
-;; Package-Version: 20211210.001
+;; Version: 1.0.5
+;; Package-Version: 20211217.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -41,6 +41,8 @@
 
 (defvar *eyebrowse-bookmarks* nil)
 
+(defvar eyebrowse-bookmark-search-size 16)
+
 (defun eyebrowse-add-bookmark (bookmark-key &optional cover-p)
   "Set the current position as eyebrowse bookmark with BOOKMARK-KEY, if COVER-P, overwrite the exist bookmark."
   (interactive "sPlease input the bookmark key to add: ")
@@ -54,17 +56,17 @@
                        (filename . ,filename)
                        ;; copied from bookmark.el
                        (front-context . ,(if (>= (- (point-max) (point))
-                                                 bookmark-search-size)
+                                                 eyebrowse-bookmark-search-size)
                                              (buffer-substring-no-properties
                                               (point)
-                                              (+ (point) bookmark-search-size))
+                                              (+ (point) eyebrowse-bookmark-search-size))
                                            nil))
                        ;; copied from bookmark.el
                        (rear-context . ,(if (>= (- (point) (point-min))
-                                                bookmark-search-size)
+                                                eyebrowse-bookmark-search-size)
                                             (buffer-substring-no-properties
                                              (point)
-                                             (- (point) bookmark-search-size))
+                                             (- (point) eyebrowse-bookmark-search-size))
                                           nil))
                        (description . ,(save-excursion
                                          (beginning-of-defun)
