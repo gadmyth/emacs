@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.0.9
-;; Package-Version: 20211215.001
+;; Version: 1.1.0
+;; Package-Version: 20211217.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -144,11 +144,11 @@
 
 (defun load-notification (notification)
   "Load the NOTIFICATION if not exist in *notifications* list."
-  (let ((id (alist-get 'id notification))
-        (noti (get-notification id)))
-    (when (not noti)
+  (let* ((id (alist-get 'id notification))
+         (noti (get-notification id)))
+    (unless noti
       (setf (get-notification id) notification)
-      (schedule-notification notification))))
+      (schedule-notification id))))
 
 (defun schedule-notification (id)
   "Schedule the notification of ID."
@@ -159,7 +159,7 @@
     (when (or
            ;; scheduled and not fired in the past
            (and scheduled
-                (< fired-time now))
+                (< fire-time now))
            ;; not scheduled and should be fired in the future
            (and (not scheduled)
                 (>= fire-time now)))
@@ -223,9 +223,8 @@
 (defun save-notifications ()
   "."
   (remove-expired-notifications)
-  (let ((content (format "%s" *notifications*)))
     (with-temp-file +notifications-file-name+
-      (insert content))))
+      (print *notifications* (current-buffer))))
 
 (defun do-schedule-notification (id seconds)
   "Show notification message which id is ID after some SECONDS."
@@ -234,8 +233,8 @@
          nil
          `(lambda ()
             (let ((notification (get-notification ,id)))
-              (message "received notification: %S" notification)
-              (let* ((message (format "%s" (alist-get 'message notification)))
+              (message "prepare to fire notification: %S" notification)
+              (let* ((message (alist-get 'message notification))
                      (message (base64-decode-string-as-multibyte message))
                      (id (alist-get 'id notification))
                      (fire-time (alist-get 'fire-time notification))
@@ -252,7 +251,7 @@
                 ;; re-schedule repeatable notification
                 (refresh-repeatable-notification id)
                 (remove-fired-notifications)))))
-    (let ((notification (get-notification ,id)))
+    (let ((notification (get-notification id)))
       (set-notify-property notification 'scheduled t)
       (update-notification notification)
       (message "scheduled notification: %S" notification))))
