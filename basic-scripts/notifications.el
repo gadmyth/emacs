@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.1
-;; Package-Version: 20211217.002
+;; Version: 1.1.2
+;; Package-Version: 20211217.003
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,10 @@
 (defvar *notifications-buffer* "*notifications*")
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
+
+(defmacro get-notification (id)
+  "ID."
+  `(alist-get ,id *notifications* nil t 'equal))
 
 (defun list-notifications ()
   "."
@@ -267,10 +271,6 @@
 (defmacro set-notify-property (notification key value)
   "Update NOTIFICATION's VALUE of KEY."
   `(setf (alist-get ,key ,notification) ,value))
-
-(defmacro get-notification (id)
-  "ID."
-  `(alist-get ,id *notifications* nil t 'equal))
 
 (global-set-key (kbd "C-x s") 'start-notify)
 
