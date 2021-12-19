@@ -22,6 +22,22 @@
       (quick-on-timesmap timestamp))
     timestamp))
 
+(defun tomorrow-timestamp ()
+  "."
+  (interactive)
+  (let ((time (decode-time)))
+    (decoded-time--alter-day time t)
+    (setf (decoded-time-second time) 0)
+    (setf (decoded-time-minute time) 0)
+    (setf (decoded-time-hour time) 0)
+    (let* ((encoded-time (encode-time time))
+           (high (car encoded-time))
+           (low (cadr encoded-time))
+           (timestamp (+ (* high 65536) low)))
+      (when (called-interactively-p 'any)
+        (quick-on-timesmap timestamp))
+      timestamp)))
+
 (defun system-current-timestamp ()
   "."
   (interactive)

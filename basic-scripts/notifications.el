@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.4
-;; Package-Version: 20211219.001
+;; Version: 1.1.5
+;; Package-Version: 20211219.002
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -52,13 +52,20 @@
 (defun list-notifications ()
   "."
   (interactive)
-  (let* ((notifications (mapcar (lambda (notification)
+  (let* ((tomorrow-timestamp (tomorrow-timestamp))
+         (notifications (if current-prefix-arg
+                            *notifications*
+                          ;; filter the today's notifications
+                          (seq-filter(lambda (notification)
+                                       (> tomorrow-timestamp (alist-get 'fire-time notification)))
+                                     *notifications*)))
+         (notifications (mapcar (lambda (notification)
                                   (let* ((message (alist-get 'message notification))
                                          (message (base64-decode-string-as-multibyte message))
                                          (fire-time (alist-get 'fire-time notification))
                                          (fire-time-str (timestamp-to-normal-string fire-time)))
                                     (format "%s (%s): %s" fire-time-str (notification-time-diff-description fire-time) message)))
-                                *notifications*))
+                                notifications))
          (notifications (sort notifications #'string<))
          (current-timestr (current-time-normal-string)))
     (completing-read (format "The notifications (%s): " current-timestr) notifications)))
