@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.3
-;; Package-Version: 20211217.004
+;; Version: 1.1.4
+;; Package-Version: 20211219.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -106,12 +106,12 @@
   (interactive
    (list
     (read-string "notification to send: " nil nil nil)
-    (if (null current-prefix-arg)
+    (if current-prefix-arg
         (read-number "after minitues: " 0)
       (read-string "at the time: " (current-time-normal-string)))
     (read-string "repeat duration: " "0m")))
   (let* ((now (current-timestamp))
-         (seconds (if (null current-prefix-arg)
+         (seconds (if current-prefix-arg
                       (* 60 arg2)
                     (- (string-to-timestamp arg2) now))))
     (when (> seconds 0)
