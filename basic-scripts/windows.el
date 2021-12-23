@@ -16,6 +16,8 @@
  (global-set-key (kbd "<H-up>") #'winner-undo)
  (global-set-key (kbd "<H-down>") #'winner-redo))
 
+(require 'cl-seq)
+
 ;; set mouse autoselect window
 (setq mouse-autoselect-window t)
 
@@ -238,12 +240,15 @@ Copied some codes from window-numbering.el."
 
 (defun run-or-raise-next (&optional buffer-filter run-func)
   "Run or raise next buffer in the buffer list filtered by BUFFER-FILTER, if buffer list is empty, exec the RUN-FUNC to create one."
-  (let ((buffers (seq-filter (or buffer-filter #'identity) (buffer-list))))
+  (let* ((buffers (seq-filter (or buffer-filter #'identity) (buffer-list)))
+         (buffers (sort buffers (lambda (a b) (string< (buffer-name a) (buffer-name b))))))
     (if (> (length buffers) 0)
-        (progn (let ((current-buffer (current-buffer)))
-                 (setq buffers (delq current-buffer buffers))
-                 (when (> (length buffers) 0)
-                   (switch-to-buffer (car buffers)))))
+        (let* ((len (length buffers))
+               (position (cl-position (current-buffer) buffers :test #'equal))
+               (index (if position (% (+ position 1) len) 0))
+               (target (nth index buffers)))
+          (message "len: %S, position: %S, index: %S, target: %S" len position index target)
+          (switch-to-buffer target))
       (call-interactively run-func))))
 
 (defun run-or-raise-next-terminal ()
