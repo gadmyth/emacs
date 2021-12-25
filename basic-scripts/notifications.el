@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.5
-;; Package-Version: 20211219.002
+;; Version: 1.1.6
+;; Package-Version: 20211225.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -254,12 +254,16 @@
                      (id (alist-get 'id notification))
                      (fire-time (alist-get 'fire-time notification))
                      (buffer (get-buffer-create *notifications-buffer*)))
+                (display-buffer buffer)
                 (with-current-buffer buffer
                   (read-only-mode 0)
-                  (goto-char (point-max))
-                  (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message "\n\n")
+                  (save-excursion
+                    (goto-char (point-max))
+                    (when (> (point-max) (point-min))
+                      (insert "\n\n"))
+                    (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message))
+                  (set-window-point (get-buffer-window buffer 'visible) (point-max))
                   (read-only-mode t))
-                (display-buffer buffer)
                 ;; mark as fired
                 (set-notify-property notification 'fired t)
                 (update-notification notification)
