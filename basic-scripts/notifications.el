@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.6
-;; Package-Version: 20211225.001
+;; Version: 1.1.7
+;; Package-Version: 20211225.002
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -41,13 +41,23 @@
 
 (defvar *notifications* nil)
 
+(defvar *notification-timers* nil)
+
 (defvar *notifications-buffer* "*notifications*")
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
 
+(defvar *notification-actions* `(("fire" . fire-notification)
+                                 ("cancel" . cancel-notification)
+                                 ("reset" . reset-notification)))
+
 (defmacro get-notification (id)
   "ID."
   `(alist-get ,id *notifications* nil t 'equal))
+
+(defmacro get-notification-timer (id)
+  "ID."
+  `(alist-get ,id *notification-timers* nil t 'equal))
 
 (defun list-notifications ()
   "."
@@ -59,16 +69,26 @@
                           (seq-filter(lambda (notification)
                                        (> tomorrow-timestamp (alist-get 'fire-time notification)))
                                      *notifications*)))
-         (notifications (mapcar (lambda (notification)
-                                  (let* ((message (alist-get 'message notification))
-                                         (message (base64-decode-string-as-multibyte message))
-                                         (fire-time (alist-get 'fire-time notification))
-                                         (fire-time-str (timestamp-to-normal-string fire-time)))
-                                    (format "%s (%s): %s" fire-time-str (notification-time-diff-description fire-time) message)))
-                                notifications))
-         (notifications (sort notifications #'string<))
-         (current-timestr (current-time-normal-string)))
-    (completing-read (format "The notifications (%s): " current-timestr) notifications)))
+         (notifications (mapcar
+                         (lambda (notification)
+                           (let* ((message (alist-get 'message notification))
+                                  (message (base64-decode-string-as-multibyte message))
+                                  (fire-time (alist-get 'fire-time notification))
+                                  (fire-time-str (timestamp-to-normal-string fire-time))
+                                  (diff (notification-time-diff-description fire-time))
+                                  (content (format "%s (%s): %s" fire-time-str diff message))
+                                  (id (alist-get 'id notification)))
+                             (cons content id)))
+                         notifications))
+         (notifications (sort notifications (lambda (pair1 pair2) (string< (car pair1) (car pair2)))))
+         (current-timestr (current-time-normal-string))
+         (content (completing-read (format "The notifications (%s): " current-timestr) notifications))
+         (id (alist-get content notifications nil nil #'equal)))
+    (message "Select the notification of id: %S" id)
+    (let* ((action-name (completing-read "Choose the notification action: " *notification-actions*))
+           (action (alist-get action-name *notification-actions* nil nil #'equal)))
+      (message "The action choosed: %S" action)
+      (funcall action id))))
 
 (defun notification-time-diff-description (fire-time)
   "Show the time diff description of FIRE-TIME and now."
@@ -243,42 +263,58 @@
 
 (defun do-schedule-notification (id seconds)
   "Show notification message which id is ID after some SECONDS."
-  (when (run-with-timer
-         seconds
-         nil
-         `(lambda ()
-            (let ((notification (get-notification ,id)))
-              (message "prepare to fire notification: %S" notification)
-              (let* ((message (alist-get 'message notification))
-                     (message (base64-decode-string-as-multibyte message))
-                     (id (alist-get 'id notification))
-                     (fire-time (alist-get 'fire-time notification))
-                     (buffer (get-buffer-create *notifications-buffer*)))
-                (display-buffer buffer)
-                (with-current-buffer buffer
-                  (read-only-mode 0)
-                  (save-excursion
-                    (goto-char (point-max))
-                    (when (> (point-max) (point-min))
-                      (insert "\n\n"))
-                    (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message))
-                  (set-window-point (get-buffer-window buffer 'visible) (point-max))
-                  (read-only-mode t))
-                ;; mark as fired
-                (set-notify-property notification 'fired t)
-                (update-notification notification)
-                ;; re-schedule repeatable notification
-                (refresh-repeatable-notification id)
-                (remove-fired-notifications)))))
+  (when-let ((timer (run-with-timer
+                     seconds
+                     nil
+                     `(lambda ()
+                        (fire-notification ,id)))))
     (let ((notification (get-notification id)))
       (set-notify-property notification 'scheduled t)
       (update-notification notification)
+      (setf (get-notification-timer id) timer)
       (message "scheduled notification: %S" notification))))
+
+(defun fire-notification (id)
+  "Fire the notification of ID right now."
+  (let ((notification (get-notification id)))
+    (message "prepare to fire notification: %S" notification)
+    (let* ((message (alist-get 'message notification))
+           (message (base64-decode-string-as-multibyte message))
+           (id (alist-get 'id notification))
+           (fire-time (alist-get 'fire-time notification))
+           (buffer (get-buffer-create *notifications-buffer*)))
+      (display-buffer buffer)
+      (with-current-buffer buffer
+        (read-only-mode 0)
+        (save-excursion
+          (goto-char (point-max))
+          (when (> (point-max) (point-min))
+            (insert "\n\n"))
+          (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message))
+        (set-window-point (get-buffer-window buffer 'visible) (point-max))
+        (read-only-mode t))
+      ;; reset timer
+      (setf (get-notification-timer id) nil)
+      ;; mark as fired
+      (set-notify-property notification 'fired t)
+      (update-notification notification)
+      ;; re-schedule repeatable notification
+      (refresh-repeatable-notification id)
+      (remove-fired-notifications))))
 
 (defun update-notification (notification)
   "NOTIFICATION."
   (when-let ((id (alist-get 'id notification)))
     (setf (get-notification id) notification)))
+
+(defun cancel-notification (id)
+  "Cancel the notification of ID."
+  (when-let ((timer (get-notification-timer id)))
+    (cancel-timer timer))
+  (setf (get-notification id) nil))
+
+(defun reset-notification (id)
+  "Reset the notification of ID.")
 
 (defmacro set-notify-property (notification key value)
   "Update NOTIFICATION's VALUE of KEY."
