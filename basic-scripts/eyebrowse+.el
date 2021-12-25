@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.13
-;; Package-Version: 20211206.001
+;; Version: 1.2.14
+;; Package-Version: 20211225.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -607,12 +607,12 @@ COPY from eyebrowse--load-window-config."
               (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
               (week-string (caddr time-string-list)))
          (list date-string " " time-string " " week-string))
-       " | "
-       (current-ip)
-       (if (> (length *fetched-public-ip*) 0) " | " "")
-       (fetched-public-ip)
-       " | "
-       (fetched-weather)
+       (let ((ip (current-ip)))
+         (if (> (length ip) 0) (list " | " ip) ""))
+       (let ((ip (fetched-public-ip)))
+         (if (> (length ip) 0) (list " | " ip) ""))
+       (let ((weather (fetched-weather)))
+         (if (> (length weather) 0) (list " | " weather) ""))
        " | "
        ;; copy the default buffer identification from bindings.el.gz
        (propertized-buffer-identification "%b")
