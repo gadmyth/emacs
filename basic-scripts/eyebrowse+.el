@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.14
-;; Package-Version: 20211225.001
+;; Version: 1.2.15
+;; Package-Version: 20211227.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -586,53 +586,74 @@ COPY from eyebrowse--load-window-config."
 
 (defvar eyebrowse-buffer-name-format
   '(:eval
-    (let* ((buffer (current-buffer))
-           (buffer-name (buffer-name buffer))
-           (locked-conf (and (boundp '*eyebrowse-locked-config-slot*)
-                             (eyebrowse-get-config-with-slot *eyebrowse-locked-config-slot*)))
-           (locked-conf-string (eyebrowse-config-string locked-conf))
-           (current-conf (eyebrowse-get-current-config))
-           (current-conf-string (eyebrowse-config-string current-conf))
-           (last-conf (eyebrowse-get-last-config))
-           (last-conf-string (eyebrowse-config-string last-conf))
-           (help-echo "mouse-1: Switch to indicated workspace"))
-      ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
-      (list
-       " "
-       (let ((index (frame-index-string)))
+    (list
+     " "
+     (let ((index (frame-index-string)))
        (if index (list index " ") ""))
-       (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
-              (time-string-list (s-split " " time-string))
-              (date-string (car time-string-list))
-              (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
-              (week-string (caddr time-string-list)))
-         (list date-string " " time-string " " week-string))
-       (let ((ip (current-ip)))
-         (if (> (length ip) 0) (list " | " ip) ""))
-       (let ((ip (fetched-public-ip)))
-         (if (> (length ip) 0) (list " | " ip) ""))
-       (let ((weather (fetched-weather)))
-         (if (> (length weather) 0) (list " | " weather) ""))
-       " | "
-       ;; copy the default buffer identification from bindings.el.gz
-       (propertized-buffer-identification "%b")
-       " | "
-       ;; - [locked-conf, current-conf, last-conf]
-       (format "[%s, %s, %s]"
-               locked-conf-string
-               ;; the current eb config is active, and with no keymap
-               (propertize current-conf-string 'face 'current-eyebrowse-config-face
-                           'mouse-face 'mode-line-highlight
-                           'slot (car current-conf)
-                           'local-map nil
-                           'help-echo help-echo)
-               ;; last-conf can be clicked to the last eb config
-               (propertize last-conf-string 'face 'last-eyebrowse-config-face
-                           'mouse-face 'mode-line-highlight
-                           'slot (car last-conf)
-                           'local-map (eyebrowse-make-keymap (car last-conf))
-                           'help-echo help-echo)
-               )))))
+     ;; time info
+     (time-info-format)
+     ;; local ip
+     (current-ip-with-seperator)
+     ;; public ip
+     (public-ip-with-seperator)
+     ;; weather
+     (weather-with-seperator)
+     " | "
+     ;; copy the default buffer identification from bindings.el.gz
+     (propertized-buffer-identification "%b")
+     " | "
+     ;; - [locked-conf, current-conf, last-conf]
+     (eyebrowse-buffer-format))))
+
+(defun time-info-format ()
+  "."
+  (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
+         (time-string-list (s-split " " time-string))
+         (date-string (car time-string-list))
+         (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
+         (week-string (caddr time-string-list)))
+    (format "%s %s %s" date-string time-string week-string)))
+
+(defun current-ip-with-seperator ()
+  "."
+  (let ((ip (current-ip)))
+    (if (> (length ip) 0) (list " | " ip) "")))
+
+(defun public-ip-with-seperator ()
+  "."
+  (let ((ip (fetched-public-ip)))
+    (if (> (length ip) 0) (list " | " ip) "")))
+
+(defun weather-with-seperator ()
+  "."
+  (let ((weather (fetched-weather)))
+    (if (> (length weather) 0) (list " | " weather) "")))
+
+(defun eyebrowse-buffer-format ()
+  "."
+  (let* ((locked-conf (and (boundp '*eyebrowse-locked-config-slot*)
+                           (eyebrowse-get-config-with-slot *eyebrowse-locked-config-slot*)))
+         (locked-conf-string (eyebrowse-config-string locked-conf))
+         (current-conf (eyebrowse-get-current-config))
+         (current-conf-string (eyebrowse-config-string current-conf))
+         (last-conf (eyebrowse-get-last-config))
+         (last-conf-string (eyebrowse-config-string last-conf))
+         (help-echo "mouse-1: Switch to indicated workspace"))
+    (format "[%s, %s, %s]"
+            locked-conf-string
+            ;; the current eb config is active, and with no keymap
+            (propertize current-conf-string 'face 'current-eyebrowse-config-face
+                        'mouse-face 'mode-line-highlight
+                        'slot (car current-conf)
+                        'local-map nil
+                        'help-echo help-echo)
+            ;; last-conf can be clicked to the last eb config
+            (propertize last-conf-string 'face 'last-eyebrowse-config-face
+                        'mouse-face 'mode-line-highlight
+                        'slot (car last-conf)
+                        'local-map (eyebrowse-make-keymap (car last-conf))
+                        'help-echo help-echo)
+            )))
 
 (defvar eyebrowse-config-format
   '(:eval
