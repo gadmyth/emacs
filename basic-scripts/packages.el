@@ -92,6 +92,7 @@
         'git-timemachine
         'datetime-format
         'solarized-theme
+        'password-generator
         'telega
         ))
 

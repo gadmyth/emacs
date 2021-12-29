@@ -82,6 +82,7 @@
 (require-safely 'smex (global-set-key (kbd "M-x") 'smex))
 (require-package-with-depends 'redis-config '(eredis))
 (require-package-with-depends 'annotate-config '(annotate))
+(require-package-with-depends 'password-generator+ '(password-generator))
 (require-package 'yas-config (yas-global-mode))
 (require-package 'auto-complete (global-auto-complete-mode))
 (require-package 'customized-dir (customized-dir-init))
