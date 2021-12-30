@@ -210,6 +210,7 @@
  `(("^/orgs/\\(.*\\)$" . ,(org-dir-compiled-handler-maker "~/org/doc/"))
    ("^/homo/\\(.*\\.html\\)$" . ,(elnode-webserver-handler-maker "~/org/homo_public_html/"))
    ("^/homo/\\(.*\\.*\\)$" . ,(org-dir-compiled-handler-maker "~/org/homogenius/"))
+   ("^/script/\\(.*\\.html\\)$" . ,(org-dir-compiled-handler-maker (expand-file-name "scriptlets" +emacs-context-directory+)))
    ("^/org/switch/\\(.*\\)$" . ,(byte-compile (elnode-switch-org)))
    ("^/url/encode/\\(.*\\)$" . ,(byte-compile (elnode-url-encoder)))
    ("^/url/decode/\\(.*\\)$" . ,(byte-compile (elnode-url-decoder)))
