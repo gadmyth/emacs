@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: password-generator+.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20211229.001
+;; Version: 1.0.1
+;; Package-Version: 20211230.001
 ;; Package-Requires: password-generator
 ;; Keywords: password-generator
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -48,6 +48,11 @@
              (swap list i j)))
   list)
 
+(defun password-generator-generate ()
+  "."
+  (interactive)
+  (password-generator-normal nil nil nil  nil nil t))
+  
 (defun password-generator-normal (&optional total-len number-len lowercase-len uppercase-len special-len return)
   "."
   (let* ((password "")
