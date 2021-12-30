@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.15
-;; Package-Version: 20211227.001
+;; Version: 1.2.16
+;; Package-Version: 20211230.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -271,7 +271,8 @@
 
 (defvar *eyebrowse-switch-buffer-action-alist*
   '(("switch to the buffer" . select-buffer-window-safely)
-    ("lock buffer's config" . eyebrowse-lock-buffer-config)))
+    ("lock buffer's config" . eyebrowse-lock-buffer-config)
+    ("kill buffer" . kill-buffer)))
 
 (defun eyebrowse-switch-buffer-with-actions (&rest args)
   "ARGS."
