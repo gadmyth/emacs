@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.16
-;; Package-Version: 20211230.001
+;; Version: 1.2.17
+;; Package-Version: 20220103.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -508,6 +508,20 @@ COPY from eyebrowse--load-window-config."
     ;; return the loading result
     loading-success-p))
 
+(defun load-frame-geometry ()
+  "."
+  (let ((file-name (eyebrowse-next-new-file-name)))
+    (when (file-exists-p file-name)
+      (with-temp-buffer
+        (insert-file-contents file-name)
+        (goto-char (point-min))
+        (let* ((rich-configs (read (current-buffer)))
+               (eyebrowse-configs (cdr (assq 'eyebrowse rich-configs)))
+               (frame-params (cdr (assq 'frame-params rich-configs))))
+          (message "*** load frame geometry from %s: %S" file-name frame-params)
+          (dolist (pair frame-params)
+            (setf (alist-get (car pair) default-frame-alist nil t 'equal) (cdr pair))))))))
+
 (defun frame-index ()
   "."
   (let* ((frames (frame-list))
@@ -529,8 +543,12 @@ COPY from eyebrowse--load-window-config."
           ((eq frame-index 7) "➑")
           ((eq frame-index 8) "➒")
           ((eq frame-index 9) "❿")
-          (t ""))))
+          (t (number-to-string frame-index)))))
 
+(defun eyebrowse-next-new-file-name ()
+  "."
+  (let ((frame-index (length (frame-list))))
+    (format "%s.%d" +eyebrowse-file-name+ frame-index)))
 
 (defun eyebrowse-file-name (&optional frame)
   "Get the eyebrowse file name of FRAME."
@@ -746,6 +764,7 @@ COPY from eyebrowse--load-window-config."
                   (lambda ()
                     (add-hook 'delete-frame-functions #'save-eyebrowse-config)
                     (add-hook 'kill-emacs-hook #'save-eyebrowse-config)
+                    (add-hook 'before-make-frame-hook #'load-frame-geometry)
                     (set-eyebrowse-header-line-format)))
         ;; set mode-line-buffer-identification
         ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
