@@ -557,8 +557,8 @@ COPY from eyebrowse--load-window-config."
   (let ((file-name (eyebrowse-file-name frame)))
     (message "Saving eyebrowse config to file %S ..." file-name)
     (eyebrowse-update-window-config)
-    (let* ((eyebrowse-configs (eyebrowse--get 'window-configs))
-           (frame-params (eyebrowse-frame-parameters))
+    (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
+           (frame-params (eyebrowse-frame-parameters frame))
            (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs)))
            (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" rich-configs))))
       (with-temp-file file-name
