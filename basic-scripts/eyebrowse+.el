@@ -559,9 +559,10 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse-update-window-config)
     (let* ((eyebrowse-configs (eyebrowse--get 'window-configs))
            (frame-params (eyebrowse-frame-parameters))
-           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs))))
+           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs)))
+           (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" rich-configs))))
       (with-temp-file file-name
-        (print rich-configs (current-buffer))))))
+        (insert content)))))
 
 (defun eyebrowse-sync-config ()
   "Sync the eyebrowse config from the first frame."
