@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.17
-;; Package-Version: 20220103.001
+;; Version: 1.2.18
+;; Package-Version: 20220103.002
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -85,9 +85,9 @@
 (defun eyebrowse-lazy-load-config ()
   "."
   (run-with-timer
-   1 nil
+   0 nil
    (lambda ()
-     ;; load eyebrowse config from file after 1 second
+     ;; load eyebrowse config from file after 0 second
      (when (load-eyebrowse-config)
        ;; add the save function if loading success from file,
        ;; or it will be dangerous to overwrite the config to file.
