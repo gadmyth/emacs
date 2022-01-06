@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.7
-;; Package-Version: 20211225.002
+;; Version: 1.1.8
+;; Package-Version: 20220106.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -105,25 +105,25 @@
          (desc ""))
     (when (>= years 1)
       (setq desc (s-concat desc (format "%dy" years))))
+    (when (>= months 12)
+      (setq months (mod months 12)))
     (when (>= months 1)
-      (when (> months 12)
-        (setq months (mod months 12)))
-      (setq desc (s-concat desc (format "%dm" months))))
+      (setq desc (cat desc (format "%dm" months))))
+    (when (>= days 30)
+      (setq days (mod days 30)))
     (when (>= days 1)
-      (when (> days 30)
-        (setq days (mod days 30)))
       (setq desc (s-concat desc (format "%dd" days))))
-    (when (>= hours 1)
-      (when (> hours 24)
+    (when (>= hours 24)
         (setq hours (mod hours 24)))
+    (when (>= hours 1)
       (setq desc (s-concat desc (format "%dh" hours))))
+    (when (>= minutes 60)
+      (setq minutes (mod minutes 60)))
     (when (>= minutes 1)
-      (when (> minutes 60)
-        (setq minutes (mod minutes 60)))
       (setq desc (s-concat desc (format "%dm" minutes))))
+    (when (>= seconds 60)
+      (setq seconds (mod seconds 60)))
     (when (>= seconds 1)
-      (when (> seconds 60)
-        (setq seconds (mod seconds 60)))
       (setq desc (s-concat desc (format "%ds" seconds))))
     (setq desc (format "%s%s" sign desc))
     desc))
