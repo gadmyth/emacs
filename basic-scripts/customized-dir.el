@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.1
-;; Package-Version: 20210929.001
+;; Version: 1.0.2
+;; Package-Version: 20220107.001
 ;; Package-Requires: ivy, counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -59,8 +59,7 @@
                                    ,(wrap-function-with-default-directory #'counsel-git))
                                   ("counsel-git-grep" .
                                    ,(wrap-function-with-default-directory #'counsel-git-grep))
-                                  ("remove-customerized-dir" .
-                                   (wrap-function-with-default-directory #'remove-customized-dir)))
+                                  ("remove-customerized-dir" . remove-customized-dir))
                                 :action (lambda (pair)
                                           (let ((f (cdr pair)))
                                             (funcall f dir)))))))
@@ -77,20 +76,21 @@
     (with-temp-buffer
       (insert-file-contents +customized-dir-file-name+)
       (goto-char (point-min))
-      (mapc #'(lambda (dir)
-                (unless (member dir *customized-dir*)
-                  (push dir *customized-dir*)))
-            (read (current-buffer))))))
+      (mapc (lambda (dir)
+              (unless (seq-contains *customized-dir* dir #'string-equal)
+                (push dir *customized-dir*)))
+            (read (current-buffer))))
+    (message "%s file loaded!" +customized-dir-file-name+)))
 
 (defun save-customized-dir-without-confirm ()
   "."
   (with-temp-file +customized-dir-file-name+
     (print *customized-dir* (current-buffer))))
 
-(defun save-customized-dir (confirmed)
+(defun save-customized-dir ()
   "CONFIRMED: ."
-  (interactive (list (y-or-n-p (format "Sure to add %s to customized-dir? " default-directory))))
-  (if confirmed
+  (interactive)
+  (if (y-or-n-p (format "Sure to save *customized-dir* to file %s? " +customized-dir-file-name+))
       (progn
         (save-customized-dir-without-confirm)
         (message "Save succeed!"))
@@ -128,21 +128,22 @@
   (if confirm
       (progn
         (let ((dir (expand-file-name default-directory)))
-          (unless (member dir *customized-dir*)
+          (unless (seq-contains *customized-dir* dir #'string-equal)
             (push dir *customized-dir*))
           (message "%s added." dir)))
     (message "Action canceled!")))
 
-(defun remove-customized-dir (confirm)
-  "CONFIRM."
-  (interactive (list (y-or-n-p (format "Sure to remove %s to customized-dir? " default-directory))))
-  (if confirm
-      (let ((dir (expand-file-name default-directory)))
-        (if (member dir *customized-dir*)
+(defun remove-customized-dir (dir)
+  "Remove DIR from *customized-dir*."
+  ;; (interactive "DChoose the directory to remove: ")
+  (message "type: %s, length: %d" (type-of dir) (length dir))
+  (if (y-or-n-p (format "Sure to remove %s to customized-dir? " dir))
+      (if (seq-contains *customized-dir* dir #'string-equal)
           (progn
-            (setq *customized-dir* (delete dir *customized-dir*))
+            (setq *customized-dir*
+                  (seq-remove (lambda (ele) (string-equal dir ele)) *customized-dir*))
             (message "%s removed." dir))
-          (message "%s is not a customized dir!" dir)))
+        (message "%s is not a customized dir!" dir))
     (message "Action canceled!")))
 
 (defun customized-dir-init ()
@@ -155,16 +156,16 @@
 (add-hook 'dired-mode-hook
           (lambda ()
             (define-key dired-mode-map "V"
-              '(lambda () (interactive)
-                 (let ((file (dired-get-file-for-visit)))
-                   (if (file-directory-p file)
-                       (magit-status file)))))
+              (lambda () (interactive)
+                (let ((file (dired-get-file-for-visit)))
+                  (if (file-directory-p file)
+                      (magit-status file)))))
 
             (define-key dired-mode-map "v"
-              '(lambda () (interactive)
-                 (let ((file (dired-get-file-for-visit)))
-                   (if (file-directory-p file)
-                       (vc-dir file)))))))
+              (lambda () (interactive)
+                (let ((file (dired-get-file-for-visit)))
+                  (if (file-directory-p file)
+                      (vc-dir file)))))))
 
 ;; ace-jump-buffer
 (require 'avy-config)
