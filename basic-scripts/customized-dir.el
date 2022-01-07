@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.2
-;; Package-Version: 20220107.001
+;; Version: 1.0.3
+;; Package-Version: 20220107.002
 ;; Package-Requires: ivy, counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -62,7 +62,10 @@
                                   ("remove-customerized-dir" . remove-customized-dir))
                                 :action (lambda (pair)
                                           (let ((f (cdr pair)))
-                                            (funcall f dir)))))))
+                                            (funcall f dir)))))
+            :preselect (car (seq-filter
+                             (lambda (ele) (string-prefix-p ele default-directory))
+                             *customized-dir*))))
 
 (defvar +customized-dir-file-name+ "~/.customized-dir-save")
 (defvar +dired-al-mode-header+ "  drwx------.  0 user user     4096 Mar  0 00:00 ")
