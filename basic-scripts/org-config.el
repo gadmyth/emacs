@@ -155,27 +155,27 @@
 (setq org-html-head-default
       (apply #'concat
              "<link rel=\"shortcut icon\" href=\"images/favicon.ico\" type=\"image/x-icon\">"
-             (mapcar #'(lambda (file)
-                         (setq default-directory (expand-file-name "~/emacs/org/res"))
-                         (let* ((css-p (string-suffix-p ".css" file))
-                                (css-left-pair "<style type='text/css'>")
-                                (css-right-pair "</style>")
-                                (js-left-pair "<script type='text/javascript'>")
-                                (js-right-pair "</script>")
-                                (left-pair (if css-p css-left-pair js-left-pair))
-                                (right-pair (if css-p css-right-pair js-right-pair)))
-                           (with-temp-buffer
-                             (insert left-pair)
-                             (insert-file-contents file) (goto-char (point-max))
-                             (insert right-pair)
-                             (buffer-string))))
+             (mapcar (lambda (file)
+                       (setq default-directory (expand-file-name "~/emacs/org/res"))
+                       (let* ((css-p (string-suffix-p ".css" file))
+                              (css-left-pair "<style type='text/css'>")
+                              (css-right-pair "</style>")
+                              (js-left-pair "<script type='text/javascript'>")
+                              (js-right-pair "</script>")
+                              (left-pair (if css-p css-left-pair js-left-pair))
+                              (right-pair (if css-p css-right-pair js-right-pair)))
+                         (with-temp-buffer
+                           (insert left-pair)
+                           (insert-file-contents file) (goto-char (point-max))
+                           (insert right-pair)
+                           (buffer-string))))
                      *org-export-res-files*)))
 
 (setq org-html-head org-html-head-default)
 
 (defun m/org-html-checkbox (checkbox)
   "Format CHECKBOX into HTML."
-  (case checkbox (on "<span class=\"check\">&#x2611;</span>") ; checkbox (checked)
+  (cl-case checkbox (on "<span class=\"check\">&#x2611;</span>") ; checkbox (checked)
         (off "<span class=\"checkbox\">&#x2610;</span>")
         (trans "<span class=\"checkbox\">&#x229F;")
         (t "")))
@@ -237,17 +237,17 @@
 (setq org-plantuml-jar-path (expand-file-name "~/libs/plantuml.jar"))
 
 (add-hook 'org-babel-after-execute-hook
-          '(lambda () (condition-case nil (org-display-inline-images) (error nil)))
+          (lambda () (condition-case nil (org-display-inline-images) (error nil)))
           'append)
 
 (setq org-confirm-babel-evaluate
-      '(lambda (lang body)
-         "LANG: , BODY."
-         (and (not (string= lang "ditaa"))
-              (not (string= lang "dot"))
-              (not (string= lang "plantuml"))
-              (not (string= lang "gnuplot"))
-              )))
+      (lambda (lang body)
+        "LANG: , BODY."
+        (and (not (string= lang "ditaa"))
+             (not (string= lang "dot"))
+             (not (string= lang "plantuml"))
+             (not (string= lang "gnuplot"))
+             )))
 
 
 (require 'ox-publish)

@@ -8,13 +8,13 @@
 
 (defun elnode--ip-host (ip-addr)
   "IP-ADDR: ."
-  (destructuring-bind (a b c d port)
+  (cl-destructuring-bind (a b c d port)
       (mapcar 'identity ip-addr)
     (format "%s.%s.%s.%s" a b c d)))
 
 (defun elnode--ip-port (ip-addr)
   "IP-ADDR: ."
-  (destructuring-bind (a b c d port)
+  (cl-destructuring-bind (a b c d port)
       (mapcar 'identity ip-addr)
     port))
 

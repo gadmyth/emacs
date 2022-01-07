@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.027
-;; Package-Version: 20211016.001
+;; Version: 1.0.026
+;; Package-Version: 20220107.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -184,7 +184,7 @@ With PARSED message and PROC."
         msg-file-path msg-picture-p)
     (if-let ((wechat-msg (erc-parse-wechat-share-msg sender msg)))
         (setq msg wechat-msg)
-      (return-from erc-update-aggregate-buffer))
+      (cl-return-from erc-update-aggregate-buffer))
 
     ;; parse the wechat file msg as picture, file or emoji
     (when-let ((file-msg (erc-parse-wechat-file-msg msg)))
@@ -375,7 +375,7 @@ With PARSED message and PROC."
 (defun erc-aggregate-current-message ()
   "Goto the current message's nick name head in *erc-aggregate-buffer*."
   (interactive)
-  (loop while (and (not (erc-aggregate-nick-name-p))
+  (cl-loop while (and (not (erc-aggregate-nick-name-p))
                    (not (eq (point) (point-min)))
                    (not (eq (point) (point-max))))
         do (previous-line)))
@@ -384,7 +384,7 @@ With PARSED message and PROC."
   "Goto the previous message's nick name head in *erc-aggregate-buffer*."
   (interactive)
   (previous-line)
-  (loop while (and (not (erc-aggregate-nick-name-p))
+  (cl-loop while (and (not (erc-aggregate-nick-name-p))
                    (not (eq (point) (point-min)))
                    (not (eq (point) (point-max))))
         do (previous-line)))
@@ -393,7 +393,7 @@ With PARSED message and PROC."
   "Goto the next message's nick name head in *erc-aggregate-buffer*."
   (interactive)
   (forward-line)
-  (loop while (and (not (erc-aggregate-nick-name-p))
+  (cl-loop while (and (not (erc-aggregate-nick-name-p))
                    (not (eq (point) (point-min)))
                    (not (eq (point) (point-max))))
         do (forward-line)))

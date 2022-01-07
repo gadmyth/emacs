@@ -13,7 +13,7 @@
          (extension "java")
          (full-cmd (format "git ls-files | egrep \"%s(Impl)?\\>.*?.%s\"" class extension))
          (cands (split-string (shell-command-to-string full-cmd) "\n" t)))
-    (flet ((candidate-action (filename)
+    (cl-flet ((candidate-action (filename)
                              (let ((buffer (if noselect (find-file-noselect filename) (find-file filename))))
                                (if finish-block (funcall finish-block buffer)))))
       (if (equal 1 (length cands))
@@ -354,7 +354,7 @@
   (interactive)
   (let ((default-directory (expand-file-name (counsel-locate-git-root)))
         (cands (git-ls-files  "application.*.properties")))
-    (flet ((list-properties
+    (cl-flet ((list-properties
             (properties-file)
             (with-current-buffer (find-file-noselect properties-file)
               (let ((collections (java-property-file-candidates)))

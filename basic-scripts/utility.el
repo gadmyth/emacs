@@ -59,7 +59,7 @@
 	  (if (string-equal buffer-file-name filename)
 		  (progn
 			(wcy-desktop-load-file buffer)
-			(return t)))))
+			(cl-return t)))))
   nil)
 
 (defun load-must-files ()

@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.5
-;; Package-Version: 20211210.001
+;; Version: 1.0.6
+;; Package-Version: 20220107.001
 ;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -103,7 +103,7 @@
                     (sig . ,signature)
                     (location . ,location))
           :parser 'json-read
-          :success (function*
+          :success (cl-function
                     (lambda (&key data &allow-other-keys)
                       (when (string-equal "results" (car (car data)))
                         (let* ((results (cdr (assoc 'results data)))
@@ -118,7 +118,7 @@
                                (format-result (format "%s:%s(%s)" loc-name weather temperature)))
                           (weathers-debug-message "weather result fetched: %s" format-result)
                           (setq *weather-api-result* format-result)))))
-          :error (function*
+          :error (cl-function
                   (lambda (&key error-thrown &allow-other-keys&rest _)
                     (message "error: %S" error-thrown))))))))
 
