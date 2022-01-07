@@ -6,8 +6,8 @@
 ;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
 
-;; Version: 2.0.1
-;; Package-Version: 2021925.001
+;; Version: 2.0.2
+;; Package-Version: 20220107.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -63,6 +63,7 @@
                           (let* ((process (get-buffer-process b))
                                  (command (process-command process)))
                             (list :type 'process
+                                  :directory default-directory
                                   :command command
                                   :name (buffer-name b)
                                   :major-mode major-mode)))
@@ -98,7 +99,10 @@
            ((eq type 'process)
             (cond ((eq buffer-major-mode 'term-mode)
                    (message "wcy new create multi-term...")
-                   (multi-term))
+                   (let ((directory (plist-get x :directory)))
+                     (when (file-directory-p directory)
+                       (let ((default-directory directory))
+                         (multi-term)))))
                   (t
                    (message "The type is process, TODO"))))
            ((eq type 'buffer)
