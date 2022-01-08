@@ -127,8 +127,15 @@ Copied some codes from window-numbering.el."
 (defun goto-last-window ()
   "."
   (interactive)
-  (let ((window (get-mru-window t t t)))
-    (select-window window)))
+  (let ((current-window (get-buffer-window))
+        (target-window (get-mru-window t t t)))
+    (when (not (equal current-window target-window))
+      (message "goto-last-window: %S" target-window)
+      (let ((current-frame (window-frame current-window))
+            (target-frame (window-frame target-window)))
+        (when (not (equal current-frame target-frame))
+          (x-focus-frame target-frame))
+        (select-window target-window)))))
 
 (defun swap-window-in-current-frame ()
   "."
