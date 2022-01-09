@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.8
-;; Package-Version: 20220106.001
+;; Version: 1.1.9
+;; Package-Version: 20220109.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -43,13 +43,24 @@
 
 (defvar *notification-timers* nil)
 
-(defvar *notifications-buffer* "*notifications*")
+(defvar *notifications-buffer* nil)
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
 
-(defvar *notification-actions* `(("fire" . fire-notification)
+(defvar *notification-actions*`(("fire" . fire-notification)
                                  ("cancel" . cancel-notification)
                                  ("reset" . reset-notification)))
+
+(defvar *notification-buffer-actions*
+  `(("reschedule at" . reschedule-notification-at)
+    ("reschedule after" . reschedule-notification-after)))
+
+(defface notifications-header-face '((t :weight bold))
+  "Face used for header in p2p notifications buffer.
+
+Buttons will be displayed in this face when the mouse cursor is
+above them."
+  :group 'notifications-faces)
 
 (defmacro get-notification (id)
   "ID."
@@ -202,6 +213,40 @@
         (message "now schedule the notification: %S" notification)
         (do-schedule-notification id seconds)))))
 
+(defun reschedule-notification-at (notification)
+  "Reschedule the expired NOTIFICATION at the certain future time."
+  (let* ((time-str (read-string "at the time: " (current-time-normal-string)))
+         (fire-time (string-to-timestamp time-str)))
+    (set-notify-property notification 'fire-time fire-time)
+    (reschedule-notifitaion notification)))
+
+(defun reschedule-notification-after (notification)
+  "Reschedule the expired NOTIFICATION after the certain duration."
+  (let* ((duration-str (read-string "repeat duration: " "0m"))
+         (index (- (length duration-str) 1))
+         (duration-number (string-to-number (substring duration-str 0 index)))
+         (duration-unit (substring duration-str index))
+         (duration (pcase duration-unit
+                     ("s" duration-number)
+                     ("m" (* 60 duration-number))
+                     ("h" (* 60 60 duration-number))
+                     ("d" (* 24 60 60 duration-number))
+                     ("w" (* 7 24 60 60 duration-number))
+                     ("M" (* 30 24 60 60 duration-number))
+                     (_ duration-number)))
+         (now (current-timestamp))
+         (fire-time (+ now duration)))
+    (set-notify-property notification 'fire-time fire-time)
+    (reschedule-notifitaion notification)))
+
+(defun reschedule-notifitaion (notification)
+  "Reschedule the NOTIFICATION."
+  (let ((id (alist-get 'id notification)))
+    (set-notify-property notification 'scheduled nil)
+    (set-notify-property notification 'fired nil)
+    (setf (get-notification id) notification)
+    (schedule-notification id)))
+
 (defun remove-expired-notifications ()
   "."
   (let ((now (current-timestamp)))
@@ -282,15 +327,29 @@
            (message (base64-decode-string-as-multibyte message))
            (id (alist-get 'id notification))
            (fire-time (alist-get 'fire-time notification))
-           (buffer (get-buffer-create *notifications-buffer*)))
+           (buffer *notifications-buffer*))
+      ;; create the buffer
+      (when (not (buffer-live-p buffer))
+        (setq *notifications-buffer* (generate-new-buffer "*notifications*"))
+        ;; set the major mode
+        (with-current-buffer *notifications-buffer* (notifications-aggregate-mode))
+        (setq buffer *notifications-buffer*))
+      ;; display
       (display-buffer buffer)
+      ;; insert notification
       (with-current-buffer buffer
         (read-only-mode 0)
         (save-excursion
           (goto-char (point-max))
           (when (> (point-max) (point-min))
             (insert "\n\n"))
-          (insert (format-time-string "%Y-%m-%d %H:%M:%S" fire-time) "\n" message))
+          (let* ((header (format-time-string "%Y-%m-%d %H:%M:%S" fire-time))
+                 (header-start (point))
+                 (header-end (+ header-start (length header))))
+            (put-text-property 0 (length header)
+                               'font-lock-face notifications-header-face header)
+            (insert header "\n" message)
+            (notifications-add-button header-start header-end notification)))
         (set-window-point (get-buffer-window buffer 'visible) (point-max))
         (read-only-mode t))
       ;; reset timer
@@ -319,6 +378,101 @@
 (defmacro set-notify-property (notification key value)
   "Update NOTIFICATION's VALUE of KEY."
   `(setf (alist-get ,key ,notification) ,value))
+
+(defun notifications-add-button (start end notification)
+  "Add a button property to from START to END with NOTIFICATION."
+  (add-text-properties
+   start end
+   (nconc
+    (list 'notification-callback #'notifications-button-callback)
+    (list 'notification-data (list notification))
+    (list 'rear-nonsticky t))))
+
+(defun notifications-button-callback (data)
+  "Callback of the notification button with DATA as args."
+  (when-let ((notification (car data)))
+    ;; DO NOTING
+    ))
+
+(defun notifications-header-p ()
+  "."
+  (eq (get-text-property (point) 'notification-callback)
+      'notifications-button-callback
+      ))
+
+(defun notifications-current-notification ()
+  "Goto the current notification's head in *notifications-buffer*."
+  (interactive)
+  (beginning-of-visual-line)
+  (loop while (and (not (notifications-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun notifications-next-notification ()
+  "Goto the next notification's head in *notifications-buffer*."
+  (interactive)
+  (beginning-of-visual-line)
+  (forward-line)
+  (loop while (and (not (notifications-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (forward-line)))
+
+(defun notifications-previous-notification ()
+  "Goto the previous notification's head in *notifications-buffer*."
+  (interactive)
+  (beginning-of-visual-line)
+  (previous-line)
+  (loop while (and (not (notifications-header-p))
+                   (not (eq (point) (point-min)))
+                   (not (eq (point) (point-max))))
+        do (previous-line)))
+
+(defun notifications-delete-this-notification ()
+  "Delete the notification in *notifications--buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (notifications-current-notification)
+  (let ((msg-start (point)))
+    (notifications-next-notification)
+    (let ((msg-end (point)))
+      (delete-region msg-start msg-end)))
+  (read-only-mode 1))
+
+(defun notifications-operate-this-notification ()
+  "Delete the notification in *notifications--buffer*."
+  (interactive)
+  (notifications-current-notification)
+  (let* ((data (get-text-property (point) 'notification-data))
+         (notification (car data)))
+    (message "operate on the notification: %S" notification)
+    (let* ((action-name (completing-read "Choose the notification action: " *notification-buffer-actions*))
+           (action (alist-get action-name *notification-buffer-actions* nil nil #'equal)))
+      (message "The action choosed: %S" action)
+      (funcall action notification))))
+
+(defun notifications-undo ()
+  "Undo in the *notifications-buffer*."
+  (interactive)
+  (read-only-mode 0)
+  (undo)
+  (read-only-mode 1))
+
+(defvar notifications-aggregate-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map text-mode-map)
+    (define-key map "n" 'notifications-next-notification)
+    (define-key map "p" 'notifications-previous-notification)
+    (define-key map "o" 'notifications-operate-this-notification)
+    (define-key map "d" 'notifications-delete-this-notification)
+    (define-key map "u" 'notifications-undo)
+    (define-key map "q" 'quit-window)
+    map))
+
+(define-derived-mode notifications-aggregate-mode text-mode "NOTIA"
+  ;; The mode for *notifications-buffer*.
+  (use-local-map notifications-aggregate-mode-map))
 
 (global-set-key (kbd "C-x s") 'start-notify)
 
