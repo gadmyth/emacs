@@ -234,7 +234,7 @@
     (define-key map (kbd "H-m") #'goto-main-window)
     (define-key map (kbd "H-S") #'switch-to-scratch-buffer)
     (define-key map (kbd "H-M") #'switch-to-message-buffer)
-    (define-key map (kbd "H-T") #'run-or-raise-next-terminal)
+    (define-key map (kbd "<H-S-return>") #'run-or-raise-next-terminal)
     (define-key map (kbd "<H-tab>") #'goto-next-window)
     (define-key map (kbd "<H-iso-lefttab>") #'goto-previous-window)
     (define-key map (kbd "<H-return>") #'swap-to-main-window)
