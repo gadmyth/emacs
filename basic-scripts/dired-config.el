@@ -50,7 +50,15 @@
      (require-package
       'dired-x
       ;; omit some files or directories under dired mode
-      (setq-default dired-omit-files-p t))
+      (setq-default dired-omit-files-p t)
+      ;; shell alist
+      (setq dired-guess-shell-alist-user
+            `(("\\.\\(jpe?g\\|png\\)\\'"
+               ,(cond ((eq window-system 'x) "gImageReader" "ristretto")
+                      (t nil)))
+              ("\\.xlsx\\'"
+               ,(cond ((eq window-system 'x) "gnumeric")
+                      (t nil))))))
 
      (require-safely
       'dired-narrow
