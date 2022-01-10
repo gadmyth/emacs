@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.9
-;; Package-Version: 20220109.001
+;; Version: 1.1.10
+;; Package-Version: 20220110.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -347,7 +347,7 @@ above them."
                  (header-start (point))
                  (header-end (+ header-start (length header))))
             (put-text-property 0 (length header)
-                               'font-lock-face notifications-header-face header)
+                               'font-lock-face 'notifications-header-face header)
             (insert header "\n" message)
             (notifications-add-button header-start header-end notification)))
         (set-window-point (get-buffer-window buffer 'visible) (point-max))
@@ -404,30 +404,30 @@ above them."
   "Goto the current notification's head in *notifications-buffer*."
   (interactive)
   (beginning-of-visual-line)
-  (loop while (and (not (notifications-header-p))
-                   (not (eq (point) (point-min)))
-                   (not (eq (point) (point-max))))
-        do (previous-line)))
+  (cl-loop while (and (not (notifications-header-p))
+                      (not (eq (point) (point-min)))
+                      (not (eq (point) (point-max))))
+           do (previous-line)))
 
 (defun notifications-next-notification ()
   "Goto the next notification's head in *notifications-buffer*."
   (interactive)
   (beginning-of-visual-line)
   (forward-line)
-  (loop while (and (not (notifications-header-p))
-                   (not (eq (point) (point-min)))
-                   (not (eq (point) (point-max))))
-        do (forward-line)))
+  (cl-loop while (and (not (notifications-header-p))
+                      (not (eq (point) (point-min)))
+                      (not (eq (point) (point-max))))
+           do (forward-line)))
 
 (defun notifications-previous-notification ()
   "Goto the previous notification's head in *notifications-buffer*."
   (interactive)
   (beginning-of-visual-line)
   (previous-line)
-  (loop while (and (not (notifications-header-p))
-                   (not (eq (point) (point-min)))
-                   (not (eq (point) (point-max))))
-        do (previous-line)))
+  (cl-loop while (and (not (notifications-header-p))
+                      (not (eq (point) (point-min)))
+                      (not (eq (point) (point-max))))
+           do (previous-line)))
 
 (defun notifications-delete-this-notification ()
   "Delete the notification in *notifications--buffer*."
