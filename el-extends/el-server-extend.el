@@ -129,7 +129,8 @@
 (defun elnode-capture ()
   "DOCROOT: , PORT: , HOST: . Capture the content, append it to *scratch* buffer."
   (lambda (httpcon)
-    (let* ((content (elnode-http-param httpcon "content")))
+    (let* ((content (elnode-http-param httpcon "content"))
+           (content (decode-coding-string content 'utf-8)))
       (message "elnode-capture, capture content: %s" content)
       (elnode-http-start httpcon 200 '("Content-Type" . "text/html"))
       (with-current-buffer (get-buffer "*scratch*")

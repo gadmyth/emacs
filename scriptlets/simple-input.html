@@ -1,17 +1,17 @@
 <html>
   <head>
     <script>
-      var submit = function() {
-          var x = document.getElementById("content")
-          alert(x.value)
-          var ajax = new XMLHttpRequest();
-          ajax.open('get', '/capture/?content=' + x.value);
-          ajax.send();
-      }
+     var submit = function() {
+       var x = document.getElementById("content")
+       alert(x.value)
+       var ajax = new XMLHttpRequest();
+       ajax.open('get', '/capture/?content=' + encodeURIComponent(x.value));
+       ajax.send();
+     }
     </script>
   </head>
   <body>
-    <textarea rows="5" cols="80" id="content"></textarea>
+    <textarea rows="10" cols="30" id="content"></textarea>
     <br/>
     <button type="button" onclick="submit()">submit</button>
   </body>
