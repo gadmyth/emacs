@@ -41,6 +41,8 @@
 
 (defvar *eyebrowse-bookmarks* nil)
 
+(defconst +eyebrowse-bookmarks-file-name+ (expand-file-name "~/.eyebrowse_bookmarks"))
+
 (defvar eyebrowse-bookmark-search-size 16)
 
 (defun eyebrowse-add-bookmark (bookmark-key &optional cover-p)
@@ -248,12 +250,31 @@
     map)
   "Initial key map for `eyebrowse-xmonad-mode'.")
 
+(defun save-eyebrowse-bookmarks ()
+  "."
+  (when (> (length *eyebrowse-bookmarks*) 0)
+    (with-temp-file +eyebrowse-bookmarks-file-name+
+      (print *eyebrowse-bookmarks* (current-buffer)))))
+
+(defun load-eyebrowse-bookmarks ()
+  "."
+  (when (file-exists-p +eyebrowse-bookmarks-file-name+)
+    (with-temp-buffer
+      (insert-file-contents +eyebrowse-bookmarks-file-name+)
+      (goto-char (point-min))
+      (setq *eyebrowse-bookmarks* (read (current-buffer)))))
+  t)
+
 (define-minor-mode eyebrowse-xmonad-mode
   "Toggle `eyebrowse-xmonad-mode."
   :keymap eyebrowse-xmonad-mode-map
   :global t
   (when eyebrowse-xmonad-mode
-    (define-eyebrowse-bookmarks-keymap)))
+    (define-eyebrowse-bookmarks-keymap)
+    (add-hook 'emacs-startup-hook
+              (lambda ()
+                (when (load-eyebrowse-bookmarks)
+                  (add-hook 'kill-emacs-hook 'save-eyebrowse-bookmarks))))))
 
 (provide 'eyebrowse-xmonad)
 ;;; eyebrowse-xmonad.el ends here
