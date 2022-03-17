@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com>
-;; Version: 0.2.4.7
-;; Package-Version: 20211202.001
+;; Version: 0.2.4.8
+;; Package-Version: 20220317.001
 ;; Package-Requires: websocket, s, dired-x, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -180,14 +180,16 @@
     (read-string (format "please input host (default %s): " *p2p-ws-server-host*) nil nil *p2p-ws-server-host*)
     (read-number "please input port: " *p2p-ws-server-port*)))
   (let* ((ws-url (format "ws://%s:%s" host port))
-         (ws-list (p2p-ws-filter-with-url ws-url)))
+         (ws-list (p2p-ws-filter-with-url ws-url))
+         (new-ws))
     (if (> (length ws-list) 0)
         (message "The connection %s already exists!" ws-url)
-      (let ((new-ws (websocket-open ws-url
-                                    :on-message #'websocket-client-message-handler
-                                    :on-close #'websocket-client-close-handler)))
-        (if (websocket-openp new-ws)
-            (push new-ws *p2p-ws-client-list*))))))
+      (setq new-ws (websocket-open ws-url
+                                   :on-message #'websocket-client-message-handler
+                                   :on-close #'websocket-client-close-handler))
+      (if (websocket-openp new-ws)
+          (push new-ws *p2p-ws-client-list*)))
+    new-ws))
 
 (defun websocket-client-message-handler (ws frame)
   "Handle the websocket WS's FRAME."
@@ -217,16 +219,45 @@
 
 (defun p2p-ws-do-send-text (ws message local-p)
   "Do send the MESSAGE to WS."
-  ;; check the websocket is opened or not
-  (when (not (websocket-openp ws))
-    (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname nil))
-    (p2p-ws-client-list-remove ws)
-    (setq ws (websocket-ensure-connected ws)))
+  (setq ws (websocket-ensure-connected ws))
   ;; recheck and send the message
   (when (websocket-openp ws)
     (p2p-ws-debug-message "<<< send message [%s] to %s" (substring message 0 (min (length message) 100)) (websocket-remote-name-with-nickname ws))
     (websocket-send-text ws message)
     (p2p-do-update-websocket-buffer (websocket-remote-name-with-nickname ws) message local-p)))
+
+(defun websocket-ensure-connected (ws)
+  "Reconnect the websocket server of WS."
+  (cond
+   ;; check the websocket is opened or not
+   ((websocket-openp ws)
+    ;; the websocket is openp, return the origin websocket
+    ws)
+   (t
+    (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname ws))
+    (cond
+     ;; sended websocket
+     ((member ws *p2p-ws-client-list*)
+      (let* ((conn (websocket-conn ws))
+             (conn-info (process-contact conn t))
+             (remote-info (mapcar 'identity (plist-get conn-info :remote))
+                          (host (format "%s.%s.%s.%s"
+                                        (first remote-info)
+                                        (second remote-info)
+                                        (third remote-info)
+                                        (fourth remote-info)))
+                          (port (fourth remote-info))))
+        (websocket-close ws)
+        ;; re-send websocket
+        (connect-websocket-server host port)))
+     ;; accepted websocket
+     ((member ws websocket-server-websockets)
+      (websocket-server-close ws)
+      ;; return the origin websocket
+      ws)
+     (t
+      ;; return the origin websocket
+      ws)))))
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
@@ -309,10 +340,7 @@
 
 (defun p2p-ws-do-set-nickname (nickname ws)
   "Set NICKNAME for websocket WS."
-  (when (not (websocket-openp ws))
-    (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname ws))
-    (p2p-ws-client-list-remove ws)
-    (setq ws (websocket-ensure-connected ws)))
+  (setq ws (websocket-ensure-connected ws))
   ;; recheck and send the message
   (when (websocket-openp ws)
     (p2p-ws-debug-message "set nickname %s to %s" nickname (websocket-remote-name-with-nickname ws))
@@ -430,13 +458,14 @@ call it with the value of the `pp2-websocket-data' text property."
     (apply fun data)))
 
 (defun p2p-websocket-button-click-button (_ignore event)
-  "Call `p2p-websocket-button-press-button'."
+  "Call `p2p-websocket-button-press-button' with EVENT."
   (interactive "P\ne")
   (save-excursion
     (mouse-set-point event)
     (p2p-websocket-button-press-button)))
 
 (defun ensure-p2p-websocket-buffer ()
+  "."
   (when (not (buffer-live-p *p2p-websocket-buffer*))
     ;; create buffer if not exists
     (setq *p2p-websocket-buffer*
