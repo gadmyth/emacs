@@ -17,6 +17,23 @@
   (select-window (get-buffer-window *temp-org-capture-buffer*))
   (org-mode))
 
+(defun org-capture-with-random-mark (description)
+  "DESCRIPTION: ."
+  (interactive "sSet the line description here: ")
+  (save-excursion
+    (beginning-of-line)
+    (newline)
+    (forward-line -1)
+    (let* ((line (replace-regexp-in-string "-" "" (org-id-uuid)))
+           (filename (replace-regexp-in-string (getenv "HOME") "${HOME}" (buffer-file-name)))
+           (formatted-line (format "[[file:%s::%s][%s]]" filename line description)))
+      (insert (format "MARK: %s" line))
+      (indent-for-tab-command)
+      (comment-line 1)
+      (setq *org-cap-temp* formatted-line)
+      (when show-temp-capture-buffer-p
+        (display-temp-capture-buffer)))))
+
 (defun org-capture-current-line (description)
   "DESCRIPTION: ."
   (interactive "sSet the line description here: ")
@@ -31,6 +48,19 @@
     (setq *org-cap-temp* formatted-line)
     (when show-temp-capture-buffer-p
       (display-temp-capture-buffer))))
+
+(defvar *org-capture-actions*
+  '(("capture current line" . org-capture-current-line)
+    ("capture new mark" . org-capture-with-random-mark)))
+
+(defun org-capture-mark ()
+  "."
+  (interactive)
+  (let* ((action (completing-read "Please choose the action: " *org-capture-actions* nil t nil nil nil))
+         (func (alist-get action *org-capture-actions* nil nil #'string=)))
+    (message "%S" func)
+    (when func
+      (call-interactively func))))
 
 (defun org-capture-insert-temp ()
   "."
@@ -120,7 +150,7 @@
           (message org-link)
           org-link))))
 
-(global-set-key (kbd "<f7>") 'org-capture-current-line)
+(global-set-key (kbd "<f7>") 'org-capture-mark)
 (global-set-key (kbd "<M-f7>") 'org-capture-insert-temp)
 (global-set-key (kbd "<f8>") 'org-make-element-link)
 (global-set-key (kbd "<M-f8>") 'org-insert-element-link)
