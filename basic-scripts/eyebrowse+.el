@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.19
-;; Package-Version: 20220107.001
+;; Version: 1.2.20
+;; Package-Version: 20220403.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -540,7 +540,8 @@ COPY from eyebrowse--load-window-config."
 (defun frame-index-string ()
   "Use number unicode for frame index from https://unicode-table.com."
   (let ((frame-index (frame-parameter nil 'eyebrowse-frame-index)))
-    (cond ((eq frame-index 0) "➊")
+    (cond ((null frame-index) "")
+          ((eq frame-index 0) "➊")
           ((eq frame-index 1) "➋")
           ((eq frame-index 2) "➌")
           ((eq frame-index 3) "➍")
