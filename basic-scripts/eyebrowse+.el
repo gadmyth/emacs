@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.20
-;; Package-Version: 20220403.001
+;; Version: 1.2.21
+;; Package-Version: 20220403.002
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -489,6 +489,8 @@ COPY from eyebrowse--load-window-config."
 (defun load-eyebrowse-config ()
   "Load eyebrowse workspace from file."
   (interactive)
+  (when (commit-editmsg-terminal-frame-p)
+    (return))
   (let ((loading-success-p)
         (file-name (eyebrowse-file-name)))
     (eyebrowse-init-original)
@@ -514,6 +516,18 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse-config-the-only-config)
     ;; return the loading result
     loading-success-p))
+
+(defun commit-editmsg-terminal-frame-p ()
+  "."
+  (let (ret)
+    (dolist (proc (process-list))
+      (let ((frame (plist-get (process-plist proc) 'frame)))
+        (when (eq (window-frame) frame)
+          (let ((buffers (plist-get (process-plist proc) 'buffers)))
+            (dolist (buffer buffers)
+              (when (string-equal (buffer-name buffer) "COMMIT_EDITMSG")
+                (setq ret t)))))))
+    ret))
 
 (defun load-frame-geometry ()
   "."
