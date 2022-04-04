@@ -34,6 +34,15 @@
       (when show-temp-capture-buffer-p
         (display-temp-capture-buffer)))))
 
+(defun org-capture-current-file (description)
+  "DESCRIPTION: ."
+  (interactive "sSet the line description here: ")
+  (let* ((filename (replace-regexp-in-string (getenv "HOME") "${HOME}" (buffer-file-name)))
+         (formatted-line (format "[[file:%s][%s]]" filename description)))
+    (setq *org-cap-temp* formatted-line)
+    (when show-temp-capture-buffer-p
+      (display-temp-capture-buffer))))
+
 (defun org-capture-current-line (description)
   "DESCRIPTION: ."
   (interactive "sSet the line description here: ")
@@ -51,7 +60,8 @@
 
 (defvar *org-capture-actions*
   '(("capture current line" . org-capture-current-line)
-    ("capture new mark" . org-capture-with-random-mark)))
+    ("capture new mark" . org-capture-with-random-mark)
+    ("capture current file" . org-capture-current-file)))
 
 (defun org-capture-mark ()
   "."
