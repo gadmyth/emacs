@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com>
-;; Version: 0.2.4.8
-;; Package-Version: 20220317.001
+;; Version: 0.2.4.9
+;; Package-Version: 20220405.001
 ;; Package-Requires: websocket, s, dired-x, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -235,29 +235,37 @@
     ws)
    (t
     (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname ws))
-    (cond
-     ;; sended websocket
-     ((member ws *p2p-ws-client-list*)
-      (let* ((conn (websocket-conn ws))
-             (conn-info (process-contact conn t))
-             (remote-info (mapcar 'identity (plist-get conn-info :remote))
-                          (host (format "%s.%s.%s.%s"
-                                        (first remote-info)
-                                        (second remote-info)
-                                        (third remote-info)
-                                        (fourth remote-info)))
-                          (port (fourth remote-info))))
-        (websocket-close ws)
-        ;; re-send websocket
-        (connect-websocket-server host port)))
-     ;; accepted websocket
-     ((member ws websocket-server-websockets)
-      (websocket-server-close ws)
-      ;; return the origin websocket
-      ws)
-     (t
-      ;; return the origin websocket
-      ws)))))
+    (websocket-reconnect ws))))
+
+(defun websocket-reconnect (ws)
+  "Reconnect the websocket server of WS."
+  (cond
+   ;; sended websocket
+   ((member ws *p2p-ws-client-list*)
+    (let* ((conn (websocket-conn ws))
+           (conn-info (process-contact conn t))
+           (remote-info (mapcar 'identity (plist-get conn-info :remote)))
+           (host (format "%s.%s.%s.%s"
+                         (first remote-info)
+                         (second remote-info)
+                         (third remote-info)
+                         (fourth remote-info)))
+           (port (fifth remote-info)))
+      (message "I'm client, now close the connect, host: %s, port: %s" host port)
+      (websocket-close ws)
+      ;; re-send websocket
+      (message "I'm client, now reconnect to the server")
+      (connect-websocket-server host port)))
+   ;; accepted websocket
+   ((member ws websocket-server-websockets)
+    (message "I'm server, just close the remote client.")
+    (websocket-server-close ws)
+    ;; return the origin websocket
+    ws)
+   (t
+    ;; return the origin websocket
+    (message "other status")
+    ws)))
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
@@ -428,6 +436,7 @@ above them."
     (define-key map "n" 'p2p-websocket-next-message)
     (define-key map "p" 'p2p-websocket-previous-message)
     (define-key map "r" 'p2p-websocket-reply-this-message)
+    (define-key map "R" 'p2p-websocket-reconnect-this-message)
     (define-key map "b" 'p2p-websocket-send-buffer-to-this-message)
     (define-key map "f" 'p2p-websocket-send-file-to-this-message)
     (define-key map "d" 'p2p-websocket-delete-this-message)
@@ -652,6 +661,15 @@ call it with the value of the `pp2-websocket-data' text property."
   (save-excursion
     (p2p-websocket-current-message)
     (p2p-websocket-button-press-button)))
+
+(defun p2p-websocket-reconnect-this-message ()
+  "Reconnect the current message's ws."
+  (interactive)
+  (save-excursion
+    (p2p-websocket-current-message)
+    (let* ((data (get-text-property (point) 'p2p-websocket-data))
+           (ws (p2p-websocket-parse-from-data (car data))))
+      (websocket-reconnect ws))))
 
 (defun p2p-websocket-send-buffer-to-this-message ()
   "Reply this current message with buffer."
