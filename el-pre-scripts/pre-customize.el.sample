@@ -39,6 +39,10 @@
 (defvar *erc-forbidden-targets* nil)
 (add-to-list '*erc-forbidden-targets* "")
 
+;; lsp
+(setq *lsp-java-enable* nil)
+(setq +lsp-java-server-default-dir+ (expand-file-name "~/lsp-java-server/"))
+
 ;; weathers
 (setq *weather-api-uid* nil)
 (setq *weather-api-key* nil)
