@@ -46,6 +46,7 @@
         'goto-last-point
         'request
         'exwm
+        'qrencode
         ;'vkill
         ))
 

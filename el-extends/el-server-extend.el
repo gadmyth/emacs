@@ -224,6 +224,13 @@
    ("^/switch-buffer/\\(.*\\)$" . (byte-compile (buffer-switcher)))
    ))
 
+(defun show-simple-input-qrcode ()
+  "."
+  (interactive)
+  (require 'qrencode)
+  (qrencode--encode-to-buffer
+   (format "http://%s:%d/script/simple-input.html" (current-ip) *my-default-elnode-port*)))
+
 (defun open-org-file-by-elnode ()
   "."
   (interactive)
