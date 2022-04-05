@@ -45,16 +45,18 @@
   "Shuffle the elements in LIST."
   (loop for i in (reverse (number-sequence 1 (1- (length list))))
         do (let ((j (random (+ i 1))))
-             (swap list i j)))
+             (when (not (eq i j))
+               (swap list i j))))
   list)
 
 (defun password-generator-generate ()
   "."
   (interactive)
-  (password-generator-normal nil nil nil  nil nil t))
+  (password-generator-normal nil nil nil nil nil t))
   
 (defun password-generator-normal (&optional total-len number-len lowercase-len uppercase-len special-len return)
   "."
+  (interactive)
   (let* ((password "")
          (number-len (or number-len 2))
          (uppercase-len (or uppercase-len 2))
