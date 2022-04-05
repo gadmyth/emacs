@@ -40,9 +40,72 @@
            (dired-add-file new)
            (dired-move-to-filename))))
 
-     ;; add create file keymap
-     (define-key dired-mode-map (kbd "c") 'dired-create-new-file)
+     (defun dired-create-directory-or-file ()
+       "."
+       (interactive)
+       (if (y-or-n-p "Make directory or else create file?")
+           (call-interactively 'dired-create-directory)
+         (call-interactively 'dired-create-new-file)))
 
+     (defvar dired-zip-compress-command-template "zip {} %o -r --filesync %i")
+     
+     (defvar dired-unzip-compress-command-template '("" "unzip {} -o -d %o %i"))
+
+     (defun dired-compress-maybe-encrypt (inner-command)
+       "Compress or uncompress maybe encrypt or decrypt under dired with INNER-COMMAND."
+       (let* ((password (and (y-or-n-p "Encrypt the file or not?")
+                             (completing-read "Please input password: " nil nil t)))
+              (password-param (or (and password
+                                       (> (length password) 0)
+                                       (format "-P %s" password))
+                                  ""))
+              (zip-command)
+              (unzip-command))
+         (ignore-errors
+           (unwind-protect
+               (progn
+                 ;; Choose encrypt or not
+                 (setq zip-command (replace-regexp-in-string
+                                    "{}" password-param
+                                    dired-zip-compress-command-template))
+                 (setq unzip-command (list
+                                      (car dired-unzip-compress-command-template)
+                                      (replace-regexp-in-string
+                                       "{}" password-param
+                                       (cadr dired-unzip-compress-command-template))))
+                 (message "unzip command: %s" unzip-command)
+                 ;; compose the new encrypt zip command
+                 (setf (alist-get "\\.zip\\'" dired-compress-files-alist nil nil #'string-equal)
+                       zip-command)
+                 (setf (alist-get "\\.zip\\'" dired-compress-file-suffixes nil nil #'string-equal)
+                       unzip-command)
+                 ;; call the compress function
+                 (call-interactively inner-command))
+             ;; recover the original zip command
+             (setf (alist-get "\\.zip\\'" dired-compress-files-alist nil nil #'string-equal)
+                   (replace-regexp-in-string
+                    "{}" ""
+                    dired-zip-compress-command-template))
+             (setf (alist-get "\\.zip\\'" dired-compress-file-suffixes nil nil #'string-equal)
+                   (list
+                    (car dired-unzip-compress-command-template)
+                    (replace-regexp-in-string
+                     "{}" "{}"
+                     (cadr dired-unzip-compress-command-template))))))))
+
+     ;; add create file keymap
+     (define-key dired-mode-map (kbd "+") dired-create-directory-or-file)
+
+     (define-key dired-mode-map (kbd "c")
+       (lambda ()
+         (interactive)
+         (dired-compress-maybe-encrypt 'dired-do-compress-to)))
+
+     (define-key dired-mode-map (kbd "Z")
+       (lambda ()
+         (interactive)
+         (dired-compress-maybe-encrypt 'dired-do-compress)))
+     
      ;; require dirtree
      (require-safely 'dirtree)
      
@@ -58,6 +121,9 @@
                       (t nil)))
               ("\\.xlsx\\'"
                ,(cond ((eq window-system 'x) "gnumeric")
+                      (t nil)))
+              ("\\.htm?l\\'"
+               ,(cond ((eq window-system 'x) "firefox" "google-chrome")
                       (t nil))))))
 
      (require-safely
