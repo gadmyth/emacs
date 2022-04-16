@@ -94,7 +94,7 @@
                      (cadr dired-unzip-compress-command-template))))))))
 
      ;; add create file keymap
-     (define-key dired-mode-map (kbd "+") dired-create-directory-or-file)
+     (define-key dired-mode-map (kbd "+") 'dired-create-directory-or-file)
 
      (define-key dired-mode-map (kbd "c")
        (lambda ()
