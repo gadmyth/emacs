@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: p2p-websocket.el <gadmyth@gmail.com>
-;; Version: 0.2.4.9
-;; Package-Version: 20220405.001
+;; Version: 0.2.5.1
+;; Package-Version: 20220416.001
 ;; Package-Requires: websocket, s, dired-x, codec
 ;; Keywords: p2p-websocket.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -237,25 +237,19 @@
     (message "websocket %s is not opened, open a new again!" (websocket-remote-name-with-nickname ws))
     (websocket-reconnect ws))))
 
+(defun websocket-ensure-server (host port)
+  "Reconnect the websocket server of HOST and PORT."
+  (when (yes-or-no-p (format "If you're client and %s:%s is server, do you want to reconnect? " host port))
+    (connect-websocket-server host port)))
+
 (defun websocket-reconnect (ws)
   "Reconnect the websocket server of WS."
   (cond
    ;; sended websocket
    ((member ws *p2p-ws-client-list*)
-    (let* ((conn (websocket-conn ws))
-           (conn-info (process-contact conn t))
-           (remote-info (mapcar 'identity (plist-get conn-info :remote)))
-           (host (format "%s.%s.%s.%s"
-                         (first remote-info)
-                         (second remote-info)
-                         (third remote-info)
-                         (fourth remote-info)))
-           (port (fifth remote-info)))
-      (message "I'm client, now close the connect, host: %s, port: %s" host port)
-      (websocket-close ws)
-      ;; re-send websocket
-      (message "I'm client, now reconnect to the server")
-      (connect-websocket-server host port)))
+    (message "I'm client, now close the connect")
+    (websocket-close ws)
+    (websocket-do-reconnect ws))
    ;; accepted websocket
    ((member ws websocket-server-websockets)
     (message "I'm server, just close the remote client.")
@@ -265,7 +259,24 @@
    (t
     ;; return the origin websocket
     (message "other status")
-    ws)))
+    (if (yes-or-no-p "If you're websocket client, do you want to reconnect? ")
+        (websocket-do-reconnect ws)
+      ws))))
+
+(defun websocket-do-reconnect (ws)
+  "Just reconnect the websocket server of WS."
+  (let* ((conn (websocket-conn ws))
+           (conn-info (process-contact conn t))
+           (remote-info (mapcar 'identity (plist-get conn-info :remote)))
+           (host (format "%s.%s.%s.%s"
+                         (first remote-info)
+                         (second remote-info)
+                         (third remote-info)
+                         (fourth remote-info)))
+           (port (fifth remote-info)))
+      ;; re-send websocket
+      (message "I'm client, now reconnect to the server")
+      (connect-websocket-server host port)))
 
 (defun websocket-remote-name (ws)
   "Get the WS's sender of remote."
@@ -405,7 +416,7 @@
   '((default :weight bold)
     (((class color) (min-colors 88)) :foreground "SlateBlue")
     (t :foreground "blue"))
-  "p2p websocket face for notices."
+  "P2P websocket face for notices."
   :group 'p2p-websocket-faces)
 
 (defcustom p2p-websocket-button-mouse-face 'highlight
@@ -460,6 +471,8 @@ call it with the value of the `pp2-websocket-data' text property."
   (interactive)
   (let* ((data (get-text-property (point) 'p2p-websocket-data))
          (fun (get-text-property (point) 'p2p-websocket-button-callback)))
+    (message "data under point is %S" data)
+    (message "function under point is %S" fun)
     (unless fun
       (message "No button at point"))
     (when (and fun (symbolp fun) (not (fboundp fun)))
@@ -489,6 +502,7 @@ call it with the value of the `pp2-websocket-data' text property."
     (p2p-do-update-websocket-buffer sender message nil)))
 
 (defun p2p-do-update-websocket-buffer (sender msg local-p)
+  "Update websocket buffer with SENDER, MSG and LOCAL-P flag."
   ;; ensure buffer
   (ensure-p2p-websocket-buffer)
   ;; update buffer
@@ -599,6 +613,11 @@ call it with the value of the `pp2-websocket-data' text property."
   "Callback of the p2p websocket sender button with DATA as args."
   (let ((ws (p2p-websocket-parse-from-data data))
         (message (read-from-minibuffer "Please input the message to send: ")))
+    (unless ws
+      (let* ((array (split-string data ":"))
+             (host (car array))
+             (port (cadr array)))
+        (setq ws (websocket-ensure-server host port))))
     (p2p-ws-do-send-text ws message t)))
 
 (defun p2p-websocket-buffer-callback (data)
@@ -706,7 +725,7 @@ call it with the value of the `pp2-websocket-data' text property."
         (string-to-number (s-trim (buffer-string)))))))
 
 (defun p2p-websocket-send-file-part (file-path begin saved-file-path saved-file-length)
-  "."
+  "Send part of file, parameter is FILE-PATH, BEGIN, SAVED-FILE-PATH, SAVED-FILE-LENGTH."
   (let* ((file-size (file-size file-path))
          (end (min file-size (+ begin 4096))))
     (when (> end begin)
