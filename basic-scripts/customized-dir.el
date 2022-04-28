@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.3
-;; Package-Version: 20220107.002
+;; Version: 1.0.4
+;; Package-Version: 20220428.001
 ;; Package-Requires: ivy, counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -92,8 +92,9 @@
 
 (defun save-customized-dir-without-confirm ()
   "."
-  (with-temp-file +customized-dir-file-name+
-    (print *customized-dir* (current-buffer))))
+  (let ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *customized-dir*))))
+    (with-temp-file +customized-dir-file-name+
+      (insert content))))
 
 (defun save-customized-dir ()
   "CONFIRMED: ."
