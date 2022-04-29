@@ -4,9 +4,9 @@
 # --
 ;;; ${1:`(buffer-name)`} --- Package.  -*- lexical-binding: ${2:nil}; -*-
 
-;; Copyright (C) `(format-time-string "%Y" (current-time))` ${5:Author Name}
+;; Copyright (C) `(format-time-string "%Y" (current-time))` ${3:Author Name}
 
-;; Author: $1 <$5:@${6:mail.com}>
+;; Author: $1 <${5:name}@${6:mail.com}>
 ;; Version: ${7:1.0}
 ;; Package-Version: `(format-time-string "%Y%m%d" (current-time))`.001
 ;; Package-Requires:$8
