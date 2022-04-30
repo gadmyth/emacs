@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20220430.002
+;; Version: 1.0.2
+;; Package-Version: 20220430.003
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -99,7 +99,7 @@
                              (buffer-name *stopwatch-current-buffer*))
     (stopwatch-debug-message "----")
     ;; record log
-    (stopwatch-log "switch-buffer")))
+    (stopwatch-log "s")))
 
 (defun stopwatch-log-file ()
   "."
@@ -107,22 +107,27 @@
 
 (defun stopwatch-log (action &optional active-buffer)
   "Record stopwatch log to file with ACTION and ACTIVE-BUFFER."
-  (when *stopwatch-previous-buffer*
+  (when (or active-buffer *stopwatch-previous-buffer*)
     (let* ((timestamp (current-timestamp))
            (buffer (or active-buffer *stopwatch-previous-buffer*))
-           (start-time (gethash buffer *stopwatch-hash* 0))
+           (start-time (gethash buffer *stopwatch-hash* timestamp))
            (duration (- timestamp start-time))
-           (time-string (timestamp-to-normal-string start-time))
+           (time-string (timestamp-to-normal-string timestamp))
            (content (format "%s\t%s\t%s\t%d\n" time-string action buffer duration)))
       (write-region content nil (stopwatch-log-file) 'append))))
 
-(defun stopwatch-focus-change-callback ()
+(defun stopwatch-active-frame ()
   "."
   (let ((active-frame)
         (frames (reverse (frame-list))))
     (dolist (frame frames)
       (when (frame-focus-state frame)
         (setq active-frame frame)))
+    active-frame))
+
+(defun stopwatch-focus-change-callback ()
+  "."
+  (let ((active-frame (stopwatch-active-frame)))
     (stopwatch-debug-message "frame focus state: %S, current frame: %S, active frame: %S, current buffer: %S"
                              (frame-focus-state)
                              (cl-position (window-frame) frames)
@@ -130,18 +135,38 @@
                              (buffer-name (current-buffer)))
     (cond
      ((not active-frame)
-      (when (eq *stopwatch-current-buffer* (current-buffer))
-        (stopwatch-log "deactive" *stopwatch-current-buffer*)
-        (puthash (current-buffer) (current-timestamp) *stopwatch-hash*)))
+      (stopwatch-log "d" *stopwatch-current-buffer*)
+      (puthash (current-buffer) (current-timestamp) *stopwatch-hash*)
+      ;; clear the current buffer
+      (setq *stopwatch-previous-buffer* nil)
+      (setq *stopwatch-current-buffer* nil))
      (t
-      (when (eq *stopwatch-current-buffer* (current-buffer))
-        (stopwatch-log "active" *stopwatch-current-buffer*)
-        (puthash (current-buffer) (current-timestamp) *stopwatch-hash*))))))
+      (setq *stopwatch-current-buffer* (current-buffer))
+      (puthash (current-buffer) (current-timestamp) *stopwatch-hash*)
+      (stopwatch-log "a" *stopwatch-current-buffer*)))))
+
+(defun stopwatch-delete-frame-callback (&optional frame)
+  "Record stopwatch log when the FRAME is deleted."
+  (let ((active-frame (stopwatch-active-frame)))
+    (stopwatch-debug-message "current frame: %S, active frame: %S, current buffer: %S"
+                             (cl-position (window-frame) frames)
+                             (and active-frame (cl-position active-frame frames))
+                             (buffer-name (current-buffer)))
+    
+    (stopwatch-log "d" *stopwatch-current-buffer*)
+    (puthash (current-buffer) (current-timestamp) *stopwatch-hash*)
+    ;; clear the current buffer
+    (setq *stopwatch-previous-buffer* nil)
+    (setq *stopwatch-current-buffer* nil)))
+  
 
 (add-hook 'switch-buffer-functions #'buffer-maybe-changed)
 
 (add-function :after after-focus-change-function
               #'stopwatch-focus-change-callback)
+
+(add-hook 'delete-frame-functions
+          #'stopwatch-delete-frame-callback)
 
 (provide 'stopwatch)
 ;;; stopwatch.el ends here
