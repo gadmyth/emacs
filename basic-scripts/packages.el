@@ -79,6 +79,7 @@
         'jq-mode
         'look-mode
         'youdao-dictionary
+        'switch-buffer-functions
         'nov))
 
 (defconst +option-packages+
