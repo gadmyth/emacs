@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20220430.003
+;; Version: 1.0.3
+;; Package-Version: 20220430.004
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -41,6 +41,7 @@
 (defvar *stopwatch-log-file* (expand-file-name ".emacs.stopwatch_log" "~"))
 (defvar *stopwatch-debug* nil)
 (defvar *stopwatch-focus-changed* nil)
+(defconst *stopwatch-log-version* 2)
 
 (defvar-local stopwatch-current-timestamp nil)
 (defvar *stopwatch-hash* (make-hash-table))
@@ -113,7 +114,12 @@
            (start-time (gethash buffer *stopwatch-hash* timestamp))
            (duration (- timestamp start-time))
            (time-string (timestamp-to-normal-string timestamp))
-           (content (format "%s\t%s\t%s\t%d\n" time-string action buffer duration)))
+           (content (format "%d\t%s\t%s\t%s\t%d\n"
+                            *stopwatch-log-version*
+                            time-string
+                            action
+                            buffer
+                            duration)))
       (write-region content nil (stopwatch-log-file) 'append))))
 
 (defun stopwatch-active-frame ()
