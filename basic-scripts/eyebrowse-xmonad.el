@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6
-;; Package-Version: 20220428.001
+;; Version: 1.0.6.1
+;; Package-Version: 20220430.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -51,7 +51,8 @@
   (let* ((buffer (current-buffer))
          (buffername (buffer-name buffer))
          (filename (buffer-file-name buffer))
-         (bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
+         (bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'string-equal))
+         (remark (alist-get "remark" bookmark nil t 'string-equal)))
     (when (or (not bookmark) cover-p)
       (setq bookmark `((eyebrowse . ,(eyebrowse--get 'current-slot))
                        (buffername . , buffername)
@@ -76,7 +77,7 @@
                                            (end-of-line)
                                            (let ((end (point)))
                                              (buffer-substring start end)))))
-                       (remark . ,(read-string "Please input the remark of this bookmark: "))
+                       (remark . ,(read-string "Please input the remark of this bookmark: " remark))
                        (position . ,(point))))
       ;; set or append the bookmark of key
       (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) bookmark)
