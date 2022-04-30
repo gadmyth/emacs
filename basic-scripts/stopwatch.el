@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.0
-;; Package-Version: 20220430.001
+;; Version: 1.0.1
+;; Package-Version: 20220430.002
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -118,14 +118,15 @@
 
 (defun stopwatch-focus-change-callback ()
   "."
-  (let ((active-frame))
-    (dolist (frame (frame-list))
+  (let ((active-frame)
+        (frames (reverse (frame-list))))
+    (dolist (frame frames)
       (when (frame-focus-state frame)
         (setq active-frame frame)))
     (stopwatch-debug-message "frame focus state: %S, current frame: %S, active frame: %S, current buffer: %S"
                              (frame-focus-state)
-                             (frame-index)
-                             (and active-frame (frame-index active-frame))
+                             (cl-position (window-frame) frames)
+                             (and active-frame (cl-position active-frame frames))
                              (buffer-name (current-buffer)))
     (cond
      ((not active-frame)
