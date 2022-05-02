@@ -2,6 +2,9 @@
 ;;; Commentary:
 ;;; Code:
 
+
+(require 'time-date)
+
 (defconst +date-command+ (if (eq window-system 'ns) "gdate" "date"))
 
 (defun quick-on-timesmap (timestamp)
@@ -33,7 +36,7 @@
     (let* ((encoded-time (encode-time time))
            (high (car encoded-time))
            (low (cadr encoded-time))
-           (timestamp (+ (* high 65536) low)))
+           (timestamp (+ (ash high 16) low)))
       (when (called-interactively-p 'any)
         (quick-on-timesmap timestamp))
       timestamp)))
