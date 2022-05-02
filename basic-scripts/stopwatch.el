@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20220430.004
+;; Version: 1.0.4
+;; Package-Version: 20220502.001
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -42,6 +42,7 @@
 (defvar *stopwatch-debug* nil)
 (defvar *stopwatch-focus-changed* nil)
 (defconst *stopwatch-log-version* 2)
+(defvar *stopwatch-focus-change-callback-added* nil)
 
 (defvar-local stopwatch-current-timestamp nil)
 (defvar *stopwatch-hash* (make-hash-table))
@@ -164,15 +165,43 @@
     ;; clear the current buffer
     (setq *stopwatch-previous-buffer* nil)
     (setq *stopwatch-current-buffer* nil)))
-  
 
-(add-hook 'switch-buffer-functions #'buffer-maybe-changed)
+(defun stopwatch-add-hooks ()
+  "."
+  ;; add buffer switch callback
+  (add-hook 'switch-buffer-functions #'buffer-maybe-changed)
+  ;; add frame delete callback
+  (add-hook 'delete-frame-functions #'stopwatch-delete-frame-callback)
+  ;; add post-command-hook
+  (add-hook 'post-command-hook #'switch-buffer-functions-run)
+  ;; add focus change callback
+  (when (not *stopwatch-focus-change-callback-added*)
+    (add-function :after after-focus-change-function
+                  #'stopwatch-focus-change-callback)
+    (setq *stopwatch-focus-change-callback-added* t)))
 
-(add-function :after after-focus-change-function
-              #'stopwatch-focus-change-callback)
+(defun stopwatch-remove-hooks ()
+  "."
+  ;; remove buffer switch callback
+  (remove-hook 'switch-buffer-functions #'buffer-maybe-changed)
+  ;; reomve frame delete callback
+  (remove-hook 'delete-frame-functions #'stopwatch-delete-frame-callback)
+  ;; remove post-command-hook
+  (remove-hook 'post-command-hook 'switch-buffer-functions-run)
+  ;; add focus change callback
+  (when *stopwatch-focus-change-callback-added*
+    (remove-function :after after-focus-change-function
+                     #'stopwatch-focus-change-callback)
+    (setq *stopwatch-focus-change-callback-added* nil)))
 
-(add-hook 'delete-frame-functions
-          #'stopwatch-delete-frame-callback)
+(define-minor-mode stopwatch-mode
+  "Record buffer change and focus change."
+  nil
+  :require 'switch-buffer-functions
+  :global t
+  (if stopwatch-mode
+      (stopwatch-add-hooks)
+    (stopwatch-remove-hooks)))
 
 (provide 'stopwatch)
 ;;; stopwatch.el ends here
