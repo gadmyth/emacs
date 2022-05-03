@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.4
-;; Package-Version: 20220502.001
+;; Version: 1.0.5
+;; Package-Version: 20220503.001
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -123,6 +123,22 @@
                             duration)))
       (write-region content nil (stopwatch-log-file) 'append))))
 
+(defun stopwatch-statistic (filename)
+  "Statistic stopwatch's file with FILENAME."
+  (interactive "fPlease select the file: ")
+  (when (file-exists-p filename)
+    (with-temp-buffer
+      (insert-file-contents filename)
+      (goto-char (point-min))
+      (let ((sum 0)
+            (date (replace-regexp-in-string "\\." "" (replace-regexp-in-string *stopwatch-log-file* "" filename))))
+        (while (re-search-forward "\t[[:digit:]]*$" nil t 1)
+          (let* ((matched (match-string-no-properties 0))
+                 (interval (string-to-number matched)))
+            (stopwatch-debug-message "find time interval: %d" interval)
+            (incf sum interval)))
+        (message "The total time using emacs on %s is %.2f hours" date (/ sum 3600.0))))))
+  
 (defun stopwatch-active-frame ()
   "."
   (let ((active-frame)
@@ -196,7 +212,6 @@
 
 (define-minor-mode stopwatch-mode
   "Record buffer change and focus change."
-  nil
   :require 'switch-buffer-functions
   :global t
   (if stopwatch-mode
