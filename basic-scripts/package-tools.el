@@ -28,8 +28,12 @@
   `(let ((all-package-featurep t))
      (dolist (p ,dependencies)
        (when (not (featurep p))
-         (message "package [%S] is not a feature, can't install!" p ,package)
-         (setq all-package-featurep nil)))
+         (cond ((package-installed-p p)
+                (require p)
+                (message "dependent package [%S] is required!" p))
+               (t
+                (message "dependent package [%S] is not installed or is not a feature, can't install %S!" p ,package)
+                (setq all-package-featurep nil)))))
      (when all-package-featurep
        (require ,package)
        (message "package [%S] is required!" ,package)
@@ -55,7 +59,7 @@
 (defvar *sync-package* t)
 
 (defun install-package (package &optional min-version no-refresh)
-  "PACKAGE is package name; MIN-VERSION is min version of package; NO-REFRESH is whether to refresh contents."
+  "Install PACKAGE with MIN-VERSION, if NO-REFRESH is t, install directly."
   (if (package-installed-p package min-version)
       t
     (progn
