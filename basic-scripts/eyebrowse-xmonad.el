@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.1
-;; Package-Version: 20220430.001
+;; Version: 1.0.6.2
+;; Package-Version: 20220503.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -81,27 +81,32 @@
                        (position . ,(point))))
       ;; set or append the bookmark of key
       (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) bookmark)
-      ;; define H-<key>, cycle the bookmarks of <key>
-      (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
-        (eval `(toggle-minibuffer
-                (lambda ()
-                  (interactive)
-                  (eyebrowse-jump-to-bookmark ,bookmark-key)))))
-      ;; define H-S-<key>, show bookmark list and choose one to delete
-      (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" (upcase bookmark-key)))
-        (eval `(toggle-minibuffer
-                (lambda ()
-                  (interactive)
-                  (eyebrowse-delete-bookmark ,bookmark-key)))))
-      ;; define H-C-<key>, show bookmark list of <key>
-      (define-key eyebrowse-xmonad-mode-map (kbd (format "H-C-%s" bookmark-key))
-        (eval `(toggle-minibuffer
-                (lambda ()
-                  (interactive)
-                  (eyebrowse-list-bookmarks nil (lambda (bookmark)
-                                                  (string-equal (car bookmark) ,bookmark-key)))))))
+      ;; define the bookmark key
+      (eyebrowse-define-bookmark-key bookmark-key)
       (when (not cover-p)
         (message "Add bookmark %s suceed!" bookmark-key)))))
+
+(defun eyebrowse-define-bookmark-key (bookmark-key)
+  "Define the BOOKMARK-KEY into eyebrowse-xmonad-mode-map."
+  ;; define H-<key>, cycle the bookmarks of <key>
+  (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key))
+    (eval `(toggle-minibuffer
+            (lambda ()
+              (interactive)
+              (eyebrowse-jump-to-bookmark ,bookmark-key)))))
+  ;; define H-S-<key>, show bookmark list and choose one to delete
+  (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" (upcase bookmark-key)))
+    (eval `(toggle-minibuffer
+            (lambda ()
+              (interactive)
+              (eyebrowse-delete-bookmark ,bookmark-key)))))
+  ;; define H-C-<key>, show bookmark list of <key>
+  (define-key eyebrowse-xmonad-mode-map (kbd (format "H-C-%s" bookmark-key))
+    (eval `(toggle-minibuffer
+            (lambda ()
+              (interactive)
+              (eyebrowse-list-bookmarks nil (lambda (bookmark)
+                                              (string-equal (car bookmark) ,bookmark-key))))))))
 
 (defun eyebrowse-cover-bookmark (bookmark-key)
   "Cover the exist bookmark of BOOKMARK-KEY."
@@ -115,7 +120,10 @@
   (interactive "sPlease input the bookmark key to delete: ")
   (message "delete bookmark: %s" bookmark-key)
   (let ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
-    (setf (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal) nil)
+    ;; remove bookmark
+    (setf (alist-get bookmark-key *eyebrowse-bookmarks* :remove :remove 'equal) :remove)
+    ;; undefine bookmark key
+    (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key)) nil)
     (message "Delete bookmark %s suceed!" bookmark-key)))
 
 (defun eyebrowse-clear-bookmark ()
@@ -265,7 +273,11 @@
     (with-temp-buffer
       (insert-file-contents +eyebrowse-bookmarks-file-name+)
       (goto-char (point-min))
-      (setq *eyebrowse-bookmarks* (read (current-buffer)))))
+      (setq *eyebrowse-bookmarks* (read (current-buffer)))
+      ;; define bookmark key
+      (dolist (bookmark *eyebrowse-bookmarks*)
+        (let ((key (car bookmark)))
+          (eyebrowse-define-bookmark-key key)))))
   t)
 
 (define-minor-mode eyebrowse-xmonad-mode
