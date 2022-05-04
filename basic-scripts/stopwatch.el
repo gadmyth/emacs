@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.5
-;; Package-Version: 20220503.001
+;; Version: 1.0.6
+;; Package-Version: 20220504.001
 ;; Package-Requires: switch-buffer-functions, dates
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -38,7 +38,7 @@
 
 (defvar *stopwatch-current-buffer* nil)
 (defvar *stopwatch-previous-buffer* nil)
-(defvar *stopwatch-log-file* (expand-file-name ".emacs.stopwatch_log" "~"))
+(defvar *stopwatch-log-file* (expand-file-name "stopwatch.log" "~/.emacs.stopwatch"))
 (defvar *stopwatch-debug* nil)
 (defvar *stopwatch-focus-changed* nil)
 (defconst *stopwatch-log-version* 2)
@@ -123,22 +123,58 @@
                             duration)))
       (write-region content nil (stopwatch-log-file) 'append))))
 
-(defun stopwatch-statistic (filename)
-  "Statistic stopwatch's file with FILENAME."
-  (interactive "fPlease select the file: ")
-  (when (file-exists-p filename)
-    (with-temp-buffer
-      (insert-file-contents filename)
-      (goto-char (point-min))
-      (let ((sum 0)
-            (date (replace-regexp-in-string "\\." "" (replace-regexp-in-string *stopwatch-log-file* "" filename))))
-        (while (re-search-forward "\t[[:digit:]]*$" nil t 1)
-          (let* ((matched (match-string-no-properties 0))
-                 (interval (string-to-number matched)))
-            (stopwatch-debug-message "find time interval: %d" interval)
-            (incf sum interval)))
-        (message "The total time using emacs on %s is %.2f hours" date (/ sum 3600.0))))))
-  
+(defun stopwatch-ensure-log-directory ()
+  "."
+  (let ((log-directory (file-name-directory *stopwatch-log-file*)))
+    (unless (file-exists-p log-directory)
+      (make-directory log-directory))))
+
+(defun stopwatch-statistic ()
+  "Statistic stopwatch's file with FILENAME, filter buffer name with REGEXP."
+  (interactive)
+  (let ((filename (read-file-name "Please select the file: " (file-name-directory *stopwatch-log-file*)))
+        (filter (read-string "Please input the file name filter: ")))
+    (when (file-exists-p filename)
+      (with-temp-buffer
+        (insert-file-contents filename)
+        (goto-char (point-min))
+        (let ((sum 0)
+              (file-table)
+              (ext-table))
+          (while (re-search-forward "^[[:digit:]]*\t.*\t.\t\\(.*\\)\t\\([[:digit:]]+\\)$" nil t 1)
+            (let* ((buffer-name (match-string-no-properties 1))
+                   (extension (file-name-extension buffer-name t))
+                   (interval (string-to-number (match-string-no-properties 2))))
+              (stopwatch-debug-message "find %s's time interval: %d" buffer-name interval)
+              (when (cond ((zerop (length filter)) t)
+                          (t (string-match-p filter buffer-name)))
+                (cl-incf sum interval)
+                (let ((tik (or (alist-get buffer-name file-table nil nil #'string-equal) 0)))
+                  (setf (alist-get buffer-name file-table nil nil #'string-equal) (+ tik interval)))
+                (let ((ext (if (> (length extension) 0) extension buffer-name)))
+                  (let ((tik (or (alist-get ext ext-table nil nil #'string-equal) 0)))
+                    (setf (alist-get ext ext-table nil nil #'string-equal) (+ tik interval)))))))
+          (let ((date (replace-regexp-in-string "\\." "" (replace-regexp-in-string *stopwatch-log-file* "" filename)))
+                (hours (/ sum 3600.0)))
+            (message "*** Now stat for the %s stat file ***" filename)
+            (message "--- Now stat for file ---")
+            (dolist (stat (sort file-table (lambda (a b)
+                                             (>= (cdr a) (cdr b)))))
+              (message "%s: %s, %.4f%%" (car stat) (stopwatch-calc-cost (cdr stat)) (/ (* 100.0 (cdr stat)) sum)))
+            (message "--- Now stat for extension ---")
+            (dolist (stat (sort ext-table (lambda (a b)
+                                            (>= (cdr a) (cdr b)))))
+              (message "%s: %s, %.4f%%" (car stat) (stopwatch-calc-cost (cdr stat)) (/ (* 100.0 (cdr stat)) sum)))
+            (message "*** The total time using emacs on %s with filter [%s] is %.4f hours ***" date filter hours)))))))
+
+(defun stopwatch-calc-cost (second)
+  "Calculate human readable cost of SECOND."
+  (let* ((second (cdr stat))
+         (cost (if (> second 3600)
+                   (format "%.4f hours" (/ second 3600.0))
+                 (format "%.2f minutes" (/ second 60.0)))))
+    cost))
+
 (defun stopwatch-active-frame ()
   "."
   (let ((active-frame)
@@ -206,7 +242,7 @@
   (remove-hook 'post-command-hook 'switch-buffer-functions-run)
   ;; add focus change callback
   (when *stopwatch-focus-change-callback-added*
-    (remove-function :after after-focus-change-function
+    (remove-function after-focus-change-function
                      #'stopwatch-focus-change-callback)
     (setq *stopwatch-focus-change-callback-added* nil)))
 
@@ -214,9 +250,12 @@
   "Record buffer change and focus change."
   :require 'switch-buffer-functions
   :global t
-  (if stopwatch-mode
-      (stopwatch-add-hooks)
-    (stopwatch-remove-hooks)))
+  (cond
+   (stopwatch-mode
+    (stopwatch-ensure-log-directory)
+    (stopwatch-add-hooks))
+   (t
+    (stopwatch-remove-hooks))))
 
 (provide 'stopwatch)
 ;;; stopwatch.el ends here
