@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: dispatch-after
-# key: dispatch-after
-# --
-dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(${1:delayInSeconds} * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    ${2:code to be executed after a specified delay}
-});

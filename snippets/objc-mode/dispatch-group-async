@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: dispatch-group-async
-# key: dispatch-group-async
-# --
-dispatch_group_async(${1:group}, ${2:dispatch_get_main_queue()}, ^{
-    ${3:code to be executed after a specified delay}
-});

@@ -1,6 +1,0 @@
-# key: if-not-empty
-# name: if-not-empty
-# --
-if [ ! -z "${1:var}" ]; then
-    $0
-fi

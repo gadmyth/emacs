@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: func-declare
-# key: func-dec
-# --
-- (${1:void})${2:func};$0

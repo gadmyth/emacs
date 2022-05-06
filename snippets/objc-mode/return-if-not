@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: return-if-not
-# key: rin
-# --
-if (!${1:true}) return${2: ${3:res}};

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: systemctl start
-# key: sys-start
-# --
-sudo systemctl start ${1:service}

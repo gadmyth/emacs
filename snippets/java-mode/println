@@ -1,4 +1,0 @@
-# key: println
-# name: println
-# --
-System.out.println(${1:"${2:string}"});

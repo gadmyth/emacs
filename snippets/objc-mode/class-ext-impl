@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: class-ext-impl
-# key: class-ext-impl
-# --
-@implementation ${1:`(replace-regexp-in-string "\\..*$" "" (buffer-name))`}($2)
-$0
-@end

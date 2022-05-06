@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: cls-add-protocol
-# key: cls-add-protocol
-# --
-NSString *${1:protocolName} = ${2:@"${3:name}"};
-Protocol *${4:protocol} = objc_getProtocol($1.UTF8String);
-if (protocol && class_conformsToProtocol($4)) {
-    class_addProtocol(${5:cls}, $4);
-}

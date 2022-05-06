@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: alert-json
-# key: alert-json
-# --
-alert(JSON.stringify(${1:here}));$0

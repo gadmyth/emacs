@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: alloc-init3
-# key: alloc-init3
-# --
-${1:Class} *${2:var} = [[$1 alloc] ${3:init}]$0

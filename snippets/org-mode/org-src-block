@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: org-src-block
-# key: org-src-block
-# --
-#+BEGIN_SRC $1
-$0
-#+END_SRC

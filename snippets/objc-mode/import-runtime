@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: import-runtime
-# key: imp-rt
-# --
-#import <objc/runtime.h>

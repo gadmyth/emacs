@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: foreign-key-constraint
-# key: for-key-cons
-# --
-CONSTRAINT \`${1:constraint-name}\` FOREIGN KEY (\`${2:foreign-key}\`) REFERENCES \`${3:foreign-table}\` (\`${4:foreign-table-key}\`) ON DELETE NO ACTION ON UPDATE NO ACTION

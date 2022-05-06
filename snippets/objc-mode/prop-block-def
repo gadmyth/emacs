@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: prop-block-def
-# key: prop-block-def
-# --
-@property(nonatomic, ${1:copy}) ${2:void} (^${3:block})(${4:void});$0

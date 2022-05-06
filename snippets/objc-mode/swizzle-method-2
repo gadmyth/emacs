@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: swizzle-method-2
-# key: swizzle-method-2
-# --
-SEL ${1:selector} = @selector(${2:originalSelector});
-IMP ${3:implementation} = imp_implementationWithBlock(${4:block});
-Method method = class_getClassMethod(${5:cls}, $1);
-class_replaceMethod($5, $1, $3, method_getTypeEncoding(method));

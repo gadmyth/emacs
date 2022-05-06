@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: auto-release-pool
-# key: arp
-# --
-@autoreleasepool {
-    $0
-}

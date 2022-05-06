@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: for-block
-# key: for-block
-# --
-for (${initialization}; ${2:condition}; ${3:increment}) {
-    $0
-}

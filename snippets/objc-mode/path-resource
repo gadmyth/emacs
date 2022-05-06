@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: path-resource
-# key: path-resource
-# --
-NSString *${1:path} = [[NSBundle mainBundle] pathForResource:@"${2:filename}" ofType:@"${3:type}"];$0

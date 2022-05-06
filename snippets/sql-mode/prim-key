@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: prim-key
-# key: primkey
-# --
-PRIMARY KEY (\`$1\`$2)$0

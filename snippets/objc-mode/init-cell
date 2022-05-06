@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: init-cell
-# key: init-cell
-# --
-- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
-    $0
-}

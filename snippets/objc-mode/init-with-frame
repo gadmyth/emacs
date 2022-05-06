@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: init-with-frame
-# key: init-with-frame
-# --
-[[${1:Class} alloc] initWithFrame:$2]$0

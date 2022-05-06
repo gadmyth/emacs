@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: block-declare
-# key: block-declare
-# --
-${1:void} (^${2:block})(${3:void}) = NULL;

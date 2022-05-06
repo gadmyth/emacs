@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: doc-path
-# key: doc-path
-# --
-NSString *${1:docPath} = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];$0

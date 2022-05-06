@@ -1,5 +1,4 @@
-;;; -*- emacs-lisp -*-
-;;; package --- pre-customize.el
+;;; package --- pre-customize.el -*- emacs-lisp -*-
 ;;; Commentary:
 ;;; Code:
 
@@ -17,6 +16,8 @@
 
 (setq *mac-scale-amount* 0
       *linux-scale-amount* 0)
+
+(defvar *snippets-default-directory* nil)
 
 (setq *load-slime* nil)
 

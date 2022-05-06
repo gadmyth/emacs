@@ -24,8 +24,7 @@
 (add-hook
  'yas-global-mode-hook
  (lambda ()
-   (add-to-list 'yas-snippet-dirs (expand-file-name "~/snippets"))
-   (add-to-list 'yas-snippet-dirs (expand-file-name "~/emacs/snippets"))))
+   (add-to-list 'yas-snippet-dirs *snippets-default-directory*)))
 
 (setq yas-indent-line 'fixed)
 

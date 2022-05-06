@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: oc-param-impl
-# key: op-imp
-# --
-${1:signature}:${2:param}$0

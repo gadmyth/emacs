@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: prop-getter
-# key: prop-getter
-# --
-public ${2:String} get${1:$(upcase-initials yas-text)}() {
-    return this.${1:property};
-}

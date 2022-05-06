@@ -1,6 +1,0 @@
-# key: if-dir
-# name: if-dir
-# --
-if [ -d ${1:dir} ]; then
-    $0
-fi

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: dispatch-queue-create
-# key: dispatch-queue-create
-# --
-dispatch_queue_create(${1:queue_name}, DISPATCH_QUEUE_${2:SERIAL});$0

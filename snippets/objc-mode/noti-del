@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: noti-del
-# key: noti-del
-# --
-[[NSNotificationCenter defaultCenter] removeObserver:${1:self}];$2

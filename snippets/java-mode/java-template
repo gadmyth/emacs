@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: java-template
-# key: java-template
-# --
-public class `(replace-regexp-in-string "\.java" "" (buffer-name))` {
-    public static void main(String[] args) {
-        $0
-    }
-}

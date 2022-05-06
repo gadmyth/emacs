@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: snyc-block
-# key: sync-block
-# --
-@synchronized(${1:obj}) {
-$0
-}

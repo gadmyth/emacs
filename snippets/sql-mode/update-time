@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: update-time
-# key: update-time
-# --
-\`update_time\` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP$0

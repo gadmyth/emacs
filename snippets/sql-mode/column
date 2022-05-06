@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: column
-# key: column
-# --
-\`${1:col-name}\` ${2:type}${3:(${4:count})}$0

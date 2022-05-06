@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: systemctl stop
-# key: sys-stop
-# --
-sudo systemctl stop ${1:service}

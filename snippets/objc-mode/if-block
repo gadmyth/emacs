@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: if-block
-# key: if-block
-# --
-if (${1:condition}) {
-    $0
-}

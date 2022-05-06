@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: dispatch-group-wait
-# key: dispatch-group-wait
-# --
-dispatch_group_wait(${1:group}, ${2:time});$0

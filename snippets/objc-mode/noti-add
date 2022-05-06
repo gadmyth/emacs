@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: noti-add
-# key: noti-add
-# --
-[[NSNotificationCenter defaultCenter] addObserver:${1:self} selector:@selector(${2:selector}) name:${3:name} object:${4:nil}];$5

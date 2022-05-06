@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: main-queue
-# key: main-queue
-# --
-dispatch_get_main_queue()$0

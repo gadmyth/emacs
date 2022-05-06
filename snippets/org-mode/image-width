@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: image-width
-# key: image-width
-# --
-#+ATTR_HTML: :width ${1:400px}

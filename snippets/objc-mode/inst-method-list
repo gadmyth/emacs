@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: inst-method-list 
-# key: inst-method-list
-# --
-unsigned int ${1:instanceMethodCount} = 0;
-Method *${2:instanceMethodList} = class_copyMethodList(${3:cls}, &$1);

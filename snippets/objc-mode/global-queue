@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: global-queue
-# key: global-queue
-# --
-dispatch_get_global_queue(${1:DISPATCH_QUEUE_PRIORITY_DEFAULT}, ${2:0});$0

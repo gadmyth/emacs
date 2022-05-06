@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: systemctl enable
-# key: sys-enable
-# --
-sudo systemctl enable ${1:service}

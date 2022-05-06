@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: string-eq
-# key: string-eq
-# --
-[${1:obj} isEqualToString:${2:str}]$0

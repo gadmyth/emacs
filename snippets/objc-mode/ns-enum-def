@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: ns-enum-def
-# key: ns-enum-def
-# --
-typedef NS_ENUM(NSUInteger, ${1:MyEnum}) {
-    ${2:MyEnumA},$0
-};

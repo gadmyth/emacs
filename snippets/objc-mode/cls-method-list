@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: cls-method-list 
-# key: cls-method-list
-# --
-unsigned int ${1:classMethodCount} = 0;
-Class ${2:metaClass} = object_getClass(${3:cls});
-Method *${4:classMethodList} = class_copyMethodList($2, &$1);

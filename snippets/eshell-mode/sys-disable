@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: systemctl disable
-# key: sys-disable
-# --
-sudo systemctl disable ${1:service}

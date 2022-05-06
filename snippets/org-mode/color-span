@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: color-span
-# key: color-span
-# --
-#+HTML: <span style="color: ${1:red}">$0</span>

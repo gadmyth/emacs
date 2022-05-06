@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: reuse-cell
-# key: reuse-cell
-# --
-[${1:tableView} dequeueReusableCellWithIdentifier:${2:identifier} forIndexPath:indexPath];$0

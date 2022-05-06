@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: fmdb-exec
-# key: fmdb-exec
-# --
-FMResultSet *resultSet = [${1:db} execute${2:Query}:${3:@"${4:select * from table}"}];
-while ([resultSet next]) {
-    // Example: NSString *name = [resultSet stringForColumn:@"name"];
-    $0
-}
