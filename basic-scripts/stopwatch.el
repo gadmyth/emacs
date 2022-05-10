@@ -3,9 +3,9 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.6
-;; Package-Version: 20220504.001
-;; Package-Requires: switch-buffer-functions, dates
+;; Version: 1.0.7
+;; Package-Version: 20220510.001
+;; Package-Requires: switch-buffer-functions, dates, dash
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/stopwatch.el
@@ -35,6 +35,7 @@
 
 (require 'switch-buffer-functions)
 (require 'dates)
+(require 'dash)
 
 (defvar *stopwatch-current-buffer* nil)
 (defvar *stopwatch-previous-buffer* nil)
@@ -140,7 +141,9 @@
         (goto-char (point-min))
         (let ((sum 0)
               (file-table)
-              (ext-table))
+              (max-file-table)
+              (ext-table)
+              (max-ext-table))
           (while (re-search-forward "^[[:digit:]]*\t.*\t.\t\\(.*\\)\t\\([[:digit:]]+\\)$" nil t 1)
             (let* ((buffer-name (match-string-no-properties 1))
                    (extension (file-name-extension buffer-name t))
@@ -149,31 +152,94 @@
               (when (cond ((zerop (length filter)) t)
                           (t (string-match-p filter buffer-name)))
                 (cl-incf sum interval)
+                ;; sum file interval
                 (let ((tik (or (alist-get buffer-name file-table nil nil #'string-equal) 0)))
                   (setf (alist-get buffer-name file-table nil nil #'string-equal) (+ tik interval)))
+                ;; max file interval
+                (let ((tik (or (alist-get buffer-name max-file-table nil nil #'string-equal) 0)))
+                  (when (> interval tik)
+                    (setf (alist-get buffer-name max-file-table nil nil #'string-equal) interval)))
+                ;; sum ext interval
                 (let ((ext (if (> (length extension) 0) extension buffer-name)))
                   (let ((tik (or (alist-get ext ext-table nil nil #'string-equal) 0)))
-                    (setf (alist-get ext ext-table nil nil #'string-equal) (+ tik interval)))))))
+                    (setf (alist-get ext ext-table nil nil #'string-equal) (+ tik interval))))
+                ;; max ext interval
+                (let ((ext (if (> (length extension) 0) extension buffer-name)))
+                  (let ((tik (or (alist-get ext max-ext-table nil nil #'string-equal) 0)))
+                    (when (> interval tik)
+                      (setf (alist-get ext max-ext-table nil nil #'string-equal) interval)))))))
           (let ((date (replace-regexp-in-string "\\." "" (replace-regexp-in-string *stopwatch-log-file* "" filename)))
-                (hours (/ sum 3600.0)))
-            (message "*** Now stat for the %s stat file ***" filename)
-            (message "--- Now stat for file ---")
-            (dolist (stat (sort file-table (lambda (a b)
-                                             (>= (cdr a) (cdr b)))))
-              (message "%s: %s, %.4f%%" (car stat) (stopwatch-calc-cost (cdr stat)) (/ (* 100.0 (cdr stat)) sum)))
-            (message "--- Now stat for extension ---")
-            (dolist (stat (sort ext-table (lambda (a b)
-                                            (>= (cdr a) (cdr b)))))
-              (message "%s: %s, %.4f%%" (car stat) (stopwatch-calc-cost (cdr stat)) (/ (* 100.0 (cdr stat)) sum)))
-            (message "*** The total time using emacs on %s with filter [%s] is %.4f hours ***" date filter hours)))))))
+                (hours (/ sum 3600.0))
+                (headers '("file" "duration" "percent" "max duration" "max percent"))
+                (rows))
+            (setq rows (append rows
+                               (stopwatch-statistic-for-table file-table max-file-table)
+                               (list (vector "" "" "" "" ""))
+                               (stopwatch-statistic-for-table ext-table max-ext-table)
+                               (list (vector "" "" "" "" ""))
+                               (list (vector "total" (format "%.2fh" hours) "" "" ""))))
+            (message "*** The total time using emacs on %s with filter [%s] is %.4f hours ***" date filter hours)
+            (display-table-in-buffer headers rows)))))))
+
+(defun stopwatch-statistic-for-table (table max-table)
+  "Show statistic message from TABLE and MAX-TABLE."
+  (let ((rows))
+    (dolist (stat (sort table (lambda (a b)
+                                (>= (cdr a) (cdr b)))))
+      (let* ((key (car stat))
+             (duration (or (cdr stat) 0))
+             (cost (stopwatch-calc-cost duration))
+             (cost-percent (format "%.2f%%" (/ (* 100.0 duration) sum)))
+             (max-duration (or (alist-get key max-table nil nil #'string-equal) 0))
+             (max-cost (stopwatch-calc-cost max-duration))
+             (max-cost-percent (format "%.2f%%" (/ (* 100.0 max-duration) duration))))
+        (message "%s: %s, %s, max: %s, %s" key cost cost-percent max-cost max-cost-percent)
+        (push (vector key cost cost-percent max-cost max-cost-percent) rows)))
+    (reverse rows)))
 
 (defun stopwatch-calc-cost (second)
   "Calculate human readable cost of SECOND."
-  (let* ((second (cdr stat))
-         (cost (if (> second 3600)
-                   (format "%.4f hours" (/ second 3600.0))
-                 (format "%.2f minutes" (/ second 60.0)))))
+  (let ((cost (cond
+               ((> second 3600)
+                (format "%.2fh" (/ second 3600.0)))
+               ((> second 60)
+                (format "%.2fm" (/ second 60.0)))
+               (t
+                (format "%ds" second)))))
     cost))
+
+(defun make-tabulated-headers (column-names rows)
+  "Column width are calculated by picking the max width of every cell under the COLUMN-NAMES and ROWS."
+  "Copied from http://rgrinberg.com/posts/emacs-table-display/"
+  (let ((widths
+         (-reduce-from
+          (lambda (acc x)
+            (-zip-with (lambda (l r) (max l (length r))) acc (append x '())))
+          (-map #'length columns-names)
+          rows)))
+    (cl-map
+     #'vector #'identity
+     (-zip-with
+      (lambda (col size) (list col size nil))
+      columns-names widths))))
+
+(defun display-table-in-buffer (columns-names rows)
+  "Display table in a buffer with COLUMNS-NAMES and ROWS."
+  "Copied from http://rgrinberg.com/posts/emacs-table-display/"
+  (let ((headers (make-tabulated-headers columns-names rows))
+        (bname "*display table*"))
+    (with-current-buffer (get-buffer-create bname)
+      (tabulated-list-mode)
+      (setq tabulated-list-format headers)
+      (setq tabulated-list-padding 2)
+      (tabulated-list-init-header)
+      (setq tabulated-list-entries
+            (-zip-with
+             (lambda (i x) (list i x))
+             (-iterate '1+ 0 (length rows))
+             rows))
+      (tabulated-list-print t)
+      (display-buffer bname))))
 
 (defun stopwatch-active-frame ()
   "."
