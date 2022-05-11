@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.10
-;; Package-Version: 20220110.001
+;; Version: 1.1.11
+;; Package-Version: 20220511.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -40,6 +40,8 @@
 (require 'uuid)
 
 (defvar *notifications* nil)
+
+(defvar *notifications-loaded* nil)
 
 (defvar *notification-timers* nil)
 
@@ -185,8 +187,7 @@ above them."
           (let ((now (current-timestamp)))
             (dolist (element list)
               (let ((notification (cdr element)))
-                (load-notification notification))))))))
-  t)
+                (load-notification notification)))))))))
 
 (defun load-notification (notification)
   "Load the NOTIFICATION if not exist in *notifications* list."
@@ -474,16 +475,18 @@ above them."
   ;; The mode for *notifications-buffer*.
   (use-local-map notifications-aggregate-mode-map))
 
-(global-set-key (kbd "C-x s") 'start-notify)
+(defun notifications-setup ()
+  "."
+  (unless *notifications-loaded*
+    (load-notifications)
+    (global-set-key (kbd "C-x s") 'start-notify)
+    ;; add the save-notifications to 'kill-emacs-hook after load file success,
+    ;; or it will save empty content to file dangerously.
+    (add-hook 'kill-emacs-hook 'save-notifications)
+    ;; setup load status
+    (setq *notifications-loaded* t)))
 
-(add-hook 'emacs-startup-hook
-          #'(lambda ()
-              ;; load content from file first
-              (when (load-notifications)
-                ;; add the save-notifications to 'kill-emacs-hook after load file success,
-                ;;or it will save empty content to file dangerously.
-                (add-hook 'kill-emacs-hook 'save-notifications))))
-
+(notifications-setup)
 
 (provide 'notifications)
 ;;; notifications.el ends here
