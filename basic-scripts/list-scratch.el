@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20220512.001
+;; Version: 1.0.2
+;; Package-Version: 20220512.002
 ;; Package-Requires: json-pointer
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -45,6 +45,10 @@
 
 (defvar *list-scratch-debug* nil)
 
+(defvar *scratch-list-loaded* nil)
+
+(defvar +scratch-list-file-name+ (expand-file-name "~/.scratch_list"))
+
 (defun list-scratch-toggle-debug ()
   "."
   (interactive)
@@ -63,7 +67,6 @@
 (defun scratch-reload-list ()
   "."
   (interactive)
-  ;; (setq *scratch-list* )
   (setq *scratch-current-path* "/root")
   (scratch-update-current-node))
 
@@ -246,6 +249,36 @@
         (when-let ((action-name (completing-read (format "%s %s: " path value) *scratch-node-actions*))
                    (action (alist-get action-name *scratch-node-actions* nil nil #'string-equal)))
           (funcall action value)))))))
+
+(defun save-scratch-list ()
+  "Save scratch list to file."
+  (interactive)
+  (let ((file-name +scratch-list-file-name+))
+    (message "Saving scratch list to file %S ..." file-name)
+    (let* ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *scratch-list*))))
+      (with-temp-file file-name
+        (insert content)))))
+
+(defun load-scratch-list ()
+  "Load scratch list from file."
+  (interactive)
+  (unless *scratch-list-loaded*
+    (let ((file-name +scratch-list-file-name+))
+      (cond
+       ((not (file-exists-p file-name))
+        (message "Can't load %s file, for it does not exist!" file-name)
+        (setq *scratch-list-loaded* t))
+       (t
+        (message "Loading scratch list from file %S ..." file-name)
+        (with-temp-buffer
+          (insert-file-contents file-name)
+          (goto-char (point-min))
+          (setq *scratch-list* (read (current-buffer)))
+          (scratch-reload-list)
+          (setq *scratch-list-loaded* t)))))))
+
+(load-scratch-list)
+(add-hook 'kill-emacs-hook #'save-scratch-list)
 
 (provide 'list-scratch)
 ;;; list-scratch.el ends here
