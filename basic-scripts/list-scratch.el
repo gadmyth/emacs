@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20220512.002
+;; Version: 1.0.3
+;; Package-Version: 20220513.001
 ;; Package-Requires: json-pointer
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -80,6 +80,7 @@
   `((".." . (lambda (data)
               (list-scratch)))
     ("copy" . scratch-copy-node)
+    ("open link" . scratch-open-link)
     ("x" . nil)
     ))
 
@@ -87,6 +88,11 @@
   "COPY DATA."
   (kill-new data)
   (message "data: %S copied" data))
+
+(defun scratch-open-link (data)
+  "Open link of DATA."
+  (when data
+    (org-open-link-from-string data)))
 
 (defun scratch-node-level-up ()
   "."
@@ -120,17 +126,25 @@
          (scratch-update-current-node)
          (list-scratch)))
       (_
-       (let* ((node-type (completing-read "Please select the node type: " '(".." list vector string) nil t nil))
-              (key (read-string "Please input key: " nil))
+       (let* ((node-type (completing-read "Please select the node type: " '(".." string list vector org-capture) nil t nil))
+              (key)
               (value))
          (pcase node-type
            (".." (list-scratch))
+           ("string"
+            (setq key (read-string "Please input key: " nil))
+            (setq value (read-string "Please input value: " nil)))
            ("list"
+            (setq key (read-string "Please input key: " nil))
             (setq value '()))
            ("vector"
+            (setq key (read-string "Please input key: " nil))
             (setq value []))
-           ("string"
-            (setq value (read-string "Please input value: " nil))))
+           ("org-capture"
+            (when *org-cap-temp*
+              (setq key (alist-get "description" *org-cap-temp* nil nil #'string-equal))
+              (setq value (alist-get "link" *org-cap-temp* nil nil #'string-equal))
+              (setq *org-cap-temp* nil))))
          (let ((path (or (and key (format "/%s" key)) "")))
            (when (not (string-equal "/" *scratch-current-path*))
              (setq path (format "%s%s" *scratch-current-path* path)))
@@ -145,19 +159,24 @@
          (current-node (or (and (consp current-node) current-node)
                            (and (vectorp current-node) (append current-node nil))
                            current-node))
-         (key (completing-read "Please input key to delete: " current-node))
-         (path (pcase node-type
-                 ('vector
-                  (format "/%d" (first-element-index key current-node #'string-equal)))
-                 (_
-                  (format "/%s" key)))))
-    (list-scratch-debug-message "*** %S" current-node)
-    (when (not (string-equal "/" *scratch-current-path*))
-      (setq path (format "%s%s" *scratch-current-path* path)))
-    (list-scratch-debug-message "the path to delete is %s" path)
-    (json-pointer-set *scratch-list* path nil t :delete)
-    (scratch-update-current-node)
-    (list-scratch)))
+         (key (completing-read "Please input key to delete: " (cons ".." current-node)))
+         (path))
+    (cond
+     ((string-equal key "..")
+      (list-scratch))
+     (t
+      (setq path (pcase node-type
+                   ('vector
+                    (format "/%d" (first-element-index key current-node #'string-equal)))
+                   (_
+                    (format "/%s" key))))
+      (list-scratch-debug-message "*** %S" current-node)
+      (when (not (string-equal "/" *scratch-current-path*))
+        (setq path (format "%s%s" *scratch-current-path* path)))
+      (list-scratch-debug-message "the path to delete is %s" path)
+      (json-pointer-set *scratch-list* path nil t :delete)
+      (scratch-update-current-node)
+      (list-scratch)))))
 
 (defun first-element-index (ele list &optional test-fn)
   "Return first index of ELE in LIST, using TEST-FN to compare."
@@ -185,13 +204,16 @@
   "."
   (list-scratch-debug-message "current path: %s" *scratch-current-path*)
   (let* ((current-node *scratch-current-node*)
+         (node-type (cond ((vectorp current-node) "#")
+                          ((consp current-node) "*")
+                          ((null current-node) "*")))
          (path *scratch-current-path*)
          (list current-node)
          ;; add up node
          (list (if (string-equal path "/root") list (cons ".." list)))
          ;; add action node
          (list (seq-concatenate 'list list '("+" "-" "x")))
-         (key (completing-read (format "%s: " path) list nil t))
+         (key (completing-read (format "%s %s: " node-type path) list nil t))
          (value (assoc-default key current-node))
          (list-action))
     (list-scratch-debug-message "key: %S, value: %S" key value)
@@ -230,6 +252,9 @@
   (interactive)
   (list-scratch-debug-message "current path: %s" *scratch-current-path*)
   (let* ((current-node *scratch-current-node*)
+         (node-type (cond ((vectorp current-node) "#")
+                          ((consp current-node) "*")
+                          ((null current-node) "*")))
          (path *scratch-current-path*)
          (list))
     (progn
@@ -240,7 +265,7 @@
       ;; add action node
       (setq list (seq-concatenate 'list list '("+" "-" "x"))))
     ;; select value
-    (let ((value (completing-read (format "%s: " path) list)))
+    (let ((value (completing-read (format "%s %s: " node-type path) list)))
       (list-scratch-debug-message "value: %s" value)
       (cond
        ((alist-get value *scratch-list-actions* nil nil #'string-equal)
