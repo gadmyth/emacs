@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.7
-;; Package-Version: 20220510.001
+;; Version: 1.0.8
+;; Package-Version: 20220513.001
 ;; Package-Requires: switch-buffer-functions, dates, dash
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -142,8 +142,10 @@
         (let ((sum 0)
               (file-table)
               (max-file-table)
+              (switch-file-table)
               (ext-table)
-              (max-ext-table))
+              (max-ext-table)
+              (switch-ext-table))
           (while (re-search-forward "^[[:digit:]]*\t.*\t.\t\\(.*\\)\t\\([[:digit:]]+\\)$" nil t 1)
             (let* ((buffer-name (match-string-no-properties 1))
                    (extension (file-name-extension buffer-name t))
@@ -153,36 +155,52 @@
                           (t (string-match-p filter buffer-name)))
                 (cl-incf sum interval)
                 ;; sum file interval
-                (let ((tik (or (alist-get buffer-name file-table nil nil #'string-equal) 0)))
-                  (setf (alist-get buffer-name file-table nil nil #'string-equal) (+ tik interval)))
+                (let ((tik (or (alist-str-get buffer-name file-table) 0)))
+                  (alist-str-set buffer-name file-table (+ tik interval))
+                  ;; switch count
+                  (when (> tik 0)
+                    (let ((count (or (alist-str-get buffer-name switch-file-table) 0)))
+                      (alist-str-set buffer-name switch-file-table (1+ count)))))
                 ;; max file interval
-                (let ((tik (or (alist-get buffer-name max-file-table nil nil #'string-equal) 0)))
+                (let ((tik (or (alist-str-get buffer-name max-file-table) 0)))
                   (when (> interval tik)
-                    (setf (alist-get buffer-name max-file-table nil nil #'string-equal) interval)))
+                    (alist-str-set buffer-name max-file-table interval)))
                 ;; sum ext interval
                 (let ((ext (if (> (length extension) 0) extension buffer-name)))
-                  (let ((tik (or (alist-get ext ext-table nil nil #'string-equal) 0)))
-                    (setf (alist-get ext ext-table nil nil #'string-equal) (+ tik interval))))
+                  (let ((tik (or (alist-str-get ext ext-table) 0)))
+                    (alist-str-set ext ext-table (+ tik interval))
+                    ;; switch count
+                    (when (> tik 0)
+                      (let ((count (or (alist-str-get ext switch-ext-table) 0)))
+                        (alist-str-set ext switch-ext-table (1+ count))))))
                 ;; max ext interval
                 (let ((ext (if (> (length extension) 0) extension buffer-name)))
-                  (let ((tik (or (alist-get ext max-ext-table nil nil #'string-equal) 0)))
+                  (let ((tik (or (alist-str-get ext max-ext-table) 0)))
                     (when (> interval tik)
-                      (setf (alist-get ext max-ext-table nil nil #'string-equal) interval)))))))
+                      (alist-str-set ext max-ext-table interval)))))))
           (let ((date (replace-regexp-in-string "\\." "" (replace-regexp-in-string *stopwatch-log-file* "" filename)))
                 (hours (/ sum 3600.0))
-                (headers '("file" "duration" "percent" "max duration" "max percent"))
+                (headers '("file" "duration" "percent" "max duration" "max percent" "switch count"))
                 (rows))
             (setq rows (append rows
-                               (stopwatch-statistic-for-table file-table max-file-table)
-                               (list (vector "" "" "" "" ""))
-                               (stopwatch-statistic-for-table ext-table max-ext-table)
-                               (list (vector "" "" "" "" ""))
-                               (list (vector "total" (format "%.2fh" hours) "" "" ""))))
+                               (stopwatch-statistic-for-table file-table max-file-table switch-file-table)
+                               (list (vector "" "" "" "" "" ""))
+                               (stopwatch-statistic-for-table ext-table max-ext-table switch-ext-table)
+                               (list (vector "" "" "" "" "" ""))
+                               (list (vector "total" (format "%.2fh" hours) "" "" "" ""))))
             (message "*** The total time using emacs on %s with filter [%s] is %.4f hours ***" date filter hours)
             (display-table-in-buffer headers rows)))))))
 
-(defun stopwatch-statistic-for-table (table max-table)
-  "Show statistic message from TABLE and MAX-TABLE."
+(defmacro alist-str-get (key alist)
+  "Get value of KEY from ALIST using `string-equal` compare func."
+  `(alist-get ,key ,alist nil nil #'string-equal))
+
+(defmacro alist-str-set (key alist value)
+  "Set VALUE for KEY of ALIST using `string-equal` compare func."
+  `(setf (alist-get ,key ,alist nil nil #'string-equal) ,value))
+
+(defun stopwatch-statistic-for-table (table max-table switch-table)
+  "Show statistic message from TABLE, MAX-TABLE and SWITCH-TABLE."
   (let ((rows))
     (dolist (stat (sort table (lambda (a b)
                                 (>= (cdr a) (cdr b)))))
@@ -190,11 +208,12 @@
              (duration (or (cdr stat) 0))
              (cost (stopwatch-calc-cost duration))
              (cost-percent (format "%.2f%%" (/ (* 100.0 duration) sum)))
-             (max-duration (or (alist-get key max-table nil nil #'string-equal) 0))
+             (max-duration (or (alist-str-get key max-table) 0))
              (max-cost (stopwatch-calc-cost max-duration))
-             (max-cost-percent (format "%.2f%%" (/ (* 100.0 max-duration) duration))))
-        (message "%s: %s, %s, max: %s, %s" key cost cost-percent max-cost max-cost-percent)
-        (push (vector key cost cost-percent max-cost max-cost-percent) rows)))
+             (max-cost-percent (format "%.2f%%" (/ (* 100.0 max-duration) duration)))
+             (switch-count (format "%d" (or (alist-str-get key switch-table) 0))))
+        (message "%s: %s, %s, max: %s, %s, %s" key cost cost-percent max-cost max-cost-percent switchx-count)
+        (push (vector key cost cost-percent max-cost max-cost-percent switch-count) rows)))
     (reverse rows)))
 
 (defun stopwatch-calc-cost (second)
@@ -252,7 +271,8 @@
 
 (defun stopwatch-focus-change-callback ()
   "."
-  (let ((active-frame (stopwatch-active-frame)))
+  (let ((frames (frame-list))
+        (active-frame (stopwatch-active-frame)))
     (stopwatch-debug-message "frame focus state: %S, current frame: %S, active frame: %S, current buffer: %S"
                              (frame-focus-state)
                              (cl-position (window-frame) frames)
@@ -272,7 +292,8 @@
 
 (defun stopwatch-delete-frame-callback (&optional frame)
   "Record stopwatch log when the FRAME is deleted."
-  (let ((active-frame (stopwatch-active-frame)))
+  (let ((frames (frame-list))
+        (active-frame (stopwatch-active-frame)))
     (stopwatch-debug-message "current frame: %S, active frame: %S, current buffer: %S"
                              (cl-position (window-frame) frames)
                              (and active-frame (cl-position active-frame frames))
