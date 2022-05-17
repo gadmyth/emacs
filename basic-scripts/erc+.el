@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.026
-;; Package-Version: 20220107.001
+;; Version: 1.0.027
+;; Package-Version: 20220517.001
 ;; Package-Requires: erc, s, text-mode, system-util
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -177,7 +177,7 @@ With PARSED message and PROC."
             (erc-debug-message "save excursion")
             ,@body))))
 
-(defun* erc-update-aggregate-buffer (short-sender target msg)
+(defun erc-update-aggregate-buffer (short-sender target msg)
   "Append SENDER and MSG to the *erc-aggregate-buffer*."
   (let ((sender (erc-sender-with-group short-sender target))
         erc-msg-link erc-link-start erc-link-end
