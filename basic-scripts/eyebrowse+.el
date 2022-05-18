@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.21
-;; Package-Version: 20220403.002
+;; Version: 1.2.22
+;; Package-Version: 20220518.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,7 @@
 (defvar *eyebrowse-default-configs* nil)
 (defvar eyebrowse-lazy-load-hook nil)
 (defvar *eyebrowse-init-function-swapped* nil)
+(defvar *eyebrowse-save-timer* nil)
 
 (defun eyebrowse-toggle-debug ()
   "."
@@ -615,6 +616,20 @@ COPY from eyebrowse--load-window-config."
         (eyebrowse--set 'window-configs configs)
         (eyebrowse--load-window-config (eyebrowse--get 'current-slot))))))
 
+(defun start-eyebrowse-save-timer ()
+  "."
+  (unless *eyebrowse-save-timer*
+    (message "Now starting the *eyebrowse-save-timer* ...")
+    (setq *eyebrowse-save-timer*
+          (run-with-idle-timer 600 600 #'save-eyebrowse-config))))
+
+(defun stop-eyebrowse-save-timer ()
+  "."
+  (when *eyebrowse-save-timer*
+    (message "Now stoping the *eyebrowse-save-timer* ...")
+    (cancel-timer *eyebrowse-save-timer*)
+    (setq *eyebrowse-save-timer* nil)))
+
 (defun eyebrowse-make-keymap (slot)
   "SLOT."
   (let ((map (make-sparse-keymap)))
@@ -818,6 +833,7 @@ COPY from eyebrowse--load-window-config."
         (add-hook 'window-configuration-change-hook #'set-eyebrowse-mode-line-format)
         (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
         (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
+        (start-eyebrowse-save-timer)
         (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
@@ -831,6 +847,7 @@ COPY from eyebrowse--load-window-config."
       (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
       (walk-all-frame-windows
        (setq-local header-line-format nil))
+      (stop-eyebrowse-save-timer)
       (eyebrowse-mode 0))))
 
 (provide 'eyebrowse+)
