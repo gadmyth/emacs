@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.11
-;; Package-Version: 20220511.001
+;; Version: 1.1.12
+;; Package-Version: 20220518.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -103,10 +103,10 @@ above them."
       (message "The action choosed: %S" action)
       (funcall action id))))
 
-(defun notification-time-diff-description (fire-time)
-  "Show the time diff description of FIRE-TIME and now."
-  (let* ((now (current-timestamp))
-         (diff (- fire-time now))
+(defun notification-time-diff-description (fire-time &optional timestamp)
+  "Show the time diff description of FIRE-TIME from TIMESTAMP."
+  (let* ((ts (or timestamp (current-timestamp)))
+         (diff (- fire-time ts))
          (sign (if (> diff 0) "+" "-"))
          (diff (abs diff))
          (seconds diff)
@@ -141,39 +141,61 @@ above them."
     (setq desc (format "%s%s" sign desc))
     desc))
 
-(defun start-notify (message arg2 arg3)
+(defun start-notify ()
   "Show MESSAGE as notification after some minutes or at some certain time of ARG2, ARG3."
-  (interactive
-   (list
-    (read-string "notification to send: " nil nil nil)
-    (if current-prefix-arg
-        (read-number "after minitues: " 0)
-      (read-string "at the time: " (current-time-normal-string)))
-    (read-string "repeat duration: " "0m")))
-  (let* ((now (current-timestamp))
-         (seconds (if current-prefix-arg
-                      (* 60 arg2)
-                    (- (string-to-timestamp arg2) now))))
-    (when (> seconds 0)
-      (let* ((message (base64-encode-string-of-multibyte message))
-             (fire-time (+ now seconds))
-             (index (- (length arg3) 1))
-             (repeat-duration-number (string-to-number (substring arg3 0 index)))
-             (repeat-duration-unit (substring arg3 index))
-             (repeat-duration (pcase repeat-duration-unit
-                                ("m" (* 60 repeat-duration-number))
-                                ("h" (* 60 60 repeat-duration-number))
-                                ("d" (* 24 60 60 repeat-duration-number))
-                                ("w" (* 7 24 60 60 repeat-duration-number))
-                                ("M" (* 30 24 60 60 repeat-duration-number))
-                                (_ repeat-duration-number)))
-             (id (replace-regexp-in-string "-" "" (uuid-string)))
-             (notification `((id . ,id)
-                             (fire-time . ,fire-time)
-                             (message . ,message)
-                             (repeat-duration . ,repeat-duration))))
-        (update-notification notification)
-        (do-schedule-notification id seconds)))))
+  (interactive)
+  (let ((message (read-string "notification to send: " nil nil nil))
+        (fire-point (if current-prefix-arg
+                        (read-number "after minitues: " 0)
+                      (read-string "at the time: " (current-time-normal-string))))
+        (repeat (read-string "repeat duration: " "0m"))
+        (system-notification-p (y-or-n-p "Is system notification? ")))
+    (let* ((now (current-timestamp))
+           (seconds (if current-prefix-arg
+                        (* 60 fire-point)
+                      (- (string-to-timestamp fire-point) now))))
+      (when (> seconds 0)
+        (let* ((message (base64-encode-string-of-multibyte message))
+               (fire-time (+ now seconds))
+               (repeat-duration (notification-parse-duration repeat)))
+          (let* ((id (replace-regexp-in-string "-" "" (uuid-string)))
+                 (notification `((id . ,id)
+                                 (fire-time . ,fire-time)
+                                 (message . ,message)
+                                 (repeat-duration . ,repeat-duration)
+                                 (system-notification-p . ,system-notification-p))))
+            (update-notification notification)
+            (do-schedule-notification id seconds)))))))
+
+(defun notification-parse-duration (description)
+  "Parse time diff DESCRIPTION to duration in seconds."
+  (let* ((start 0)
+         (list)
+         (duration 0))
+    (while (string-match "[[:digit:]]+[[:alpha:]]" description start)
+      (let* ((beg (match-beginning 0))
+             (end (match-end 0))
+             (pair (substring description beg end)))
+        (setq start end)
+        (push pair list)))
+    (dolist (pair list)
+      (incf duration (notification-parse-duration-pair pair)))
+    duration))
+
+(defun notification-parse-duration-pair (rich-duration)
+  "Parse RICH-DURATION with unit to duration of second."
+  (let* ((index (- (length rich-duration) 1))
+         (repeat-duration-number (string-to-number (substring rich-duration 0 index)))
+         (repeat-duration-unit (substring rich-duration index))
+         (repeat-duration (pcase repeat-duration-unit
+                            ("m" (* 60 repeat-duration-number))
+                            ("h" (* 60 60 repeat-duration-number))
+                            ("d" (* 24 60 60 repeat-duration-number))
+                            ("w" (* 7 24 60 60 repeat-duration-number))
+                            ("M" (* 30 24 60 60 repeat-duration-number))
+                            ("y" (* 365 24 60 60 repeat-duration-number))
+                            (_ repeat-duration-number))))
+    repeat-duration))
 
 (defun load-notifications ()
   "."
@@ -223,18 +245,9 @@ above them."
 
 (defun reschedule-notification-after (notification)
   "Reschedule the expired NOTIFICATION after the certain duration."
-  (let* ((duration-str (read-string "repeat duration: " "0m"))
-         (index (- (length duration-str) 1))
-         (duration-number (string-to-number (substring duration-str 0 index)))
-         (duration-unit (substring duration-str index))
-         (duration (pcase duration-unit
-                     ("s" duration-number)
-                     ("m" (* 60 duration-number))
-                     ("h" (* 60 60 duration-number))
-                     ("d" (* 24 60 60 duration-number))
-                     ("w" (* 7 24 60 60 duration-number))
-                     ("M" (* 30 24 60 60 duration-number))
-                     (_ duration-number)))
+  (let* ((str (read-string "repeat duration: " "0m"))
+         (index (- (length str) 1))
+         (duration (notification-parse-duration str))
          (now (current-timestamp))
          (fire-time (+ now duration)))
     (set-notify-property notification 'fire-time fire-time)
@@ -353,6 +366,8 @@ above them."
             (notifications-add-button header-start header-end notification)))
         (set-window-point (get-buffer-window buffer 'visible) (point-max))
         (read-only-mode t))
+      ;; send system notification
+      (try-fire-system-notification notification)
       ;; reset timer
       (setf (get-notification-timer id) nil)
       ;; mark as fired
@@ -361,6 +376,18 @@ above them."
       ;; re-schedule repeatable notification
       (refresh-repeatable-notification id)
       (remove-fired-notifications))))
+
+(defun try-fire-system-notification (notification)
+  "Try fire system NOTIFICATION."
+  (when-let ((system-notification-p (alist-get 'system-notification-p notification)))
+    (let* ((message (alist-get 'message notification))
+           (message (base64-decode-string-as-multibyte message)))
+      (when (and (eq window-system 'x)
+                 (executable-find "notify-send"))
+        (let* ((notify-cmd (executable-find "notify-send"))
+               (time (format-time-string "%Y-%m-%d %H:%M:%S" (current-timestamp)))
+               (command (format "%s \"emacs\" \"%s\n%s\" -u critical" notify-cmd message time)))
+          (shell-command-to-string command))))))
 
 (defun update-notification (notification)
   "NOTIFICATION."
