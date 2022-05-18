@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.6
-;; Package-Version: 20220107.001
+;; Version: 1.0.7
+;; Package-Version: 20220518.001
 ;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -128,7 +128,7 @@
             (zerop (length *weather-api-result*)))
     (when (not *weather-fetch-timer*)
       (setq *weather-fetch-timer*
-            (run-with-timer 1 300 #'refresh-weather))))
+            (run-with-idle-timer 300 300 #'refresh-weather))))
   *weather-api-result*)
 
 (defun reset-weather-fetch-timer ()
