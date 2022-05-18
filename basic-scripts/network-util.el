@@ -86,7 +86,7 @@
   (when (zerop (length *fetched-public-ip*))
     (when (not *public-ip-fetch-timer*)
       (setq *public-ip-fetch-timer*
-            (run-with-timer 1 300 #'refresh-public-ip))))
+            (run-with-idle-timer 300 300 #'refresh-public-ip))))
   *fetched-public-ip*)
 
 (defun reset-public-ip-fetch-timer ()
