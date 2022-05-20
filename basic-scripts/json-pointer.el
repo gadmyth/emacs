@@ -5,8 +5,8 @@
 
 ;; Author: Gadmyth <gadmyth@gmail.com>
 ;; URL: https://github.com/gadmyth/emacs/basic-scripts/json-pointer.el
-;; Version: 1.0.2
-;; Package-Version: 20220512.001
+;; Version: 1.0.3
+;; Package-Version: 20220520.001
 
 ;; Copied and modified from following repository:
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
@@ -106,15 +106,20 @@
                ;; is cons
                (json-pointer-debug-message "*** is last path ***")
                (cond
+                ;; is list
                 ((or (null data) (consp data))
                  (json-pointer-debug-message "the value found: %S" (assoc-default p data))
                  (let ((find (assoc-default p data)))
                    (when (or (not find)
                              (y-or-n-p
                               (cond (value
-                                     (format "Override the value of %s from %S to %S?" p find value))
+                                     (pcase action-type
+                                       (:rename
+                                        (format "Rename the key from %s to %s ?" p value))
+                                       (_
+                                        (format "Override the value of %s from %S to %S?" p find value))))
                                     (t
-                                     (format "Delete the value %s (%S) ?" p  find)))))
+                                     (format "Delete the value %s (%S) ?" p find)))))
                      (json-pointer-debug-message "now do the set (%s, %s) into %S..." p value data)
                      (when (and path-string-p (symbolp p))
                        (setq p (symbol-name p)))
@@ -124,6 +129,8 @@
                        (pcase action-type
                          (:delete
                           (assoc-delete-depth-2 parent parent-path p))
+                         (:rename
+                          (assoc-rename-depth data p value))
                          (_
                           (assoc-set-depth-2 parent parent-path p value)))
                        (json-pointer-debug-message "after set, data is %S"
@@ -182,6 +189,10 @@
   (alist-get path2
              (alist-get path1 data nil nil #'string-equal)
              nil nil #'string-equal))
+
+(defun assoc-rename-depth (data path1 path2)
+  "Rename /PATH1 of DATA to /PATH2."
+  (setf (car (assoc path1 data #'string-equal)) path2))
 
 (defun vector-remove-at (index vector)
   "Remove the INDEX element of VECTOR."
