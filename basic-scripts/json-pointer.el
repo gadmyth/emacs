@@ -5,8 +5,8 @@
 
 ;; Author: Gadmyth <gadmyth@gmail.com>
 ;; URL: https://github.com/gadmyth/emacs/basic-scripts/json-pointer.el
-;; Version: 1.0.3
-;; Package-Version: 20220520.001
+;; Version: 1.0.4
+;; Package-Version: 20220521.001
 
 ;; Copied and modified from following repository:
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
@@ -55,8 +55,8 @@
              for p1 = (replace-regexp-in-string "~1" "/" path)
              for p2 = (replace-regexp-in-string "~0" "~" path)
              collect
-             (cond ((string-match-p "^[[:digit:]]*$" p2)
-                    (string-to-number p2))
+             (cond ((string-match-p "^\[[[:digit:]]*\]$" p2)
+                    (string-to-number (substring p2 1 -1)))
                    (path-string-p
                     p2)
                    (t
