@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.13
-;; Package-Version: 20220521.001
+;; Version: 1.2.0
+;; Package-Version: 20220521.002
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -53,9 +53,9 @@
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
 
-(defvar *notification-actions*`(("fire" . fire-notification)
-                                 ("cancel" . cancel-notification)
-                                 ("reset" . reset-notification)))
+(defvar *notification-actions*`(("reset" . reset-notification)
+                                ("fire" . fire-notification)
+                                ("cancel" . cancel-notification)))
 
 (defvar *notification-buffer-actions*
   `(("reschedule at" . reschedule-notification-at)
@@ -110,8 +110,15 @@ above them."
 (defun notification-time-diff-description (fire-time &optional timestamp)
   "Show the time diff description of FIRE-TIME from TIMESTAMP."
   (let* ((ts (or timestamp (current-timestamp)))
-         (diff (- fire-time ts))
-         (sign (if (> diff 0) "+" "-"))
+         (diff (- fire-time ts)))
+    (notification-rich-duration diff)))
+
+(defun notification-rich-duration (seconds)
+  "."
+  (let* ((diff seconds)
+         (sign (cond ((> diff 0) "+")
+                     ((< diff 0) "-")
+                     (t "")))
          (diff (abs diff))
          (seconds diff)
          (minutes (/ diff 60))
@@ -131,7 +138,7 @@ above them."
     (when (>= days 1)
       (setq desc (s-concat desc (format "%dd" days))))
     (when (>= hours 24)
-        (setq hours (mod hours 24)))
+      (setq hours (mod hours 24)))
     (when (>= hours 1)
       (setq desc (s-concat desc (format "%dh" hours))))
     (when (>= minutes 60)
@@ -143,6 +150,8 @@ above them."
     (when (>= seconds 1)
       (setq desc (s-concat desc (format "%ds" seconds))))
     (setq desc (format "%s%s" sign desc))
+    (when (zerop (length desc))
+      (setq desc "0m"))
     desc))
 
 (defun start-notify ()
@@ -398,14 +407,43 @@ above them."
   (when-let ((id (alist-get 'id notification)))
     (setf (get-notification id) notification)))
 
+(defun cancel-notification-timer (id)
+  "Cancel the notification's timer of ID."
+  (when-let ((timer (get-notification-timer id)))
+    (cancel-timer timer)))
+
 (defun cancel-notification (id)
   "Cancel the notification of ID."
-  (when-let ((timer (get-notification-timer id)))
-    (cancel-timer timer))
+  (cancel-notification-timer id)
   (setf (get-notification id) nil))
 
 (defun reset-notification (id)
-  "Reset the notification of ID.")
+  "Reset the notification of ID."
+  (let* ((notification (get-notification id))
+         (message (base64-encode-string-of-multibyte
+                   (read-string "notification to send: "
+                                (base64-decode-string-as-multibyte (alist-get 'message notification)))))
+         (fire-time (string-to-timestamp
+                     (read-string "at the time: "
+                                  (timestamp-to-normal-string (alist-get 'fire-time notification)))))
+         (repeat-duration (alist-get 'repeat-duration notification))
+         (repeat (notification-parse-duration
+                  (read-string "repeat duration: "
+                               (notification-rich-duration repeat-duration))))
+         (system-notification-p (member (read-string "Is system notification? (y or n) "
+                                                     (if (alist-get 'system-notification-p notification) "y" "n"))
+                                        '("y" "Y"))))
+    ;; reset the notification's property
+    (when (not (alist-get 'fired notification))
+      (set-notify-property notification 'message message)
+      (set-notify-property notification 'fire-time fire-time)
+      (set-notify-property notification 'repeat-duration repeat)
+      (set-notify-property notification 'system-notification-p system-notification-p)
+      ;; cancel scheduled notification
+      (when (alist-get 'scheduled notification)
+        (cancel-notification-timer id)
+        (reschedule-notifitaion notification)
+        (message "notification reset succeed!")))))
 
 (defmacro set-notify-property (notification key value)
   "Update NOTIFICATION's VALUE of KEY."
