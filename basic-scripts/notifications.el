@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.1.12
-;; Package-Version: 20220518.001
+;; Version: 1.1.13
+;; Package-Version: 20220521.001
 ;; Package-Requires: timer, dates, codec
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -46,6 +46,10 @@
 (defvar *notification-timers* nil)
 
 (defvar *notifications-buffer* nil)
+
+(defvar *notifications-expired-idle-timer* nil)
+
+(defvar *notifications-expired-idle-delay* 180)
 
 (defvar +notifications-file-name+ (expand-file-name "~/.emacs.notifications"))
 
@@ -502,6 +506,28 @@ above them."
   ;; The mode for *notifications-buffer*.
   (use-local-map notifications-aggregate-mode-map))
 
+(defun notifications-expired-inspection ()
+  "."
+  (message "### %s Now check the expired notifications..." (current-time-normal-string))
+  (let* ((now (current-timestamp))
+         (expired-list (seq-filter (lambda (notification)
+                                    (and (not (alist-get 'fired notification))
+                                         (alist-get 'scheduled notification)
+                                         (> (- now (alist-get 'fire-time notification)) 60)))
+                                  *notifications*)))
+    (message "### %s %d expired notifications should be fired." (current-time-normal-string) (length expired-list))
+    (dolist (notification expired-list)
+      (fire-notification (alist-get 'id notification)))))
+
+(defun start-notification-expired-idle-checker ()
+  "Start a idle checker to fire expired notifications."
+  (unless *notifications-expired-idle-timer*
+    (setq *notifications-expired-idle-timer*
+          (run-with-idle-timer
+           *notifications-expired-idle-delay*
+           *notifications-expired-idle-delay*
+           #'notifications-expired-inspection))))
+
 (defun notifications-setup ()
   "."
   (unless *notifications-loaded*
@@ -514,6 +540,7 @@ above them."
     (setq *notifications-loaded* t)))
 
 (notifications-setup)
+(start-notification-expired-idle-checker)
 
 (provide 'notifications)
 ;;; notifications.el ends here
