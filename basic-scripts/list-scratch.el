@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.5
-;; Package-Version: 20220521.001
+;; Version: 1.0.6
+;; Package-Version: 20220526.001
 ;; Package-Requires: json-pointer, dash
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -88,21 +88,41 @@
     ))
 
 (defun scratch-copy-node (key value)
-  "COPY DATA."
+  "COPY VALUE of KEY."
   (kill-new value)
   (message "data: %S copied" value))
 
 (defun scratch-edit-in-buffer (key value)
-  "Edit VALUE in a buffer."
-  (message "path: %s" *scratch-current-path*))
+  "Edit VALUE of KEY in a buffer."
+  (let ((buffer (get-buffer-create "*scratch-edit-buffer*")))
+    (switch-to-buffer buffer)
+    (with-current-buffer buffer
+      (erase-buffer)
+      (scratch-edit-mode t)
+      (insert value))))
+
+(defun scratch-finish-edit-in-buffer ()
+  "."
+  (interactive)
+  ;; save json value
+  (with-current-buffer "*scratch-edit-buffer*"
+    (let* ((value (buffer-string))
+           (path *scratch-current-path*))
+      (when (> (length value) 0)
+        (json-pointer-set *scratch-list* path value t :set t))))
+  ;; kill buffer
+  (kill-buffer "*scratch-edit-buffer*")
+  ;; update json node
+  (scratch-update-current-node)
+  (list-scratch))
 
 (defun scratch-open-link (key value)
-  "Open link of VALUE."
+  "Open link of KEY's VALUE."
   (when value
     (org-open-link-from-string value)))
 
 (defun scratch-parent-path (path)
-  "."
+  "Get the PATH's parent path."
   (let ((parent (file-name-directory path)))
     (when (> (length parent) 1)
       (setq parent (substring parent 0 (- (length parent) 1))))
@@ -154,18 +174,19 @@
             (scratch-add-org-capture-node current-node))))))))
 
 (defun scratch-add-string-type-node (current-node)
-  "."
+  "Add string type node under CURRENT-NODE."
   (let* ((key (completing-read "Please input key to add as string: " (cons ".." current-node)))
+         (default (json-pointer-get current-node (scratch-concat-path "/" key) t))
          (value))
     (cond
      ((string= key "..")
       (list-scratch))
      (t
-      (setq value (read-string (format "Please input value for %s: " key) nil))
+      (setq value (read-string (format "Please input value for %s: " key) default))
       (scratch-do-add-node key value)))))
 
 (defun scratch-add-list-type-node (current-node)
-  "."
+  "Add list type node under CURRENT-NODE."
   (let* ((key (completing-read "Please input key to add as list: " (cons ".." current-node)))
          (value))
     (cond
@@ -176,7 +197,7 @@
       (scratch-do-add-node key value)))))
 
 (defun scratch-add-vector-type-node (current-node)
-  "."
+  "Add vector type node under CURRENT-NODE."
   (let* ((key (completing-read "Please input key to add as vector: " (cons ".." current-node)))
          (value))
     (cond
@@ -187,7 +208,7 @@
       (scratch-do-add-node key value)))))
 
 (defun scratch-add-org-capture-node (current-node)
-  "."
+  "Add org capture node under CURRENT-NODE."
   (when *org-cap-temp*
     (let ((key (assoc-default "description" *org-cap-temp* #'string=))
           (value (assoc-default "link" *org-cap-temp* #'string=)))
@@ -195,7 +216,7 @@
       (setq *org-cap-temp* nil))))
 
 (defun scratch-do-add-node (key value)
-  "."
+  "The common logic of add VALUE of KEY."
   (when (> (length key) 0)
     (let ((path (scratch-concat-path *scratch-current-path* key)))
       (json-pointer-set *scratch-list* path value t :set))
@@ -228,7 +249,7 @@
       (list-scratch)))))
 
 (defun scratch-rename-leaf (key value)
-  "Rename CURRENT-NODE's key name."
+  "Rename CURRENT-NODE's KEY with VALUE."
   (let ((new-key (read-string "Please input a new key name: "))
         (path *scratch-current-path*))
     (message "current-path: %s, new key name is: %s" *scratch-current-path* new-key)
@@ -379,6 +400,18 @@
         (let ((index-path (format "[%d]" (first-element-index value current-node #'string=))))
           (scratch-level-down index-path)
           (list-scratch)))))))
+
+(defvar scratch-edit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-x #") 'scratch-finish-edit-in-buffer)
+    map)
+  "Initial key map for `scratch-edit-mode'.")
+
+(define-minor-mode scratch-edit-mode
+  "Toggle `scratch-edit-mode."
+  :keymap scratch-edit-mode-map
+  :global nil
+  )
 
 (defun save-scratch-list ()
   "Save scratch list to file."
