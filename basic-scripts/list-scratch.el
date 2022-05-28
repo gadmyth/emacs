@@ -3,9 +3,9 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.6
-;; Package-Version: 20220526.001
-;; Package-Requires: json-pointer, dash
+;; Version: 1.0.7
+;; Package-Version: 20220528.001
+;; Package-Requires: json-pointer, dash, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/list-scratch.el
@@ -36,6 +36,7 @@
 
 (require 'json-pointer)
 (require 'dash)
+(require 'dates)
 
 (defvar *scratch-list* '(("root" . nil)))
 
@@ -48,6 +49,13 @@
 (defvar *scratch-list-loaded* nil)
 
 (defvar +scratch-list-file-name+ (expand-file-name "~/.scratch_list"))
+
+(defvar *scratch-list-modified* nil)
+
+(defvar *scratch-list-idle-save-timer* nil)
+
+(defvar *scratch-list-idle-delay* 300)
+
 
 (defun list-scratch-toggle-debug ()
   "."
@@ -109,7 +117,8 @@
     (let* ((value (buffer-string))
            (path *scratch-current-path*))
       (when (> (length value) 0)
-        (json-pointer-set *scratch-list* path value t :set t))))
+        (json-pointer-set *scratch-list* path value t :set t)
+        (setq *scratch-list-modified* t))))
   ;; kill buffer
   (kill-buffer "*scratch-edit-buffer*")
   ;; update json node
@@ -155,6 +164,7 @@
          (when (not (string= "/" *scratch-current-path*))
            (setq path (format "%s%s" *scratch-current-path* "/[0]")))
          (json-pointer-set *scratch-list* path value t :add)
+         (setq *scratch-list-modified* t)
          (scratch-update-current-node)
          (list-scratch)))
       (_
@@ -219,7 +229,8 @@
   "The common logic of add VALUE of KEY."
   (when (> (length key) 0)
     (let ((path (scratch-concat-path *scratch-current-path* key)))
-      (json-pointer-set *scratch-list* path value t :set))
+      (json-pointer-set *scratch-list* path value t :set)
+      (setq *scratch-list-modified* t))
     (scratch-update-current-node)
     (list-scratch)))
 
@@ -245,6 +256,7 @@
         (setq path (format "%s%s" *scratch-current-path* path)))
       (list-scratch-debug-message "the path to delete is %s" path)
       (json-pointer-set *scratch-list* path nil t :delete)
+      (setq *scratch-list-modified* t)
       (scratch-update-current-node)
       (list-scratch)))))
 
@@ -254,6 +266,7 @@
         (path *scratch-current-path*))
     (message "current-path: %s, new key name is: %s" *scratch-current-path* new-key)
     (json-pointer-set *scratch-list* path new-key t :rename)
+    (setq *scratch-list-modified* t)
     (scratch-node-level-up)
     (scratch-level-down new-key)
     (list-scratch)))
@@ -264,6 +277,7 @@
         (path *scratch-current-path*))
     (message "current-path: %s, new key name is: %s" *scratch-current-path* new-key)
     (json-pointer-set *scratch-list* path new-key t :rename)
+    (setq *scratch-list-modified* t)
     (scratch-node-level-up)
     (scratch-level-down new-key)
     (list-scratch)))
@@ -420,7 +434,8 @@
     (message "Saving scratch list to file %S ..." file-name)
     (let* ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *scratch-list*))))
       (with-temp-file file-name
-        (insert content)))))
+        (insert content)))
+    (setq *scratch-list-modified* nil)))
 
 (defun load-scratch-list ()
   "Load scratch list from file."
@@ -440,7 +455,28 @@
           (scratch-reload-list)
           (setq *scratch-list-loaded* t)))))))
 
+(defun save-scratch-list-when-modified ()
+  "."
+  (message "### %s Now saving the scratch list..." (current-time-normal-string))
+  (let* ((now (current-timestamp)))
+    (cond
+     (*scratch-list-modified*
+      (message "### scratch list is modified, now saving..." (current-time-normal-string))
+      (save-scratch-list))
+     (t
+      (message "### scratch list is not modified, ignore." (current-time-normal-string))))))
+
+(defun start-scratch-list-idle-saver ()
+  "Start a idle saver to save scratch list."
+  (unless *scratch-list-idle-save-timer*
+    (setq *scratch-list-idle-save-timer*
+          (run-with-idle-timer
+           *scratch-list-idle-delay*
+           *scratch-list-idle-delay*
+           #'save-scratch-list-when-modified))))
+
 (load-scratch-list)
+(start-scratch-list-idle-saver)
 (add-hook 'kill-emacs-hook #'save-scratch-list)
 
 (provide 'list-scratch)
