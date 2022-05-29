@@ -3,9 +3,9 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.7
-;; Package-Version: 20220528.001
-;; Package-Requires: json-pointer, dash, dates
+;; Version: 1.0.8
+;; Package-Version: 20220529.001
+;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/list-scratch.el
@@ -35,12 +35,13 @@
 
 
 (require 'json-pointer)
-(require 'dash)
 (require 'dates)
 
 (defvar *scratch-list* '(("root" . nil)))
 
 (defvar *scratch-current-path* "/root")
+
+(defvar *scratch-current-key* "root")
 
 (defvar *scratch-current-node* nil)
 
@@ -72,42 +73,36 @@
   "."
   (setq *scratch-current-node* (json-pointer-get *scratch-list* *scratch-current-path* t)))
 
-(defun scratch-reload-list ()
-  "."
-  (interactive)
-  (setq *scratch-current-path* "/root")
-  (scratch-update-current-node))
-
 (defun scratch-level-up-to-root ()
   "."
   (interactive)
   (setq *scratch-current-path* "/root")
+  (setq *scratch-current-key* "root")
   (scratch-update-current-node))
 
-(defvar *scratch-node-actions*
-  `((".." . (lambda (key value)
-              (scratch-node-level-up)
-              (list-scratch)))
-    ("copy" . scratch-copy-node)
-    ("edit in buffer" . scratch-edit-in-buffer)
-    ("open link" . scratch-open-link)
-    ("~" . scratch-rename-leaf)
-    ("x" . nil)
-    ))
+(defun scratch-copy-node ()
+  "COPY *scratch-current-node*."
+  (let ((value *scratch-current-node*))
+    (kill-new value)
+    (message "data: %S copied" value)))
 
-(defun scratch-copy-node (key value)
-  "COPY VALUE of KEY."
-  (kill-new value)
-  (message "data: %S copied" value))
+(defun scratch-copy-node-checker ()
+  "."
+  (stringp *scratch-current-node*))
 
-(defun scratch-edit-in-buffer (key value)
-  "Edit VALUE of KEY in a buffer."
-  (let ((buffer (get-buffer-create "*scratch-edit-buffer*")))
+(defun scratch-edit-in-buffer ()
+  "Edit *scratch-current-node* in a buffer."
+  (let ((buffer (get-buffer-create "*scratch-edit-buffer*"))
+        (value *scratch-current-node*))
     (switch-to-buffer buffer)
     (with-current-buffer buffer
       (erase-buffer)
       (scratch-edit-mode t)
       (insert value))))
+
+(defun scratch-edit-in-buffer-checker ()
+  "."
+  (stringp *scratch-current-node*))
 
 (defun scratch-finish-edit-in-buffer ()
   "."
@@ -125,10 +120,16 @@
   (scratch-update-current-node)
   (list-scratch))
 
-(defun scratch-open-link (key value)
-  "Open link of KEY's VALUE."
-  (when value
-    (org-open-link-from-string value)))
+(defun scratch-open-link ()
+  "Open link of *scratch-current-node*."
+  (when-let ((link *scratch-current-node*))
+    (org-open-link-from-string link)))
+
+(defun scratch-open-link-checker ()
+  "."
+  (let ((value *scratch-current-node*))
+    (and (stringp value)
+         (string-prefix-p "http"))))
 
 (defun scratch-parent-path (path)
   "Get the PATH's parent path."
@@ -140,23 +141,23 @@
 (defun scratch-node-level-up ()
   "."
   (setq *scratch-current-path* (scratch-parent-path *scratch-current-path*))
+  (setq *scratch-current-key* (file-name-nondirectory *scratch-current-path*))
   (list-scratch-debug-message "level up, current path: %s" *scratch-current-path*)
   (scratch-update-current-node))
 
-(defvar *scratch-list-actions*
-  `((".." . (lambda (_ignore)
-              (scratch-node-level-up)
-              (list-scratch)))
-    ("+" . scratch-add-node)
-    ("-" . scratch-delete-node)
-    ("~" . scratch-rename-node)
-    ("x" . (lambda (_ignore)
-             nil))
-    ))
+(defun scratch-level-up ()
+  "."
+  (scratch-node-level-up)
+  (list-scratch))
 
-(defun scratch-add-node (current-node)
-  "Add a new node to scratch CURRENT-NODE."
-  (let ((type (type-of current-node)))
+(defun scratch-level-up-checker ()
+  "."
+  (not (string= *scratch-current-path* "/root")))
+
+(defun scratch-add-node ()
+  "Add a new node to scratch *scratch-current-node*."
+  (let* ((current-node *scratch-current-node*)
+         (type (type-of current-node)))
     (pcase type
       ('vector
        (let ((path)
@@ -182,6 +183,13 @@
             (scratch-add-vector-type-node current-node))
            ("org-capture"
             (scratch-add-org-capture-node current-node))))))))
+
+(defun scratch-add-node-checker ()
+  "."
+  (let ((current-node *scratch-current-node*))
+    (or (consp current-node)
+        (vectorp current-node)
+        (null current-node))))
 
 (defun scratch-add-string-type-node (current-node)
   "Add string type node under CURRENT-NODE."
@@ -234,9 +242,10 @@
     (scratch-update-current-node)
     (list-scratch)))
 
-(defun scratch-delete-node (current-node)
-  "Delete the sub node under CURRENT-NODE."
-  (let* ((node-type (type-of current-node))
+(defun scratch-delete-node ()
+  "Delete the sub node under *scratch-current-node*."
+  (let* ((current-node *scratch-current-node*)
+         (node-type (type-of current-node))
          (current-node (or (and (consp current-node) current-node)
                            (and (vectorp current-node) (append current-node nil))
                            current-node))
@@ -260,27 +269,28 @@
       (scratch-update-current-node)
       (list-scratch)))))
 
-(defun scratch-rename-leaf (key value)
-  "Rename CURRENT-NODE's KEY with VALUE."
-  (let ((new-key (read-string "Please input a new key name: "))
-        (path *scratch-current-path*))
-    (message "current-path: %s, new key name is: %s" *scratch-current-path* new-key)
-    (json-pointer-set *scratch-list* path new-key t :rename)
-    (setq *scratch-list-modified* t)
-    (scratch-node-level-up)
-    (scratch-level-down new-key)
-    (list-scratch)))
+(defun scratch-delete-node-checker ()
+  "."
+  (let ((current-node *scratch-current-node*))
+    (or (consp current-node)
+        (vectorp current-node)
+        (null current-node))))
 
-(defun scratch-rename-node (current-node)
-  "Rename CURRENT-NODE's key name."
-  (let ((new-key (read-string "Please input a new key name: "))
-        (path *scratch-current-path*))
-    (message "current-path: %s, new key name is: %s" *scratch-current-path* new-key)
-    (json-pointer-set *scratch-list* path new-key t :rename)
-    (setq *scratch-list-modified* t)
-    (scratch-node-level-up)
-    (scratch-level-down new-key)
-    (list-scratch)))
+(defun scratch-rename-node ()
+  "Rename *scratch-current-node*'s key name."
+  (let* ((path *scratch-current-path*)
+         (key (file-name-nondirectory path)))
+    (let ((new-key (read-string (format "Please input a new key name to rename %s: " key))))
+      (message "current-path: %s, new key name is: %s" path new-key)
+      (json-pointer-set *scratch-list* path new-key t :rename)
+      (setq *scratch-list-modified* t)
+      (scratch-node-level-up)
+      (scratch-level-down new-key)
+      (list-scratch))))
+
+(defun scratch-rename-node-checker ()
+  "."
+  (not (string= path "/root")))
 
 (defun first-element-index (ele list &optional test-fn)
   "Return first index of ELE in LIST, using TEST-FN to compare."
@@ -318,13 +328,6 @@
                           ((null current-node) "*")))
          (path *scratch-current-path*)
          (list current-node)
-         ;; add up node
-         (list (if (string= path "/root") list (cons ".." list)))
-         ;; add other action node
-         (action-list (or (and (string= path "/root")
-                               '("+" "-" "x"))
-                          '("+" "-" "~" "x")))
-         (list (seq-concatenate 'list list action-list))
          (key (completing-read (format "%s %s: " node-type path) list nil t))
          (value (assoc-default key current-node))
          (list-action))
@@ -338,9 +341,6 @@
       (list-scratch-debug-message "value is vector")
       (scratch-level-down-with-node key value)
       (list-scratch-vector))
-     ((setq list-action (assoc-default key *scratch-list-actions* #'string=))
-      (list-scratch-debug-message "key is list action")
-      (funcall list-action current-node))
      ((not (null value))
       (list-scratch-debug-message "value is string")
       (scratch-level-down-with-node key value)
@@ -358,13 +358,9 @@
     (list-scratch-string-with-param path key value)))
 
 (defun list-scratch-string-with-param (path key value)
-  "."
-  (let* ((list *scratch-node-actions*)
-         (list (-insert-at 1 value list))
-         (action-name (completing-read (format "%s's value: " (scratch-concat-path path key)) list))
-         (action (assoc-default action-name *scratch-node-actions* #'string=)))
-    (when action
-      (funcall action key value))))
+  "List string type string with VALUE of KEY under PATH."
+  (let* ((list (list value))
+         (action-name (completing-read (format "%s's value: " (scratch-concat-path path key)) list)))))
 
 (defun scratch-concat-path (parent path)
   "Concat PARENT with PATH."
@@ -376,6 +372,7 @@
   "Update scratch list down to PATH, and set current-node as NODE."
   (let* ((current-path *scratch-current-path*))
     (setq *scratch-current-path* (scratch-concat-path current-path path))
+    (setq *scratch-current-key* path)
     (setq *scratch-current-node* node)))
 
 (defun scratch-level-down (path)
@@ -384,6 +381,7 @@
          (new-path (scratch-concat-path current-path path))
          (node (json-pointer-get *scratch-list* new-path t)))
     (setq *scratch-current-path* new-path)
+    (setq *scratch-current-key* path)
     (setq *scratch-current-node* node)))
 
 (defun list-scratch-vector ()
@@ -397,23 +395,13 @@
          (list))
     (progn
       (seq-doseq (item current-node) (push item list))
-      (setq list (reverse list))
-      ;; add up node
-      (unless (string= path "/") (setq list (cons ".." list)))
-      ;; add action node
-      (setq list (seq-concatenate 'list list '("+" "-" "x"))))
+      (setq list (reverse list)))
     ;; select value
     (let ((value (completing-read (format "%s %s: " node-type path) list)))
       (list-scratch-debug-message "value: %s" value)
-      (cond
-       ;; value is action
-       ((assoc-default value *scratch-list-actions* #'string=)
-        (funcall (assoc-default value *scratch-list-actions* #'string=) current-node))
-       (t
-        ;; value is normal node
-        (let ((index-path (format "[%d]" (first-element-index value current-node #'string=))))
-          (scratch-level-down index-path)
-          (list-scratch)))))))
+      (let ((index-path (format "[%d]" (first-element-index value current-node #'string=))))
+        (scratch-level-down index-path)
+        (list-scratch)))))
 
 (defvar scratch-edit-mode-map
   (let ((map (make-sparse-keymap)))
@@ -424,6 +412,35 @@
 (define-minor-mode scratch-edit-mode
   "Toggle `scratch-edit-mode."
   :keymap scratch-edit-mode-map
+  :global nil
+  )
+
+(defmacro scratch-generate-action (action quit-checker)
+  "Generate an function which run the ACTION in the minibuffer, quit minibuffer when QUIT-CHECKER is valid."
+  `(lambda ()
+     (interactive)
+     (when (and ,action
+                ,quit-checker
+                (funcall ,quit-checker))
+       (run-with-timer 0 nil ,action)
+       (minibuffer-keyboard-quit))))
+
+(defvar scratch-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-x") #'minibuffer-keyboard-quit)
+    (define-key map (kbd "C-c +") (scratch-generate-action #'scratch-add-node #'scratch-add-node-checker))
+    (define-key map (kbd "C-c -") (scratch-generate-action #'scratch-delete-node #'scratch-delete-node-checker))
+    (define-key map (kbd "C-c C-l") (scratch-generate-action #'scratch-open-link #'scratch-open-link-checker))
+    (define-key map (kbd "C-c C-c") (scratch-generate-action #'scratch-copy-node #'scratch-copy-node-checker))
+    (define-key map (kbd "C-c C-e") (scratch-generate-action #'scratch-edit-in-buffer #'scratch-edit-in-buffer-checker))
+    (define-key map (kbd "C-c ~") (scratch-generate-action #'scratch-rename-node #'scratch-rename-node-checker))
+    (define-key map (kbd "C-<up>") (scratch-generate-action #'scratch-level-up #'scratch-level-up-checker))
+    map)
+  "Initial key map for `scratch-list-mode'.")
+
+(define-minor-mode scratch-list-mode
+  "Toggle `scratch-list-mode."
+  :keymap scratch-list-mode-map
   :global nil
   )
 
@@ -452,7 +469,7 @@
           (insert-file-contents file-name)
           (goto-char (point-min))
           (setq *scratch-list* (read (current-buffer)))
-          (scratch-reload-list)
+          (scratch-level-up-to-root)
           (setq *scratch-list-loaded* t)))))))
 
 (defun save-scratch-list-when-modified ()
@@ -475,9 +492,16 @@
            *scratch-list-idle-delay*
            #'save-scratch-list-when-modified))))
 
+(defun scratch-list-setup-minibuffer-mode ()
+  "."
+  (when (window-minibuffer-p)
+    (scratch-list-mode t)))
+
+(add-hook 'kill-emacs-hook #'save-scratch-list)
+(add-hook 'minibuffer-setup-hook 'scratch-list-setup-minibuffer-mode)
+
 (load-scratch-list)
 (start-scratch-list-idle-saver)
-(add-hook 'kill-emacs-hook #'save-scratch-list)
 
 (provide 'list-scratch)
 ;;; list-scratch.el ends here
