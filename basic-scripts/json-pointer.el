@@ -5,8 +5,8 @@
 
 ;; Author: Gadmyth <gadmyth@gmail.com>
 ;; URL: https://github.com/gadmyth/emacs/basic-scripts/json-pointer.el
-;; Version: 1.0.4
-;; Package-Version: 20220521.001
+;; Version: 1.0.5
+;; Package-Version: 20220605.001
 
 ;; Copied and modified from following repository:
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
@@ -83,7 +83,7 @@
              finally return data)))
 
 ;;;###autoload
-(defun json-pointer-set (json path value &optional path-string-p action-type)
+(defun json-pointer-set (json path value &optional path-string-p action-type override-confirm-p)
   "Set VALUE in JSON of PATH, if PATH-STRING-P is t, path is not a symbol."
   (let* ((data json)
          (paths (json-pointer--parse-path path path-string-p))
@@ -111,6 +111,7 @@
                  (json-pointer-debug-message "the value found: %S" (assoc-default p data))
                  (let ((find (assoc-default p data)))
                    (when (or (not find)
+                             override-confirm-p
                              (y-or-n-p
                               (cond (value
                                      (pcase action-type
