@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: stopwatch.el <gadmyth@gmail.com>
-;; Version: 1.0.8
-;; Package-Version: 20220513.001
+;; Version: 1.0.9
+;; Package-Version: 20220606.001
 ;; Package-Requires: switch-buffer-functions, dates, dash
 ;; Keywords: stopwatch
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -212,7 +212,7 @@
              (max-cost (stopwatch-calc-cost max-duration))
              (max-cost-percent (format "%.2f%%" (/ (* 100.0 max-duration) duration)))
              (switch-count (format "%d" (or (alist-str-get key switch-table) 0))))
-        (message "%s: %s, %s, max: %s, %s, %s" key cost cost-percent max-cost max-cost-percent switchx-count)
+        (message "%s: %s, %s, max: %s, %s, %s" key cost cost-percent max-cost max-cost-percent switch-count)
         (push (vector key cost cost-percent max-cost max-cost-percent switch-count) rows)))
     (reverse rows)))
 
