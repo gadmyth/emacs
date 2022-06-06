@@ -16,8 +16,8 @@
     (let ((content (decode-coding-string (buffer-string) 'utf-8)))
       content)))
 
-(defun refresh-cookies (domain cookie-keys)
-  "Get the browser cookies of DOMAIN whoice key's is COOKIE-KEYS."
+(defun refresh-cookies (domain cookie-keys secure-p)
+  "Get the browser cookies of DOMAIN whoice key's is COOKIE-KEYS, SECURE-P."
   (url-cookie-delete-cookies domain)
   (let* ((param (mapconcat 'identity cookie-keys ":"))
          (scriptlets-dir (expand-file-name "scriptlets" +emacs-context-directory+))
@@ -32,7 +32,7 @@
       (let* ((cookie-key (cadr cookie-pair))
              (cookie-value (caddr cookie-pair)))
         (message "parsed cookie to store: [%s: %s]\n\n" cookie-key cookie-value)
-        (url-cookie-store cookie-key cookie-value nil domain "/" t)))))
+        (url-cookie-store cookie-key cookie-value nil domain "/" secure-p)))))
 
 (provide 'rest-util)
 ;;; rest-util.el ends here
