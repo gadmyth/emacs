@@ -2,8 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-(defvar *mac-scale-amount* 0)
-(defvar *linux-scale-amount* 0)
 
 (global-linum-mode 0)
 (global-visual-line-mode t)

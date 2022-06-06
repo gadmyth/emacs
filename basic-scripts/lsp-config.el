@@ -6,8 +6,8 @@
 (defvar +lsp-java-server-default-dir+ nil)
 
 (when (and
-        +lsp-java-server-default-dir+
-        *lsp-java-enable*)
+        (bound-and-true-p +lsp-java-server-default-dir+)
+        (bound-and-true-p *lsp-java-enable*))
   (require 'lsp)
   (require 'lsp-ui)
   (setq lsp-java-server-install-dir +lsp-java-server-default-dir+)

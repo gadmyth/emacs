@@ -2,12 +2,10 @@
 ;;; Commentary:
 ;;; Code:
 
-(defvar *socks5-proxy-server* nil)
-(defvar *socks5-proxy-port* nil)
-
 (require-safely
  'telega
- (when (and *socks5-proxy-server* *socks5-proxy-port*)
+ (when (and (bound-and-true-p *socks5-proxy-server*)
+            (bound-and-true-p *socks5-proxy-port*))
    (setq telega-proxies
          (list
           `(:server ,*socks5-proxy-server*

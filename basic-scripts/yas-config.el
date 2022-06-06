@@ -24,7 +24,9 @@
 (add-hook
  'yas-global-mode-hook
  (lambda ()
-   (add-to-list 'yas-snippet-dirs *snippets-default-directory*)))
+   (when (and (bound-and-true-p *snippets-default-directory*)
+              (file-directory-p *snippets-default-directory*))
+     (add-to-list 'yas-snippet-dirs *snippets-default-directory*))))
 
 (setq yas-indent-line 'fixed)
 

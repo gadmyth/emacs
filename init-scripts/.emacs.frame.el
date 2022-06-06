@@ -9,6 +9,7 @@
 (add-to-list 'load-path (expand-file-name "el-post-scripts" +emacs-context-directory+))
 
 (require 'package-tools)
+(require 'q)
 
 ;; load script files at first
 (require-safely

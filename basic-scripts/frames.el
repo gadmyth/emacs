@@ -61,15 +61,11 @@
              (set-suitable-frame-size-inner (selected-frame)))))
       (set-suitable-frame-size-inner frame))))
 
-(defvar *tool-bar-mode* t)
-(defvar *menu-bar-mode* t)
-(defvar *blink-cursor-mode* t)
-(defvar *scroll-bar-mode* t)
+(if (boundp 'tool-bar-mode) (tool-bar-mode (bound-or-default *tool-bar-mode* t)))
+(if (boundp 'menu-bar-mode) (menu-bar-mode (bound-or-default *menu-bar-mode* t)))
+(if (boundp 'blink-cursor-mode) (blink-cursor-mode (bound-or-default *blink-cursor-mode* t)))
+(if (boundp 'scroll-bar-mode) (scroll-bar-mode (bound-or-default *scroll-bar-mode* t)))
 
-(if (boundp 'tool-bar-mode) (tool-bar-mode *tool-bar-mode*))
-(if (boundp 'menu-bar-mode) (menu-bar-mode *menu-bar-mode*))
-(if (boundp 'blink-cursor-mode) (blink-cursor-mode *blink-cursor-mode*))
-(if (boundp 'scroll-bar-mode) (scroll-bar-mode *scroll-bar-mode*))
 (put 'scroll-left 'disabled nil)
 
 (defun get-workspace (index from-end)

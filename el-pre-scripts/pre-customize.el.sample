@@ -9,45 +9,32 @@
 ;; set emacs customize file
 (setq custom-file (expand-file-name ".emacs-custom.el" user-emacs-directory))
 
+;; frames.el
 (defvar *tool-bar-mode* 0)
 (defvar *menu-bar-mode* 0)
 (defvar *blink-cursor-mode* t)
 (defvar *scroll-bar-mode* 0)
 
-(setq *mac-scale-amount* 0
-      *linux-scale-amount* 0)
-
 (defvar *snippets-default-directory* nil)
 
-(setq *load-slime* nil)
+;; calendar-config.el
+(defconst +calendar-longitude+ 0)
+(defconst +calendar-latitude+ 0)
+(defconst +calendar-location-name+ "")
+(defconst +calendar-time-zone+ 0) ;; +0 hours
+(defconst +calendar-standard-time-zone-name+ "UTC")
+(defconst +calendar-daylight-time-zone-name+ "UTC")
 
-(setq org-agenda-files '("some org files"))
-(setq *calendar-longitude* 0)
-(setq *calendar-latitude* 0)
 (setq *diary-file* "diary file")
 
 (setq *gkroam-default-root-dir* "~/gkroam")
 
-(setq org-agenda-files '("~/file1.org"))
+;; org.el
+(setq org-agenda-files '("some org files"))
 
-(setq *annotate-file* "~/.emacs.d/annotations")
-
-;; socks5 proxy
-(setq *socks5-proxy-server* "127.0.0.1")
-(setq *socks5-proxy-port* 1080)
-
-;; erc
-(defvar *erc-forbidden-targets* nil)
-(add-to-list '*erc-forbidden-targets* "")
-
-;; lsp
+;; lsp-config
 (setq *lsp-java-enable* nil)
 (setq +lsp-java-server-default-dir+ (expand-file-name "~/lsp-java-server/"))
-
-;; weathers
-(setq *weather-api-uid* nil)
-(setq *weather-api-key* nil)
-(setq *weather-location* nil)
 
 (provide 'pre-customize)
 ;;; pre-customize.el ends here

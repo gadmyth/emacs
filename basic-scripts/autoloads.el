@@ -90,7 +90,7 @@ trees.
 ;;;***
 
 ;;;### (autoloads nil nil ("annot.el" "avy-config.el" "clipboard.el"
-;;;;;;  "eww-config.el" "fonts.el" "holiday-config.el" "ido-config.el"
+;;;;;;  "eww-config.el" "fonts.el" "calendar-config.el" "ido-config.el"
 ;;;;;;  "mode-bars.el" "projectile-config.el") (0 0 0 0))
 
 ;;;***

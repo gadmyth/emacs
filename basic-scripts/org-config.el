@@ -40,10 +40,8 @@
 (require 'org-agenda)
 
 ;; config files
-(defvar org-agenda-files)
-(defvar *diary-file* nil)
-(setq org-agenda-diary-file *diary-file*)
-(setq diary-file *diary-file*)
+(set-when-non-null org-agenda-diary-file *diary-file*)
+(set-when-non-null diary-file *diary-file*)
 
 (setq org-agenda-span 'day)
 (setq org-agenda-include-diary t)
@@ -56,11 +54,7 @@
         "......" "----------------"))
 
 ;; set (longitude, latitude) for sunrise and sunset
-(require 'solar)
-(defvar *calendar-longitude* 0)
-(defvar *calendar-latitude* 0)
-(setq calendar-longitude *calendar-longitude*)
-(setq calendar-latitude *calendar-latitude*)
+(require 'calendar-config)
 
 (defun diary-sunrise ()
   "."

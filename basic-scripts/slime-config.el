@@ -3,9 +3,7 @@
 ;;; Code:
 
 
-(defvar *load-slime* nil)
-
-(when *load-slime*
+(when (bound-and-true-p *load-slime*)
   (require 'slime-autoloads)
   (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
   (add-hook 'inferior-lisp-mode-hook (lambda () (inferior-slime-mode t)))
