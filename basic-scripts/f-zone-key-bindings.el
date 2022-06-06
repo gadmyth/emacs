@@ -6,6 +6,7 @@
 (require 'eyebrowse+)
 (require 'customized-dir)
 (require 'minibuffer+)
+(require 'list-scratch)
 
 ;; buffer
 (global-set-key (kbd "<f1>") (toggle-minibuffer 'switch-scratch-buffers))
@@ -46,6 +47,9 @@
 (global-set-key (kbd "<f6>") (toggle-minibuffer 'find-library))
 (global-set-key (kbd "<M-f6>") (toggle-minibuffer 'require-library))
 (global-set-key (kbd "<C-f6>") (toggle-minibuffer 'load-library))
+
+;; list-scratch
+(global-set-key (kbd "<f12>") (toggle-minibuffer 'list-scratch))
 
 (provide 'f-zone-key-bindings)
 ;;; f-zone-key-bindings.el ends here
