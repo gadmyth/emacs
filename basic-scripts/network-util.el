@@ -75,7 +75,7 @@
   (interactive)
   (let ((request-backend 'url-retrieve))
     (request
-      "https://ifconfig.cc"
+      "http://ifconfig.cc"
       :parser 'buffer-string
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
