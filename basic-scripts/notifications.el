@@ -162,7 +162,8 @@ above them."
                         (read-number "after minitues: " 0)
                       (read-string "at the time: " (current-time-normal-string))))
         (repeat (read-string "repeat duration: " "0m"))
-        (system-notification-p (y-or-n-p "Is system notification? ")))
+        (system-notification-p (member (read-string "Is system notification? (y or n) " "y")
+                                       '("y" "Y"))))
     (let* ((now (current-timestamp))
            (seconds (if current-prefix-arg
                         (* 60 fire-point)
