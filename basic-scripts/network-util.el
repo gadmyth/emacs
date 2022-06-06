@@ -42,7 +42,7 @@
 
 (defvar *fetched-public-ip* "")
 
-(defun public-ip ()
+(defun public-ip-bak ()
   "."
   (interactive)
   (cond
@@ -68,6 +68,22 @@
                           (setq *fetched-public-ip* ip)
                           (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))))))))))
    (t "")))
+
+
+(defun public-ip ()
+  "."
+  (interactive)
+  (let ((request-backend 'url-retrieve))
+    (request
+      "https://ifconfig.cc"
+      :parser 'buffer-string
+      :success (cl-function
+                (lambda (&key data &allow-other-keys)
+                  (when (> (length data) 0)
+                    (let* ((ip data))
+                      (network-util-debug-message "public ip fetched: [%S]" ip)
+                      (setq *fetched-public-ip* ip)
+                      (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))))))))
 
 (defvar *public-ip-fetch-timer* nil)
 
