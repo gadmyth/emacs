@@ -4,17 +4,12 @@
 
 (require 'annotate)
 
-;; set up annotion file
-(setq annotate-file *annotate-file*)
-
-;; remove annotation
-(defun annotate-remove-annotation ()
-  "."
-  (interactive)
-  (when-let ((annotation (annotate-annotation-at (point))))
-    (annotate--delete-annotation-chain annotation)))
-
-(define-key annotate-mode-map (kbd "C-c d") 'annotate-remove-annotation)
+(let ((map annotate-mode-map))
+    (define-key map (kbd "C-x C-a a") #'annotate-annotate)
+    (define-key map (kbd "C-x C-a d") #'annotate-delete-annotation)
+    (define-key map (kbd "C-x C-a s") #'annotate-show-annotation-summary)
+    (define-key map (kbd "C-x C-a ]")   #'annotate-goto-next-annotation)
+    (define-key map (kbd "C-x C-a [")   #'annotate-goto-previous-annotation))
 
 ;; TODO: list all the annotations, list the annotation of current buffer
 
