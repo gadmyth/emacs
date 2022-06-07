@@ -16,6 +16,22 @@
     (let ((content (decode-coding-string (buffer-string) 'utf-8)))
       content)))
 
+(defun url-retrieve-utf8-html-parser ()
+  "."
+  (with-current-buffer (current-buffer)
+    (let ((content (decode-coding-string (buffer-string) 'utf-8)))
+      (erase-buffer)
+      (insert content)
+      (libxml-parse-html-region (point-min) (point-max)))))
+
+(defun url-retrieve-utf8-xml-parser ()
+  "."
+  (with-current-buffer (current-buffer)
+    (let ((content (decode-coding-string (buffer-string) 'utf-8)))
+      (erase-buffer)
+      (insert content)
+      (libxml-parse-xml-region (point-min) (point-max)))))
+
 (defun refresh-cookies (domain cookie-keys secure-p)
   "Get the browser cookies of DOMAIN whoice key's is COOKIE-KEYS, SECURE-P."
   (url-cookie-delete-cookies domain)
