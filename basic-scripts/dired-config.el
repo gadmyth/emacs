@@ -116,7 +116,7 @@
       (setq-default dired-omit-files-p t)
       ;; shell alist
       (setq dired-guess-shell-alist-user
-            `(("\\.\\(jpe?g\\|png\\)\\'"
+            `(("\\.\\(jpe?g\\|png\\|gif\\)\\'"
                ,(cond ((eq window-system 'x) "gImageReader" "ristretto")
                       (t nil)))
               ("\\.xlsx\\'"
