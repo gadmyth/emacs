@@ -3,9 +3,9 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.027
-;; Package-Version: 20220517.001
-;; Package-Requires: erc, s, text-mode, system-util
+;; Version: 1.0.1
+;; Package-Version: 20220608.001
+;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/erc+.el
@@ -37,6 +37,7 @@
 (require 's)
 (require 'text-mode)
 (require 'system-util)
+(require 'browse-url+)
 
 
 (defvar erc-nick nil)
@@ -309,32 +310,11 @@ With PARSED message and PROC."
       (require 'system-util))
   (apply #'open-file-by-system (list data)))
 
-(defvar *erc-browse-function-list* '((browse-url-default-browser . browse-url)
-                                     (eww-browse-url . browse-url)
-                                     (w3m-browse-url . browse-url)
-                                     (browse-url-firefox . browse-url)
-                                     (browse-url-chrome . browse-url)
-                                     (erc-show-link-url . erc-show-link-url)))
-
 (defvar *erc-image-action-list* '(erc-ffap-image erc-open-image erc-image-path))
-
-(defun erc-show-link-url (url)
-  "Show erc link's URL."
-  (message "erc link url is: %s" url))
 
 (defun erc-button-link-callback (data)
   "When click the nick name erc-button, response with the DATA to open the link."
-  (let* ((action-list *erc-browse-function-list*)
-         (action (intern (completing-read "Select the browser: "
-                                          action-list nil t)))
-         (func (alist-get action action-list nil nil #'string=))
-         (browse-url-browser-function action))
-    (erc-debug-message "browser function is: %s" browse-url-browser-function)
-    (if (equal func #'browse-url)
-        (if (not (fboundp browse-url-browser-function))
-            (message "%s is not implemented!" browse-url-browser-function)
-          (browse-url data))
-      (funcall func data))))
+  (browse-url-select-function data))
 
 (defun erc-image-at-point ()
   "Get the image at point."
