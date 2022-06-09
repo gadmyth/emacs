@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20220608.001
+;; Version: 1.0.2
+;; Package-Version: 20220609.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -50,6 +50,7 @@
 (defvar *erc-forbidden-targets-unread-count* nil)
 (defconst *erc-forbidden-targets-file-name* (expand-file-name "~/.erc_forbidden_targets"))
 (defconst *erc-forbidden-targets-actions* '(("jump" . erc-jump-to-buffer)
+                                            ("reset unread count" . erc-reset-forbidden-taget-unread-count)
                                             ("unforbidden" . erc-unforbidden-target)))
 
 (defun erc-toggle-debug ()
@@ -502,6 +503,13 @@ With PARSED message and PROC."
     (let ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*))))
       (when (and count (> count 0))
         (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) 0)))))
+
+(defun erc-unforbidden-target (target)
+  "Unforbidden the TARGET in *erc-aggregate-buffer*."
+  (interactive)
+  (when-let ((channel target))
+    (setq *erc-forbidden-targets* (delete channel *erc-forbidden-targets*))
+    (message "The channel %s is unforbbiden now." channel)))
 
 (defun erc-action-on-forbidden-target ()
   "Unforbidden the channel at this point in *erc-aggregate-buffer*."
