@@ -117,15 +117,25 @@
     (network-util-debug-message "*public-ip-fetch-timer* set to [%S]" *public-ip-fetch-timer*)
     ))
 
-(defun switch-proxy (enable)
+(defun switch-proxy ()
   "ENABLE's value is t or nil."
-  (interactive "Senable? ")
-  (let ((proxy
-		 (if enable
-			 "127.0.0.1:8118"
-		   nil)))
+  (interactive)
+  (let* ((enable (y-or-n-p "Turn on the proxy? "))
+         (proxy
+		  (if enable
+			  "127.0.0.1:1080"
+		    nil)))
 	(setenv "http_proxy"  proxy)
-	(setenv "https_proxy" proxy)))
+	(setenv "https_proxy" proxy)
+    (setenv "all_proxy"   proxy)))
+
+(defun show-proxy ()
+  "."
+  (interactive)
+  (let ((http-proxy (getenv "http_proxy"))
+        (https-proxy (getenv "https_proxy"))
+        (all-proxy (getenv "all_proxy")))
+    (message "http_proxy: %s\nhttps_proxy: %s\nall_proxy: %s" http-proxy https-proxy all-proxy)))
 
 (provide 'network-util)
 ;;; network-util.el ends here
