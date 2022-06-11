@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20220609.001
+;; Version: 1.0.3
+;; Package-Version: 20220611.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -311,7 +311,7 @@ With PARSED message and PROC."
       (require 'system-util))
   (apply #'open-file-by-system (list data)))
 
-(defvar *erc-image-action-list* '(erc-ffap-image erc-open-image erc-image-path))
+(defvar *erc-image-action-list* '(erc-open-image-selected erc-open-image erc-ffap-image erc-image-path))
 
 (defun erc-button-link-callback (data)
   "When click the nick name erc-button, response with the DATA to open the link."
@@ -325,8 +325,20 @@ With PARSED message and PROC."
 
 (defun erc-open-image (&rest image)
   "Open the IMAGE by it's path."
-  (if-let ((image-path (plist-get (cdr image) :file)))
-      (open-file-by-system image-path)))
+  (when-let ((image-path (plist-get (cdr image) :file)))
+    (open-file-by-system image-path)))
+
+(defvar *erc-image-program-list*
+  (cond ((eq window-system 'x)
+         '("viewnior" "ristretto" "gimp"))
+        (t nil)))
+
+(defun erc-open-image-selected (&rest image)
+  "Open the IMAGE by it's path."
+  (when (> (length *erc-image-program-list*) 0)
+    (when-let ((path (plist-get (cdr image) :file))
+               (program (completing-read "Select the command: " *erc-image-program-list* nil t)))
+      (start-process program nil program path))))
 
 (defun erc-image-path (&rest image)
   "Open the IMAGE by it's path."
@@ -342,11 +354,11 @@ With PARSED message and PROC."
 (defun erc-right-click ()
   "Double click in the erc aggregate buffer."
   (interactive)
-  (if-let ((image (erc-image-at-point)))
-      (let* ((action-list *erc-image-action-list*)
-             (action (intern (completing-read "Select the action: "
-                                              action-list nil t))))
-        (apply action image))))
+  (when-let ((image (erc-image-at-point)))
+    (let* ((action-list *erc-image-action-list*)
+           (action (intern (completing-read "Select the action: "
+                                            action-list nil t))))
+      (apply action image))))
 
 (defun erc-aggregate-nick-name-p ()
   "Check the current point is a nick name button or not."
@@ -394,6 +406,19 @@ With PARSED message and PROC."
     (erc-aggregate-current-message)
     (let ((data (car (get-text-property (point) 'erc-data))))
       (erc-reply-message data))))
+
+(defun erc-handle-this-image ()
+  "View the image of this current message."
+  (interactive)
+  (save-excursion
+    (erc-aggregate-current-message)
+    (forward-line)
+    (forward-line)
+    (when-let ((image (erc-image-at-point)))
+      (let* ((action-list *erc-image-action-list*)
+             (action (intern (completing-read "Select the action: "
+                                              action-list nil t))))
+        (apply action image)))))
 
 (defun erc-delete-this-message ()
   "Delete the message in *erc-aggregate-buffer*."
@@ -568,6 +593,7 @@ With PARSED message and PROC."
     (define-key map "p" 'erc-aggregate-previous-message)
     (define-key map "j" 'erc-jump-this-message)
     (define-key map "r" 'erc-reply-this-message)
+    (define-key map "i" 'erc-handle-this-image)
     (define-key map "d" 'erc-delete-this-message)
     (define-key map "D" 'erc-delete-all-channel-message)
     (define-key map "f" 'erc-forbidden-this-channel)
