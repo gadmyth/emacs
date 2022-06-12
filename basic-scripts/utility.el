@@ -79,16 +79,28 @@
 (defun show-symbol-at-point ()
   "."
   (interactive)
-  (let* ((sym (symbol-at-point))
-         (value (cond ((fboundp sym) 'function)
-                      ((boundp sym) (symbol-value sym))
-                      (t nil))))
-    (message "Symbol: %S [%S]" sym value)))
+  (let* ((sym (symbol-at-point)))
+    (message "Symbol: [%S] is function: [%S], value: [%S]"
+             sym
+             (fboundp sym)
+             (cond ((boundp sym)
+                    (symbol-value sym))
+                   (t
+                    :_unbounded_)))))
 
 (defun find-library-at-point ()
   "."
   (interactive)
   (find-library (word-at-point)))
+
+(defun open-image-at-point ()
+  "."
+  (interactive)
+  (let ((path (thing-at-point-file-at-point))
+        (program "viewnior"))
+    (when (and (> (length path) 0)
+               (executable-find program))
+      (start-process program nil program path))))
 
 (defun copy-buffer-string ()
   "."

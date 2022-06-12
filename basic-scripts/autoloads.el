@@ -76,7 +76,7 @@ trees.
 ;;;### (autoloads nil "utility" "utility.el" (0 0 0 0))
 ;;; Generated autoloads from utility.el
 
-(register-definition-prefixes "utility" '("*find-grep-dired--dir*" "*must-loading-files*" "clean-svn" "copy-buffer-string" "ensure-mkdir" "find" "load-" "show-symbol-at-point" "switch-default-dir" "trim-"))
+(register-definition-prefixes "utility" '("*find-grep-dired--dir*" "*must-loading-files*" "clean-svn" "copy-buffer-string" "ensure-mkdir" "find" "load-" "open-image-at-point" "show-symbol-at-point" "switch-default-dir" "trim-"))
 
 ;;;***
 
@@ -89,9 +89,9 @@ trees.
 
 ;;;***
 
-;;;### (autoloads nil nil ("annot.el" "avy-config.el" "clipboard.el"
-;;;;;;  "eww-config.el" "fonts.el" "calendar-config.el" "ido-config.el"
-;;;;;;  "mode-bars.el" "projectile-config.el") (0 0 0 0))
+;;;### (autoloads nil nil ("annot.el" "avy-config.el" "calendar-config.el"
+;;;;;;  "clipboard.el" "fonts.el" "ido-config.el" "mode-bars.el"
+;;;;;;  "projectile-config.el") (0 0 0 0))
 
 ;;;***
 
