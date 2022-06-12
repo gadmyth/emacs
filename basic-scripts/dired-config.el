@@ -117,7 +117,7 @@
       ;; shell alist
       (setq dired-guess-shell-alist-user
             `(("\\.\\(jpe?g\\|png\\|gif\\)\\'"
-               ,(cond ((eq window-system 'x) "gImageReader" "ristretto")
+               ,(cond ((eq window-system 'x) "ristretto" "viewnior")
                       (t nil)))
               ("\\.xlsx\\'"
                ,(cond ((eq window-system 'x) "gnumeric")

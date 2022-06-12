@@ -208,7 +208,7 @@
 (defvar *org-link-program-alist*
   `(("\\.\\(jpe?g\\|png\\)\\'"
      ,(cond ((eq window-system 'x)
-             '("ristretto" "gImageReader"))
+             '("viewnior" "ristretto"))
             (t nil)))
     ("\\.xlsx\\'"
      ,(cond ((eq window-system 'x)
