@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: browse-url+.el <gadmyth@gmail.com>
-;; Version: 1.0.0
-;; Package-Version: 20220608.001
+;; Version: 1.0.1
+;; Package-Version: 20220612.001
 ;; Package-Requires: w3m
 ;; Keywords: browse url
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -36,7 +36,7 @@
 (defvar *browse-url-function-list*
   `((browse-url-default-browser . browse-url)
     (eww-browse-url . browse-url)
-    ,(if (featurep 'w3m)
+    ,(if (featurep 'w3m-load)
          `(w3m-browse-url . browse-url))
     (browse-url-firefox . browse-url)
     (browse-url-chrome . browse-url)
