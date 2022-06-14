@@ -120,14 +120,23 @@
 (defun switch-proxy ()
   "ENABLE's value is t or nil."
   (interactive)
-  (let* ((enable (y-or-n-p "Turn on the proxy? "))
-         (proxy
-		  (if enable
-			  "127.0.0.1:1080"
-		    nil)))
-	(setenv "http_proxy"  proxy)
-	(setenv "https_proxy" proxy)
-    (setenv "all_proxy"   proxy)))
+  (let* ((enable (y-or-n-p "Turn on the proxy? ")))
+    (if enable (turn-on-proxy)
+      (turn-off-proxy))))
+
+(defun turn-on-proxy ()
+  "."
+  (do-switch-proxy "127.0.0.1:1080"))
+
+(defun turn-off-proxy ()
+  "."
+  (do-switch-proxy nil))
+
+(defun do-switch-proxy (proxy)
+  "Switch PROXY."
+  (setenv "http_proxy"  proxy)
+  (setenv "https_proxy" proxy)
+  (setenv "all_proxy"   proxy))
 
 (defun show-proxy ()
   "."

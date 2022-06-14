@@ -62,7 +62,7 @@
 (require 'el-server-extend)
 (require 'goto-last-point+)
 (require 'f-zone-key-bindings)
-(require 'holiday-config)
+(require 'calendar-config)
 (require 'dired-config)
 (require 'emoji-config)
 (require 'sudo-edit)
@@ -95,7 +95,7 @@
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))
-(switch-proxy nil)
+(turn-off-proxy)
 
 ;; load must files
 (load-must-files)
