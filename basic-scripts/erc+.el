@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20220611.001
+;; Version: 1.0.4
+;; Package-Version: 20220614.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -179,8 +179,8 @@ With PARSED message and PROC."
             (erc-debug-message "save excursion")
             ,@body))))
 
-(defun erc-update-aggregate-buffer (short-sender target msg)
-  "Append SENDER and MSG to the *erc-aggregate-buffer*."
+(cl-defun erc-update-aggregate-buffer (short-sender target msg)
+  "Append SHORT-SENDER, TARGET and MSG to the *erc-aggregate-buffer*."
   (let ((sender (erc-sender-with-group short-sender target))
         erc-msg-link erc-link-start erc-link-end
         msg-file-path msg-picture-p)
@@ -276,6 +276,19 @@ With PARSED message and PROC."
     (erc-debug-message "nick click, data: %s, short-sender: %s, channel: %s, buffer-name: %s" data short-sender channel buffer-name)
     (erc-jump-to-buffer buffer-name)))
 
+
+(defun display-and-switch-to-buffer (buffer-or-name)
+  "Display buffer of BUFFER-OR-NAME, and switch to the buffer's window."
+  (display-buffer buffer-or-name)
+  (eval
+   `(run-with-timer
+     0.0 nil
+     (lambda (buffer-or-name) (select-window (get-buffer-window buffer-or-name))) ,buffer-or-name)))
+
+(defvar *erc-buffer-jump-actions*
+  `(("current window" . switch-to-buffer)
+    ("other window" . display-and-switch-to-buffer)))
+
 (defun erc-jump-to-buffer (buffer-name)
   "Jump to the buffer of BUFFER-NAME."
   (interactive)
@@ -284,9 +297,16 @@ With PARSED message and PROC."
     (when (assoc (intern buffer-name) *erc-forbidden-targets-unread-count*)
       (erc-reset-forbidden-taget-unread-count buffer-name))
     (when buffer
-      (display-buffer buffer)
-      (if (and window (window-live-p window))
-          (select-window window)))))
+      (cond
+       ((window-live-p window)
+        (select-window window))
+       (t
+        (when-let* ((action (completing-read "Select the buffer window choose action: "
+                                                    *erc-buffer-jump-actions*
+                                                    nil t))
+                    (func (assoc-default action *erc-buffer-jump-actions*)))
+          (message "action: %s, function: %S" action func)
+          (funcall func buffer)))))))
 
 
 (defun erc-reply-message (data)
@@ -575,9 +595,9 @@ With PARSED message and PROC."
   (interactive)
   (let ((file-name *erc-forbidden-targets-file-name*))
     (message "Saving *erc-forbidden-targets* to file %S ..." file-name)
-    (let ((content *erc-forbidden-targets*))
+    (let ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *erc-forbidden-targets*))))
       (with-temp-file file-name
-        (print content (current-buffer))))))
+        (insert content)))))
 
 (defun delete-erc-forbidden-targets (target)
   "Delete a TARGET from *erc-forbidden-targets*."
