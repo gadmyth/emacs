@@ -10,11 +10,12 @@
   (unless eredis--current-process
     (eredis-connect "localhost" 6379)))
 
-(defun r-get (key)
+(defun r-get (key &optional debug)
   "KEY."
   (interactive "sget redis value for key: ")
   (let ((value (eredis-get key)))
-    (message value)
+    (when debug
+      (message value))
     value))
 
 (defun r-set (key value)
