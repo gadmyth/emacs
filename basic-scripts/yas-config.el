@@ -89,12 +89,11 @@
 (defun expand-snippet-for-current-mode ()
   "Expand the selected snippet of listing snippets for current major mode."
   (interactive)
-  (expand-snippet-for-mode-internal (symbol-name major-mode)))
+  (expand-snippet-for-mode-internal major-mode))
 
-(defun expand-snippet-for-mode-internal (mode-name)
-  "List snippets defined for mode of MODE-NAME, and expand the selected snippet, default mode is major mode."
+(defun select-snippet-for-mode (mode action)
+  "List snippets for MODE, and do something with ACTION."
   (let* ((yas-buffer-local-condition 'always)
-         (mode (intern mode-name))
          (templates (yas--all-templates (yas--get-snippet-tables mode)))
          (template (and templates
                         (or (yas--prompt-for-template
@@ -103,9 +102,16 @@
                             (car templates))))
          (name (and template (yas--template-name template)))
          (snippet (and name (yas-lookup-snippet name mode))))
-    (if snippet (yas-expand-snippet snippet)
-      (message "No snippets tables active!"))))
-  
+    (when action
+      (funcall action snippet))))
+
+(defun expand-snippet-for-mode-internal (mode)
+  "List snippets defined for MODE, and expand the selected snippet, default mode is major mode."
+  (select-snippet-for-mode mode
+                           (lambda (snippet)
+                             (if snippet (yas-expand-snippet snippet)
+                               (message "No snippets tables active!")))))
+
 (defun yas-create-snippet-with-region (file-name snippet-name key)
   "FILE-NAME, SNIPPET-NAME, KEY."
   (interactive "sSnippet File Name: \nsSnippet Name: \nsSnippet Key: ")
@@ -142,6 +148,31 @@
              (rename-buffer default-file-name t)
              (save-buffer)
              (quit-window t)))))))
+
+(defun yas-expand-snippet-with-params (snippet-name &rest params)
+  "SNIPPET-NAME, PARAMS."
+  (interactive)
+  (when-let ((snippet (yas-lookup-snippet snippet-name)))
+    (yas-expand-snippet snippet)
+    (dolist (p params)
+      (if (or (string-equal "__default__" p)
+              (string-equal "" p))
+          (yas-next-field)
+        (progn
+          (insert p)
+          (yas-next-field))))))
+
+(defun yas-expand-snippet-with-region ()
+  "."
+  (interactive)
+  (when (region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (content (buffer-substring start end))
+           (params (split-string content)))
+      (select-snippet-for-mode major-mode
+                               (lambda (snippet)
+                                 (eval `(yas-expand-snippet-with-params (yas--template-name snippet) ,@params)))))))
 
 (provide 'yas-config)
 ;;; yas-config.el ends here
