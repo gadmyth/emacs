@@ -79,7 +79,14 @@
 (defun show-symbol-at-point ()
   "."
   (interactive)
-  (let* ((sym (symbol-at-point)))
+  (let* ((sym (and (region-active-p)
+                   (let ((region-string (buffer-substring-no-properties (region-beginning) (region-end))))
+                     (when (> (length region-string) 0)
+                       (intern region-string)))))
+         (sym (or sym (symbol-at-point)))
+         (sym (or sym (let ((symbol-string (read-string "Please input the symbol: ")))
+                        (when (> (length symbol-string) 0)
+                          (intern symbol-string))))))
     (message "Symbol: [%S] is function: [%S], value: [%S]"
              sym
              (fboundp sym)
