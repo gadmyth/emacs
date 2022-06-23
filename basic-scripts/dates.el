@@ -78,7 +78,7 @@
 (defun timestamp-to-normal-string (timestamp)
   "TIMESTAMP."
   (timestamp-to-string-with-format timestamp "%Y-%m-%d %H:%M:%S"))
-
+q
 (defun timestamp-to-short-string (timestamp)
   "TIMESTAMP."
   (timestamp-to-string-with-format timestamp "%Y-%m-%d"))
@@ -121,7 +121,22 @@
     (message ct)
     ct))
 
-
+(defun reformat-time-string (time-string timezone-diff-minutes)
+  "Reformat TIME-STRING like 2021-10-15T11:39:40.000+00:00 to 2021-10-15 19:39:40 at GMT+8, TIMEZONE-DIFF-MINUTES is for the TIME-STRING."
+  (let* ((parsed-date (timezone-parse-date time-string))
+         (parsed-time (timezone-parse-time (aref parsed-date 3))))
+    (seq-let [year month day _ _] parsed-date
+      (seq-let [hour minute second] parsed-time
+        ;; (message "%s-%s-%s %s:%s:%s" year month day hour minute second)
+        (let* ((decoded-time (list (string-to-number second)
+                                   (string-to-number minute)
+                                   (string-to-number hour)
+                                   (string-to-number day)
+                                   (string-to-number month)
+                                   (string-to-number year) nil nil timezone-diff-minutes))
+               (encoded-time (encode-time decoded-time)))
+          ;; (message "decoded time: %s" decoded-time)
+          (format-time-string "%Y-%m-%d %H:%M:%S" encoded-time))))))
 
 (provide 'dates)
 ;;; dates.el ends here
