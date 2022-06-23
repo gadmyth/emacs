@@ -95,6 +95,27 @@
                    (t
                     :_unbounded_)))))
 
+(defun set-symbol-value-at-point ()
+  "."
+  (interactive)
+  (let* ((sym (and (region-active-p)
+                   (let ((region-string (buffer-substring-no-properties (region-beginning) (region-end))))
+                     (when (> (length region-string) 0)
+                       (intern region-string)))))
+         (sym (or sym (symbol-at-point)))
+         (sym (or sym (let ((symbol-string (read-string "Please input the symbol: ")))
+                        (when (> (length symbol-string) 0)
+                          (intern symbol-string))))))
+    (let* ((type (completing-read "Please select the value type: " '(string number)))
+           (value
+            (pcase type
+              ("string" (read-string (format "Please input value for [%s]: " (symbol-name sym))))
+              ("number" (read-number (format "Please input value for [%s]: " (symbol-name sym))))
+              (_ (message (format "not support value type: %S" type))))))
+      (when value
+        (setf (symbol-value sym) value)))))
+
+
 (defun find-library-at-point ()
   "."
   (interactive)

@@ -21,7 +21,7 @@
 ;;;### (autoloads nil "dates" "dates.el" (0 0 0 0))
 ;;; Generated autoloads from dates.el
 
-(register-definition-prefixes "dates" '("+date-command+" "current-time" "org-current-timestamp" "quick-on-time" "string-to-timestamp" "system-" "timestamp-to-" "tomorrow-timestamp"))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dates" '("+date-command+" "current-time" "org-current-timestamp" "quick-on-time" "reformat-time-string" "string-to-timestamp" "system-" "timestamp-to-" "tomorrow-timestamp")))
 
 ;;;***
 
@@ -66,17 +66,10 @@ trees.
 
 ;;;***
 
-;;;### (autoloads nil "redis-config" "redis-config.el" (0 0 0 0))
-;;; Generated autoloads from redis-config.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "redis-config" '("r-")))
-
-;;;***
-
 ;;;### (autoloads nil "utility" "utility.el" (0 0 0 0))
 ;;; Generated autoloads from utility.el
 
-(register-definition-prefixes "utility" '("*find-grep-dired--dir*" "*must-loading-files*" "clean-svn" "copy-buffer-string" "ensure-mkdir" "find" "load-" "open-image-at-point" "show-symbol-at-point" "switch-default-dir" "trim-"))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "utility" '("*find-grep-dired--dir*" "*must-loading-files*" "clean-svn" "copy-buffer-string" "ensure-mkdir" "find" "load-" "open-image-at-point" "set-symbol-value-at-point" "show-symbol-at-point" "switch-default-dir" "trim-")))
 
 ;;;***
 
@@ -91,7 +84,7 @@ trees.
 
 ;;;### (autoloads nil nil ("annot.el" "avy-config.el" "calendar-config.el"
 ;;;;;;  "clipboard.el" "fonts.el" "ido-config.el" "mode-bars.el"
-;;;;;;  "projectile-config.el") (0 0 0 0))
+;;;;;;  "projectile-config.el" "redis-config.el") (0 0 0 0))
 
 ;;;***
 
