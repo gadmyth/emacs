@@ -268,23 +268,6 @@
   (push-mark-command nil)
   (end-of-visual-line))
 
-(defun parse-mybatis-column-property-string ()
-  "."
-  (interactive)
-  (let ((regexp "^.*?\s*property=\"\\(.*\\)\"")
-        (line (buffer-substring (line-beginning-position) (line-end-position))))
-    (if (string-match regexp line)
-        (let ((prop (substring-no-properties line (match-beginning 1) (match-end 1))))
-          (message "parsed property is %s" prop)
-          prop))))
-
-(defun create-java-property-from-mybatis-column ()
-  "."
-  (interactive)
-  (let* ((prop (parse-mybatis-column-property-string))
-         (java-property (format "private String %s;" prop)))
-    (kill-new java-property)))
-
 (defun remove-all-text-properties-region (beg end)
   "Remove all the text properties with region from BEG to END."
   (interactive "r")
