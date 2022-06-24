@@ -125,42 +125,74 @@
       (goto-char end)
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
-(defun join-with-comma (start end)
+(defun join-with-comma ()
   "Format and insert sql IN collection from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
+  (interactive)
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
            (lines (split-string region-string "\n"))
            (lines-with-action lines))
       (goto-char end)
-      (insert "\n" (string-join lines-with-action ",") "\n"))))
+      (insert "\n" (string-join lines-with-action ",") "\n")))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (joined-string (string-join (split-string string "\n") ",")))
+      (message joined-string)
+      joined-string))))
 
-(defun lower-camel-case (start end)
-  "Replace the string from START to END of region with lower camel case format."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
+(defun lower-camel-case ()
+  "Replace the string of region with lower camel case format."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
            (lower-camel-string (s-lower-camel-case region-string)))
       (delete-region start end)
-      (insert lower-camel-string))))
+      (insert lower-camel-string)))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (lower-camel-string (s-lower-camel-case string)))
+      (message lower-camel-string)
+      lower-camel-string))))
 
-(defun snake-case (start end)
-  "Replace the string from START to END of region with snake case format."
+(defun snake-case ()
+  "Replace the string of region with snake case format."
   (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
            (snake-case-string (s-snake-case region-string)))
       (delete-region start end)
-      (insert snake-case-string))))
+      (insert snake-case-string)))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (snake-case-string (s-snake-case string)))
+      (message snake-case-string)
+      snake-case-string))))
 
-(defun dash-case (start end)
-  "Replace the string from START to END of region with snake case format."
+(defun dash-case ()
+  "Replace the string of region with snake case format."
   (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
            (dash-case-string (s-dashed-words region-string)))
       (delete-region start end)
-      (insert dash-case-string))))
+      (insert dash-case-string)))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (dash-case-string (s-dashed-words string)))
+      (message dash-case-string)
+      dash-case-string))))
 
 (defun join-the-line ()
   "."
