@@ -39,7 +39,7 @@
          (scriptlets-dir (expand-file-name "scriptlets" +emacs-context-directory+))
          (python-command (executable-find "python3"))
          (script-path (expand-file-name "get-browser-cookies.py" scriptlets-dir))
-         (command (format "%s %s %s %s" python-command script-path domain param))
+         (command (format "%s %s %s %s %s" python-command script-path "cookie-pair" domain param))
          (result (shell-command-to-string command))
          (cookie-list (split-string result "\n"))
          (cookie-list (seq-filter (lambda (s) (string-prefix-p "cookie pair:" s)) cookie-list))

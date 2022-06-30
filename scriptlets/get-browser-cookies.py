@@ -5,8 +5,9 @@ import browser_cookie3
 def main():
     """Print cookies."""
     cookiejar = None
-    domain = sys.argv[1]
-    cookie_keys = sys.argv[2].split(":")
+    print_style = sys.argv[1]
+    domain = sys.argv[2]
+    cookie_keys = sys.argv[3].split(":")
     if not cookiejar:
         try:
             cookiejar = browser_cookie3.chrome(domain_name=domain)
@@ -32,7 +33,10 @@ def main():
         return
 
     for c in cookies:
-        print("cookie pair:%s:%s" % (c.name, c.value))
+        if print_style == "cookie-pair":
+            print("cookie pair:%s:%s" % (c.name, c.value))
+        elif print_style == "set-cookie":
+            print("Set-Cookie: %s=%s; expires=%s; Path=%s" % (c.name, c.value, c.expires, c.path))
 
 
 if __name__ == "__main__":
