@@ -44,25 +44,51 @@
           (forward-line 1))
         (reverse list)))))
 
+(defun parse-mybatis-result-columns ()
+  "."
+  (interactive)
+  (when (region-active-p)
+    (save-excursion
+      (let ((start (region-beginning))
+            (end (region-end))
+            (list))
+        (goto-char start)
+        (while (< (point) end)
+          (push (parse-mybatis-result-column-string) list)
+          (forward-line 1))
+        (reverse list)))))
+
 (defun generate-mybatis-base-column-list ()
   "."
   (interactive)
-  (let ((column-list (s-join "," (parse-mybatis-result-properties))))
+  (let ((column-list (s-join "," (parse-mybatis-result-columns))))
     (message column-list)))
 
 (defun generate-mybatis-insert-column (column)
   "."
-  (let ((str (format "<if test=\"%s != null\">\n\t%s,\n</if>"
-                     (s-lower-camel-case column)
-                     column)))
+  (let* ((property (s-lower-camel-case column))
+         (str (format "<if test=\"%s != null\">\n\t%s,\n</if>"
+                      property
+                      column)))
     (message str)))
 
 (defun generate-mybatis-insert-value (column jdbc-type)
   "."
-  (let ((str (format "<if test=\"%s != null\">\n\t#{%s,jdbcType=%s},\n</if>"
-                     (s-lower-camel-case column)
-                     column
+  (let* ((property (s-lower-camel-case column))
+         (str (format "<if test=\"%s != null\">\n\t#{%s,jdbcType=%s},\n</if>"
+                     property
+                     property
                      jdbc-type)))
+    (message str)))
+
+(defun generate-mybatis-update-value (column jdbc-type)
+  "."
+  (let* ((property (s-lower-camel-case column))
+         (str (format "<if test=\"%s != null\">\n\t%s = #{%s,jdbcType=%s},\n</if>"
+                      property
+                      column
+                      property
+                      jdbc-type)))
     (message str)))
 
 (defun generate-mybatis-insert-columns ()
@@ -96,6 +122,45 @@
             (forward-line 1))
           (reverse list))))))
 
+(defun generate-mybatis-update-values ()
+  "."
+  (interactive)
+  (when (region-active-p)
+    (save-excursion
+      (let ((start (region-beginning))
+            (end (region-end))
+            (list))
+        (goto-char start)
+        (while (< (point) end)
+          (let* ((column (parse-mybatis-result-column-string))
+                 (jdbc-type (parse-mybatis-result-jdbc-type-string)))
+            (push (generate-mybatis-update-value column jdbc-type) list)
+            (forward-line 1))
+          (reverse list))))))
+
+(defun generate-sql-column-definitions ()
+  "."
+  (interactive)
+  (when (region-active-p)
+    (save-excursion
+      (let ((start (region-beginning))
+            (end (region-end))
+            (list))
+        (goto-char start)
+        (while (< (point) end)
+          (let* ((column (parse-mybatis-result-column-string))
+                 (jdbc-type (parse-mybatis-result-jdbc-type-string)))
+            (push (generate-sql-column-definition column jdbc-type) list)
+            (forward-line 1))
+          (reverse list))))))
+
+(defun generate-sql-column-definition (column jdbc-type)
+  "."
+  (let ((str (format "%s\t%s,"
+                     column
+                     jdbc-type)))
+    (message str)))
+
 (defun generate-mybatis-insert-block ()
   "."
   (interactive)
@@ -107,6 +172,25 @@
     (message "<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\">")
     (generate-mybatis-insert-values)
     (message "</trim>")))
+
+(defun generate-mybatis-update-block ()
+  "."
+  (interactive)
+  (let ((table-name (read-string "Please input table name: ")))
+    (message "update %s" table-name)
+    (message "<set>")
+    (generate-mybatis-update-values)
+    (message "</set>")
+    (message "where id = #{id,jdbcType=BIGINT}")))
+
+(defun generate-create-table-sql ()
+  "."
+  (interactive)
+  (let ((table-name (read-string "Please input table name: ")))
+    (message "create table %s" table-name)
+    (message "(")
+    (generate-sql-column-definitions)
+    (message ")")))
 
 (defun create-java-property-from-mybatis-column ()
   "."
