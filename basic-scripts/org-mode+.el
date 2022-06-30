@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: org-mode+.el <gadmyth@gmail.com>
-;; Version: 1.0.0
-;; Package-Version: 20220608.001
+;; Version: 1.0.1
+;; Package-Version: 20220630.001
 ;; Package-Requires: org, dash, browse-url+
 ;; Keywords: org-mode
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -248,6 +248,26 @@
             (lambda (elem)
               (string-match-p (car elem) param))
             *org-link-program-alist*))))
+
+(defun enhance-org-open-link ()
+  "."
+  (cond
+   ((bound-and-true-p *enhance-org-open-link*)
+    ;; copied and modified from ol.el.gz
+    (dolist (scheme '("http" "https"))
+      (org-link-set-parameters scheme
+                               :follow
+                               `(lambda (url)
+                                  (browse-url-select-function (concat ,scheme ":" url))))))
+   (t
+    ;; copied from ol.el.gz
+    (dolist (scheme '("http" "https"))
+      (org-link-set-parameters scheme
+			                   :follow
+			                   `(lambda (url arg)
+			                      (browse-url (concat ,scheme ":" url) arg)))))))
+
+(enhance-org-open-link)
 
 (global-set-key (kbd "<f7>") 'org-capture-mark)
 (global-set-key (kbd "<M-f7>") 'org-capture-insert-temp)
