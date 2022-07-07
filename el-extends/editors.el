@@ -125,6 +125,18 @@
       (goto-char end)
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
+(defun split-string-of-region (start end)
+  "Format and insert sql IN collection from START to END of region."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (lines (split-string region-string "\n"))
+           (column-index (read-number "Please input the cut column index: ")))
+      (goto-char end)
+      (insert "\n")
+      (seq-doseq (line lines)
+        (insert (nth column-index (split-string line)) "\n")))))
+
 (defun join-to-string-list (start end)
   "Join list to a string list from START to END of region."
   (interactive "r")
