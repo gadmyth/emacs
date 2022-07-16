@@ -106,8 +106,8 @@
 
 (defun packages-init-archives ()
   "."
-  (when (bound-and-true-p *package-archives*)
-    (seq-doseq (archive *package-archives*)
+  (when (bound-and-true-p *customize-package-archives*)
+    (seq-doseq (archive *customize-package-archives*)
       (set-pair-to-alist 'package-archives (car archive) (cdr archive)))))
 
 (provide 'package-tools)
