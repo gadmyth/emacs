@@ -75,6 +75,7 @@
         'jq-mode
         'look-mode
         'youdao-dictionary
+        'pinyin-search
         'switch-buffer-functions
         'nov))
 
