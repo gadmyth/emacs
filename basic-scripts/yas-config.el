@@ -65,15 +65,16 @@
   "."
   (let ((modes))
     (dolist (dir (yas-snippet-dirs))
-      (let ((files (directory-files dir)))
-        (dolist (file-name files)
-          (let ((whole-path-file (expand-file-name file-name dir)))
-            (when (and
-                   (not (string-equal "." file-name))
-                   (not (string-equal ".." file-name))
-                   (file-directory-p whole-path-file)
-                   (not (-contains-p modes file-name)))
-              (push file-name modes))))))
+      (when (and (file-directory-p dir))
+        (let ((files (directory-files dir)))
+          (dolist (file-name files)
+            (let ((whole-path-file (expand-file-name file-name dir)))
+              (when (and
+                     (not (string-equal "." file-name))
+                     (not (string-equal ".." file-name))
+                     (file-directory-p whole-path-file)
+                     (not (-contains-p modes file-name)))
+                (push file-name modes)))))))
     modes))
 
 (yasnippet-all-defined-modes)
