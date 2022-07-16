@@ -3,7 +3,7 @@
 ;;; Code:
 
 
-(require-safely 'solarized-theme (load-theme 'solarized-dark t))
+(require-package 'solarized-theme (load-theme 'solarized-dark t))
 
 (provide 'themes)
 ;;; themes.el ends here

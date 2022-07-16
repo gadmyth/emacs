@@ -4,14 +4,10 @@
 ;;; Code:
 
 (require 'package)
+(require 'package-tools)
 
-(setq package-archives nil)
-(defvar package-archives-host "http://elpa.emacs-china.org")
-
-(set-pair-to-alist 'package-archives "gnu" (concat package-archives-host "/gnu/"))
-(set-pair-to-alist 'package-archives "org" (concat package-archives-host "/org/"))
-(set-pair-to-alist 'package-archives "melpa" (concat package-archives-host "/melpa/"))
-(set-pair-to-alist 'package-archives "melpa-stable" (concat package-archives-host "/stable-melpa/"))
+;; init archives
+(packages-init-archives)
 
 ;; the slime should git clone from github
 (add-to-list 'load-path (expand-file-name "elpa/slime" user-emacs-directory))

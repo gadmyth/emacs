@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-safely
+(require-package
  'restclient
  (defun restclient-find-vars-before-point ()
    (let ((vars nil)

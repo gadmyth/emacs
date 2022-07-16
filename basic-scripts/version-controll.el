@@ -12,7 +12,7 @@
 								 (mapc (lambda (file) (delete-file file)) (cadr (vc-deduce-fileset t))))))
 
 
-(require-safely
+(require-package
  'magit
  (setq magit-auto-revert-mode nil)
 

@@ -2,15 +2,15 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-safely
+(require-package
  'windmove
  (windmove-default-keybindings))
 
-(require-safely
+(require-package
  'window-numbering
  (window-numbering-mode 1))
 
-(require-safely
+(require-package
  'winner
  (winner-mode 1)
  (global-set-key (kbd "<H-up>") #'winner-undo)

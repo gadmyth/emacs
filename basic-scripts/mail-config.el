@@ -5,7 +5,7 @@
 
 (eval-when-compile (require 'cl))
 
-(require-safely
+(require-package
  'mew
  (autoload 'mew "mew" nil t)
  (autoload 'mew-ned "mew" nil t))

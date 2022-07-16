@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-packages-safely
+(require-packages
  '(web-mode)
  (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
  (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
@@ -17,7 +17,7 @@
              ))
  )
 
-(require-packages-safely
+(require-packages
  '(js2-mode js2-refactor)
  (setq auto-mode-alist
        (append
@@ -28,7 +28,7 @@
   (js2r-add-keybindings-with-prefix "C-c C-m")
  )
 
-(require-packages-safely
+(require-packages
  '(emmet-mode)
  ;; Auto-start on any markup modes
  (add-hook 'sgml-mode-hook 'emmet-mode)

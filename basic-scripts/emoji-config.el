@@ -9,7 +9,7 @@
     t 'symbol
     (font-spec :family (if (eq window-system 'ns) "Apple Color Emoji" "Symbola") nil 'prepend))))
 
-(require-safely
+(require-package
  'ac-emoji
  (add-hook
   'swift-mode-hook

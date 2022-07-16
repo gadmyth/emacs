@@ -3,21 +3,18 @@
 ;;; Code:
 
 ;; load path
-(add-to-list 'load-path (expand-file-name "basic-scripts" +emacs-context-directory+))
-(add-to-list 'load-path (expand-file-name "el-pre-scripts" +emacs-context-directory+))
-(add-to-list 'load-path (expand-file-name "el-extends" +emacs-context-directory+))
-(add-to-list 'load-path (expand-file-name "el-post-scripts" +emacs-context-directory+))
+(emacs-load-path-initialize)
 
 (require 'package-tools)
 (require 'q)
 
 ;; load script files at first
-(require-safely
+(require-package
  'script-extends
  (load-pre-script-files))
 
 ;; insall packages
-(require-safely
+(require-package
  'packages
  (package-initialize)
  (install-packages-if-needed +required-packages+))
@@ -26,7 +23,6 @@
 (require 'loading-config)
 (require 'basic-config)
 (require 'proced-config)
-(require 'utility)
 (require 'servers)
 (require 'frames)
 (require 'windows)
@@ -41,14 +37,10 @@
 (require 'clipboard)
 ;(require 'codings)
 (require 'codec)
-(require 'dates)
 (require 'abbrev-config)
-(require 'anythings)
 (require 'uniquify-config)
 (require 'version-controll)
 (require 'swiper-config)
-(require 'elisp+)
-(require 'org-mode+)
 (require 'org-config)
 (require 'gkroam-config)
 (require 'ido-config)
@@ -58,40 +50,57 @@
 (require 'scales)
 (require 'files-config)
 ;(require 'evil-config)
-(require 'el-server)
-(require 'el-server-extend)
-(require 'goto-last-point+)
 (require 'f-zone-key-bindings)
 (require 'calendar-config)
 (require 'dired-config)
 (require 'emoji-config)
-(require 'sudo-edit)
+;; download package
 (require 'web-config)
 (require 'smart-compile-config)
 (require 'python-config)
-(require 'scratch+)
-(require 'notifications)
 (require 'lsp-config)
+;; package + post config, in a seperate repo?? not in emacs.git, but should keep in cvs
 (require 'youdao-dictionary-conf)
 (require 'nov-config)
+;; self config, require safely
 (require 'pdf-config)
 (require 'vc-config)
-
-(require-safely 'smartparens (smartparens-global-mode))
-(require-safely 'expand-region (global-set-key (kbd "C-=") 'er/expand-region))
-(require-safely 'alpha (transparency-set-value *default-trans-value*))
-(require-safely 'smex (global-set-key (kbd "M-x") 'smex))
-(require-package-with-depends 'redis-config '(eredis))
-(require-package-with-depends 'annotate-config '(annotate))
-(require-package-with-depends 'password-generator+ '(password-generator))
-(require-package-with-depends 'stopwatch '(switch-buffer-functions) (stopwatch-mode t))
+(require-package 'redis-config :dependencies '(eredis))
+(require-package 'annotate-config :dependencies '(annotate))
 (require-package 'yas-config (yas-global-mode))
-(require-package 'auto-complete (global-auto-complete-mode))
-(require-package 'customized-dir (customized-dir-init))
-(require-package 'wcy-desktop (wcy-desktop-init))
-(require-package 'eyebrowse+ (eyebrowse-plus-mode t))
-(require-package 'eyebrowse-xmonad (eyebrowse-xmonad-mode t))
+(require 'anythings)
 (require 'exwm-conf)
+
+;; -------
+;; network-util, rest-util, minibuffer+
+;; -------
+(require 'q)
+(require 'utility)
+(require 'dates)
+(require 'elisp+)
+(require 'el-server)
+(require 'el-server-extend)
+(require 'org-mode+)
+(require 'goto-last-point+)
+(require 'scratch+)
+(require 'list-scratch)
+(require 'notifications)
+(require-package 'customized-dir (customized-dir-init))
+(require-package 'stopwatch :dependencies '(switch-buffer-functions) (stopwatch-mode 1))
+(require-package 'eyebrowse+ (eyebrowse-plus-mode 1))
+(require-package 'eyebrowse-xmonad (eyebrowse-xmonad-mode 1))
+(require-package 'wcy-desktop (wcy-desktop-init))
+(require-package 'password-generator+ :dependencies '(password-generator))
+
+
+;; the following should move to el-post-scripts
+;; package + post config
+(require 'sudo-edit)
+(require-package 'smartparens (smartparens-global-mode))
+(require-package 'expand-region (global-set-key (kbd "C-=") 'er/expand-region))
+(require-package 'alpha (transparency-set-value *default-trans-value*))
+(require-package 'smex (global-set-key (kbd "M-x") 'smex))
+(require-package 'auto-complete (global-auto-complete-mode))
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))

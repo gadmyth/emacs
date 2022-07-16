@@ -3,7 +3,7 @@
 ;;; Code:
 
 
-(require-packages-safely
+(require-packages
  '(anything anything-config)
  (defvar anything-c-source-objc-headline
    '((name . "Objective-C Headline")

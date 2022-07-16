@@ -12,9 +12,9 @@
   "."
   (revert-buffer-with-default-coding-system)
   (scale-large)
-  (require-safely 'textmate (textmate-mode))
-  (require-safely 'xcscope (cscope-minor-mode))
-  (require-safely 'annotate (annotate-mode))
+  (require-package 'textmate (textmate-mode))
+  (require-package 'xcscope (cscope-minor-mode))
+  (require-package 'annotate (annotate-mode))
   (display-line-numbers-mode (if (equal major-mode 'org-mode) 0 1)))
 
 (add-hook 'find-file-hook #'find-file-post-action)

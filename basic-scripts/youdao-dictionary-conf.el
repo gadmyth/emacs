@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-safely
+(require-package
  'youdao-dictionary
  (global-set-key (kbd "\C-c t") #'youdao-dictionary-search-at-point-tooltip))
 

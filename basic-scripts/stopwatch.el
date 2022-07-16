@@ -339,9 +339,11 @@
   :global t
   (cond
    (stopwatch-mode
+    (message "Now turn on the stopwatch mode...")
     (stopwatch-ensure-log-directory)
     (stopwatch-add-hooks))
    (t
+    (message "Now turn off the stopwatch mode...")
     (stopwatch-remove-hooks))))
 
 (provide 'stopwatch)

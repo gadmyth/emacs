@@ -183,7 +183,7 @@
   '(progn
 	 (setq org-startup-indented t)
      (setq org-startup-folded "showall")
-     (require-safely 'valign (valign-mode))))
+     (require-package 'valign (valign-mode))))
 
 ;;; setup org src code color
 (setq org-src-fontify-natively t)

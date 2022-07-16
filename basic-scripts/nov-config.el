@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-safely
+(require-package
  'nov
  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 

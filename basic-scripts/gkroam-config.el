@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-packages-safely
+(require-packages
  '(gkroam rg f)
 
  (defvar *gkroam-default-root-dir* "")

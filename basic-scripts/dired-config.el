@@ -107,7 +107,7 @@
          (dired-compress-maybe-encrypt 'dired-do-compress)))
      
      ;; require dirtree
-     (require-safely 'dirtree)
+     (require-package 'dirtree)
      
      ;; require dired-x
      (require-package
@@ -126,7 +126,7 @@
                ,(cond ((eq window-system 'x) "firefox" "google-chrome")
                       (t nil))))))
 
-     (require-safely
+     (require-package
       'dired-narrow
       (define-key dired-mode-map (kbd "/") 'dired-narrow))))
 

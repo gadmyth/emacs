@@ -4,7 +4,11 @@
 
 (require 'package)
 
-(setq package-archives-host "http://elpa.emacs-china.org")
+;; https://www.emacswiki.org/emacs/ELPA
+(defvar *customize-package-archives*
+  '(("gnu" . "https://elpa.gnu.org/packages/")
+    ("melpa" . "https://melpa.org/packages/")
+    ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 ;; set emacs customize file
 (setq custom-file (expand-file-name ".emacs-custom.el" user-emacs-directory))

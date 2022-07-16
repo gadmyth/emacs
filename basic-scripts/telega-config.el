@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require-safely
+(require-package
  'telega
  (when (and (bound-and-true-p *socks5-proxy-server*)
             (bound-and-true-p *socks5-proxy-port*))
