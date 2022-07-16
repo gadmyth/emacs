@@ -43,6 +43,7 @@
         'request
         'exwm
         'qrencode
+        'uuid
         ;'vkill
         ))
 

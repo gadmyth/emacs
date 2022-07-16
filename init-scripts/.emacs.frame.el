@@ -84,7 +84,7 @@
 (require 'goto-last-point+)
 (require 'scratch+)
 (require 'list-scratch)
-(require 'notifications)
+(require-package 'notifications :dependencies '(uuid))
 (require-package 'customized-dir (customized-dir-init))
 (require-package 'stopwatch :dependencies '(switch-buffer-functions) (stopwatch-mode 1))
 (require-package 'eyebrowse+ (eyebrowse-plus-mode 1))
