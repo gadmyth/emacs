@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 's)
+
 (defvar *wrapper-content*)
 
 (defun wrapping (wrapper)
@@ -126,6 +128,21 @@
       (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
 
 (defun split-string-of-region (start end)
+  "Format and insert sql IN collection from START to END of region."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (seperator (read-string "Please input the seperator: "))
+           (lines (split-string region-string seperator)))
+      (goto-char end)
+      (insert "\n")
+      (seq-doseq (line lines)
+        (seq-doseq (column (split-string line seperator))
+          (let ((column (s-trim column)))
+            (when (> (length column) 0)
+              (insert (s-trim column) "\n"))))))))
+
+(defun cut-string-of-region (start end)
   "Format and insert sql IN collection from START to END of region."
   (interactive "r")
   (when (region-active-p)
