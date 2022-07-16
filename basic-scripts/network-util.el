@@ -117,34 +117,70 @@
     (network-util-debug-message "*public-ip-fetch-timer* set to [%S]" *public-ip-fetch-timer*)
     ))
 
-(defun switch-proxy ()
+(defun switch-env-proxy ()
   "ENABLE's value is t or nil."
   (interactive)
-  (let* ((enable (y-or-n-p "Turn on the proxy? ")))
-    (if enable (turn-on-proxy)
-      (turn-off-proxy))))
+  (let* ((enable (y-or-n-p "Turn on the env proxy? ")))
+    (if enable (turn-on-env-proxy)
+      (turn-off-env-proxy))))
 
-(defun turn-on-proxy ()
+(defun turn-on-env-proxy ()
   "."
   (do-switch-proxy "127.0.0.1:1080"))
 
-(defun turn-off-proxy ()
+(defun turn-off-env-proxy ()
   "."
-  (do-switch-proxy nil))
+  (do-switch-env-proxy nil))
 
-(defun do-switch-proxy (proxy)
+(defun do-switch-env-proxy (proxy)
   "Switch PROXY."
   (setenv "http_proxy"  proxy)
   (setenv "https_proxy" proxy)
   (setenv "all_proxy"   proxy))
 
-(defun show-proxy ()
+(defun show-env-proxy ()
   "."
   (interactive)
   (let ((http-proxy (getenv "http_proxy"))
         (https-proxy (getenv "https_proxy"))
         (all-proxy (getenv "all_proxy")))
     (message "http_proxy: %s\nhttps_proxy: %s\nall_proxy: %s" http-proxy https-proxy all-proxy)))
+
+(defun switch-w3m-proxy ()
+  "ENABLE's value is t or nil."
+  (interactive)
+  (when (featurep 'w3m)
+    (let* ((enable (y-or-n-p "Turn on the w3m proxy? ")))
+      (if enable (turn-on-w3m-proxy)
+        (turn-off-w3m-proxy)))))
+
+(defun turn-on-w3m-proxy ()
+  "."
+  (when (featurep 'w3m)
+    (setq w3m-command-arguments-alist
+          '(("" "-o" "http_proxy=http://127.0.0.1:8118"
+             "-o" "https_proxy=http://127.0.0.1:8118")))))
+
+(defun turn-off-w3m-proxy ()
+  "."
+  (when (featurep 'w3m)
+    (setq w3m-command-arguments-alist nil)))
+
+(defun switch-url-proxy ()
+  "ENABLE's value is t or nil."
+  (interactive)
+  (let* ((enable (y-or-n-p "Turn on the url proxy? ")))
+    (if enable (turn-on-url-proxy)
+      (turn-off-url-proxy))))
+
+(defun turn-on-url-proxy ()
+  "."
+  (setq url-proxy-services '(("http" . "127.0.0.1:8118")
+                             ("https" . "127.0.0.1:8118"))))
+
+(defun turn-off-url-proxy ()
+  "."
+  (setq url-proxy-services nil))
 
 (provide 'network-util)
 ;;; network-util.el ends here

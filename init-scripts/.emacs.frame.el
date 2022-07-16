@@ -104,7 +104,7 @@
 
 (eval-after-load "textmate" '(add-to-list '*textmate-project-roots* ".svn"))
 (eval-after-load "xcscope" '(ignore-errors (add-to-list 'cscope-indexer-suffixes "*.java")))
-(turn-off-proxy)
+(require-package 'network-util (turn-off-env-proxy))
 
 ;; load must files
 (load-must-files)
