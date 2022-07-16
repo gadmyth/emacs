@@ -3,9 +3,9 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.2.0
-;; Package-Version: 20220521.002
-;; Package-Requires: timer, dates, codec
+;; Version: 1.2.1
+;; Package-Version: 20220716.001
+;; Package-Requires: timer, dates, codec, uuid
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/notifications.el
@@ -111,10 +111,10 @@ above them."
   "Show the time diff description of FIRE-TIME from TIMESTAMP."
   (let* ((ts (or timestamp (current-timestamp)))
          (diff (- fire-time ts)))
-    (notification-rich-duration diff)))
+    (notification-duration-desciption diff)))
 
-(defun notification-rich-duration (seconds)
-  "."
+(defun notification-duration-desciption (seconds)
+  "Parse duration description of SECONDS."
   (let* ((diff seconds)
          (sign (cond ((> diff 0) "+")
                      ((< diff 0) "-")
@@ -430,7 +430,7 @@ above them."
          (repeat-duration (alist-get 'repeat-duration notification))
          (repeat (notification-parse-duration
                   (read-string "repeat duration: "
-                               (notification-rich-duration repeat-duration))))
+                               (notification-duration-desciption repeat-duration))))
          (system-notification-p (member (read-string "Is system notification? (y or n) "
                                                      (if (alist-get 'system-notification-p notification) "y" "n"))
                                         '("y" "Y"))))
