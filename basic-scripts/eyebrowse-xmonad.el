@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.3
-;; Package-Version: 20220513.001
+;; Version: 1.0.6.4
+;; Package-Version: 20220716.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -285,12 +285,16 @@
   "Toggle `eyebrowse-xmonad-mode."
   :keymap eyebrowse-xmonad-mode-map
   :global t
-  (when eyebrowse-xmonad-mode
+  (cond
+   (eyebrowse-xmonad-mode
+    (message "Now turn on the eyebrowse-xmonad-mode...")
     (define-eyebrowse-bookmarks-keymap)
     (add-hook 'emacs-startup-hook
               (lambda ()
                 (when (load-eyebrowse-bookmarks)
-                  (add-hook 'kill-emacs-hook 'save-eyebrowse-bookmarks))))))
+                  (add-hook 'kill-emacs-hook 'save-eyebrowse-bookmarks)))))
+   (t
+    (message "Now turn off the eyebrowse-xmonad-mode..."))))
 
 (provide 'eyebrowse-xmonad)
 ;;; eyebrowse-xmonad.el ends here

@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.22
-;; Package-Version: 20220518.001
+;; Version: 1.2.23
+;; Package-Version: 20220716.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -815,26 +815,28 @@ COPY from eyebrowse--load-window-config."
   "Toggle `eyebrowse-plus-mode."
   :keymap eyebrowse-plus-mode-map
   :global t
-  (if eyebrowse-plus-mode
-      (progn
-        (eyebrowse-swap-init-function)
-        (add-hook 'eyebrowse-lazy-load-hook
-                  (lambda ()
-                    (add-hook 'delete-frame-functions #'save-eyebrowse-config)
-                    (add-hook 'kill-emacs-hook #'save-eyebrowse-config)
-                    (add-hook 'before-make-frame-hook #'load-frame-geometry)
-                    (set-eyebrowse-header-line-format)
-                    (set-eyebrowse-mode-line-format)))
-        ;; set mode-line-buffer-identification
-        ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
-        (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
-        (add-hook 'find-file-hook #'set-eyebrowse-mode-line-format)
-        (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
-        (add-hook 'window-configuration-change-hook #'set-eyebrowse-mode-line-format)
-        (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
-        (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
-        (start-eyebrowse-save-timer)
-        (eyebrowse-mode 1))
+  (cond
+   (eyebrowse-plus-mode
+    (message "Now turn on the eyebrowse-plus-mode...")
+    (progn
+      (eyebrowse-swap-init-function)
+      (add-hook 'eyebrowse-lazy-load-hook
+                (lambda ()
+                  (add-hook 'delete-frame-functions #'save-eyebrowse-config)
+                  (add-hook 'kill-emacs-hook #'save-eyebrowse-config)
+                  (add-hook 'before-make-frame-hook #'load-frame-geometry)
+                  (set-eyebrowse-header-line-format)
+                  (set-eyebrowse-mode-line-format)))
+      ;; set mode-line-buffer-identification
+                                        ;(setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
+      (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
+      (add-hook 'find-file-hook #'set-eyebrowse-mode-line-format)
+      (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
+      (add-hook 'window-configuration-change-hook #'set-eyebrowse-mode-line-format)
+      (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
+      (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
+      (start-eyebrowse-save-timer)
+      (eyebrowse-mode 1))
     (progn
       (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
       (remove-hook 'kill-emacs-hook #'save-eyebrowse-config)
@@ -848,7 +850,9 @@ COPY from eyebrowse--load-window-config."
       (walk-all-frame-windows
        (setq-local header-line-format nil))
       (stop-eyebrowse-save-timer)
-      (eyebrowse-mode 0))))
+      (eyebrowse-mode 0)))
+   (t
+    (message "Now turn off the eyebrowse-plus-mode..."))))
 
 (provide 'eyebrowse+)
 ;;; eyebrowse+.el ends here
