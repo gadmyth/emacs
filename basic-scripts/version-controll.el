@@ -16,9 +16,9 @@
  'magit
  (setq magit-auto-revert-mode nil)
 
- (let ((options (plist-get magit-diff-popup :options))
-       (word-diff '(?w "word-diff" "--word-diff=" magit-word-diff-select)))
-   (plist-put magit-diff-popup :options (cons word-diff options)))
+ ;; (let ((options (plist-get magit-diff-popup :options))
+ ;;       (word-diff '(?w "word-diff" "--word-diff=" magit-word-diff-select)))
+ ;;   (plist-put magit-diff-popup :options (cons word-diff options)))
 
  (defun magit-word-diff-select (&rest _ignore)
    (magit-read-char-case nil t
