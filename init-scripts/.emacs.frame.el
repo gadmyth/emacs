@@ -29,7 +29,6 @@
 (require 'buffers)
 (require 'mode-bars)
 (require 'fonts)
-(require 'themes)
 (require 'shells)
 (require 'irc-config)
 (require 'telega-config)

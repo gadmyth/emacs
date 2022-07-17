@@ -3,6 +3,9 @@
 ;;; Commentary:
 ;;; Code:
 
+;; theme
+(require-package 'solarized-theme (load-theme 'solarized-light-high-contrast t))
+
 ;; erc
 (setq erc-nick user-full-name)
 (setq erc-default-server "127.0.0.1")
