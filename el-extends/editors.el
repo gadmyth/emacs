@@ -142,6 +142,15 @@
             (when (> (length column) 0)
               (insert (s-trim column) "\n"))))))))
 
+(defun count-line-of-region (start end)
+  "Format and insert sql IN collection from START to END of region."
+  (interactive "r")
+  (when (region-active-p)
+    (let* ((region-string (buffer-substring-no-properties start end))
+           (seperator (read-string "Please input the seperator: "))
+           (lines (split-string region-string seperator)))
+      (message "line count is %d" (length lines)))))
+
 (defun cut-string-of-region (start end)
   "Format and insert sql IN collection from START to END of region."
   (interactive "r")
