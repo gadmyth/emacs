@@ -2,7 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-(defvar *use-ubuntu-font* nil)
 
 (defmacro when-font-exist (font-name &rest body)
   "FONT-NAME: , BODY: ."
@@ -15,7 +14,7 @@
 
 (when-font-exist
  "Ubuntu Mono"
- (when *use-ubuntu-font*
+ (when (bound-and-true-p *use-ubuntu-font*)
    (custom-set-faces `(default ((t (:family ,font-name)))))
    (set-face-attribute 'default nil :height 140)))
 
