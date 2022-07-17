@@ -8,18 +8,21 @@
 
 (defmacro require-package (package &rest args)
   "Require PACKAGE if all dependencies can be required, then execute body in ARGS."
-  `(let ((should-require-p))
-     (unless should-require-p
-       ;; check package installed
-	   (if (not (package-installed-p ,package))
-	       (message "package [%S] is not installed!" ,package)
-         (setq should-require-p t)))
-     (unless should-require-p
-       ;; check package in load-path
+  `(let ((could-require-p))
+     ;; check package in load-path
+     (unless could-require-p
        (if (not (ignore-errors (find-library-name (symbol-name ,package))))
-	       (message "package [%S] is not found in load-path!" ,package)
-         (setq should-require-p t)))
-     (when should-require-p
+	       (message "require-package [%S]: package is not found in load-path!" ,package)
+         (setq could-require-p t)))
+     ;; check package installed
+     (unless could-require-p
+	   (unless (package-installed-p ,package)
+	     (message "require-package [%S]: package is not installed, try to install..." ,package)
+         (call-safely (package-install ,package))
+         ;; check package installed again
+         (setq could-require-p (package-installed-p ,package))))
+     ;; parse and require dependencies
+     (when could-require-p
        (let* ((all-package-featurep t)
               ;; args is substitute as arg list, and will be eval, should quote it, don't eval it
               (arg-list ',args)
@@ -33,31 +36,55 @@
            (cond
             ;; aleady required
             ((featurep p)
-             (message "dependent package [%S] is already required before!" p))
+             (message "require-package [%S]: dependent package [%S] is already required before!" ,package p))
+            ;; find and require package in load-path
+            ((ignore-errors (find-library-name (symbol-name p)))
+             (require p)
+             (message "require-package [%S]: dependent package [%S] is required!" ,package p))
+            ;; package is already installed
+            ((package-installed-p p)
+             (require p)
+             (message "require-package [%S]: dependent package [%S] is required!" ,package p))
+            ;; try to install package
             (t
+             (message "require-package [%S]: try to install package: %S..." ,package p)
+             (call-safely (package-install p))
              (cond
               ;; require installed package
               ((package-installed-p p)
                (require p)
-               (message "dependent package [%S] is required!" p))
+               (message "require-package [%S]: dependent package [%S] is required!" ,package p))
               (t
                ;; can't require an uninstalled package
-               (message "dependent package [%S] is not installed or is not a feature, can't install %S!" p ,package)
+               (message "require-package [%S]: dependent package [%S] is not installed or is not a feature, can't install %S!" ,package p ,package)
                (setq all-package-featurep nil))))))
          (when all-package-featurep
            (cond
             ;; already required
             ((featurep ,package)
-             (message "package [%S] is already required before!" ,package))
+             (message "require-package [%S]: package is already required before!" ,package))
             (t
              (require ,package)
-             (message "package [%S] is required!" ,package)))
+             (message "require-package [%S]: package is required!" ,package)))
            (when body
              ;; body is a list not eval, should eval each one in the body list
              (seq-doseq (expression body)
                ;; (message "exp: %S" expression)
                (eval expression))))))
      nil))
+
+;; https://curiousprogrammer.wordpress.com/2009/06/08/error-handling-in-emacs-lisp/
+(defmacro call-safely (func &rest clean-up)
+  "Call FUNC safely, when catch an exception, do CLEAN-UP."
+  `(unwind-protect
+       (let (retval)
+         (condition-case ex
+             (setq retval (progn ,func))
+           ('error
+            (message (format "Caught exception: [%s]" ex))
+            (setq retval (cons 'exception (list ex)))))
+         retval)
+     ,@clean-up))
 
 (defmacro require-packages (packages &rest body)
   "PACKAGES, BODY."
@@ -85,7 +112,7 @@
     (progn
       (message "Should install-package: [%S]" package)
       (if (or (assoc package package-archive-contents) no-refresh)
-          (package-install package)
+          (call-safely (package-install package))
         (progn
           (package-refresh-contents)
           (install-package package min-version t))))))
