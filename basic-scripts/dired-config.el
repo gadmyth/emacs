@@ -43,9 +43,14 @@
      (defun dired-create-directory-or-file ()
        "."
        (interactive)
-       (if (y-or-n-p "Make directory or else create file?")
-           (call-interactively 'dired-create-directory)
-         (call-interactively 'dired-create-new-file)))
+       (let ((type (read-string "Make directory (d) or create file (f) ? ")))
+         (pcase type
+           ("d"
+            (call-interactively 'dired-create-directory))
+           ("f"
+            (call-interactively 'dired-create-new-file))
+           (t
+            (message "wrong action type")))))
 
      (defvar dired-zip-compress-command-template "zip {} %o -r --filesync %i")
      
@@ -53,11 +58,9 @@
 
      (defun dired-compress-maybe-encrypt (inner-command)
        "Compress or uncompress maybe encrypt or decrypt under dired with INNER-COMMAND."
-       (let* ((password (and (y-or-n-p "Encrypt the file or not?")
-                             (completing-read "Please input password: " nil nil t)))
-              (password-param (or (and password
-                                       (> (length password) 0)
-                                       (format "-P %s" password))
+       (let* ((password (read-passwd "Please input password (default no password): "))
+              (password-param (or (and (> (length password) 0)
+                                       (format "-P \"%s\"" password))
                                   ""))
               (zip-command)
               (unzip-command))
@@ -73,7 +76,7 @@
                                       (replace-regexp-in-string
                                        "{}" password-param
                                        (cadr dired-unzip-compress-command-template))))
-                 (message "unzip command: %s" unzip-command)
+                 ;; (message "unzip command: %s" unzip-command)
                  ;; compose the new encrypt zip command
                  (setf (alist-get "\\.zip\\'" dired-compress-files-alist nil nil #'string-equal)
                        zip-command)
