@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.4
-;; Package-Version: 20220614.001
+;; Version: 1.0.5
+;; Package-Version: 20220726.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -92,7 +92,7 @@ With PARSED message and PROC."
     (when (not (buffer-live-p *erc-aggregate-buffer*))
       ;; create buffer if not exists
       (setq *erc-aggregate-buffer*
-            (generate-new-buffer "*erc-aggregate-buffer*"))
+            (generate-new-buffer "#erc-aggregate-buffer#"))
       (load-erc-forbidden-targets)
       ;; set the major mode
       (with-current-buffer *erc-aggregate-buffer*
