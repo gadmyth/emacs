@@ -207,9 +207,14 @@
                                   (java-show-constant constant)))
                             t))))))
 
-(defconst +java-property-regexp+ "^\s*?private\s*.*;\s*?$")
+(defconst +java-property-regexp+ "^\s*?private\s*\\([^\s]*\\)\s*\\([^\s]*\\);\s*?$")
 
 (defun java-goto-property ()
+  "."
+  (interactive)
+  (scj-goto-with-regexp +java-property-regexp+ "The property name: " "No property here."))
+
+(defun java-class-properties ()
   "."
   (interactive)
   (scj-goto-with-regexp +java-property-regexp+ "The property name: " "No property here."))

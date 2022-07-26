@@ -42,6 +42,18 @@
                                            (let ((line-num (cadr candidate)))
                                              (scj-goto-line-no-interactive line-num)))))))
 
+(defun scj-collect-with-regexp (regexp prompt empty-message)
+  "REGEXP, PROMPT, EMPTY-MESSAGE."
+  (scj-action-with-regexp regexp prompt empty-message
+                          #'(lambda (collections)
+                              (let ((list (mapcar (lambda (rich)
+                                                    (let* ((content (car rich))
+                                                           (start  0)
+                                                           (end (length rich)))
+                                                      (substring-no-properties content)))
+                                                  collections)))
+                                (reverse list)))))
+
 (defun scj-goto-last-with-regexp (regexp prompt empty-message &optional finish-block)
   "REGEXP, PROMPT, EMPTY-MESSAGE, FINISH-BLOCK."
   (scj-action-with-regexp regexp prompt empty-message
