@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.5
-;; Package-Version: 20220726.001
+;; Version: 1.0.6
+;; Package-Version: 20220729.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -605,6 +605,18 @@ With PARSED message and PROC."
   (message "Deleting the target %s from *erc-forbidden-targets* ..." target)
   (setq *erc-forbidden-targets* (delete target *erc-forbidden-targets*))
   (message "The target %s is deleted now." target))
+
+(defun erc-setup-buffer (buffer)
+  "Override the erc-setup-buffer function, don't display the BUFFER automatically.")
+
+(defun start-erc (server port nick-name passwd)
+  "Start erc with NICK-NAME and PASSWD of erc SERVER at PORT."
+  (interactive (list
+                (read-string "server: " erc-default-server)
+                (read-number "port: " erc-default-port)
+                (read-string "nick name: " erc-nick)
+                (read-passwd "passwd: ")))
+  (erc :server server :port port :nick nick-name :password passwd))
 
 (defvar erc-aggregate-mode-map
   (let ((map (make-sparse-keymap)))
