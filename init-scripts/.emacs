@@ -2,8 +2,6 @@
 ;;; Commentary:
 
 ;;; Code:
-(defvar *load-config-from-initial-file*)
-(setq *load-config-from-initial-file* t)
 
 ;; current file is <parent dir>/emacs.git/init-script/.emacs,
 ;; +emacs-init-script-directory+ should be <parent dir>/emacs.git/init-script
@@ -16,6 +14,9 @@
 
 (defconst +emacs-context-directory+
   (file-name-directory (directory-file-name +emacs-init-script-directory+)))
+
+(defvar *load-config-from-initial-file*)
+(setq *load-config-from-initial-file* t)
 
 (when *load-config-from-initial-file*
   (let ((init-file-name (expand-file-name "emacs.init.el" +emacs-init-script-directory+)))
