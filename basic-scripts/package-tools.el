@@ -4,7 +4,7 @@
 
 (require 'package)
 (require 'find-func)
-
+(require 'q)
 
 (defmacro require-package (package &rest args)
   "Require PACKAGE if all dependencies can be required, then execute body in ARGS."
@@ -48,7 +48,9 @@
             ;; try to install package
             (t
              (message "require-package [%S]: try to install package: %S..." ,package p)
-             (call-safely (package-install p))
+             (call-safely
+              (package-install p)
+              (setq all-package-featurep nil))
              (cond
               ;; require installed package
               ((package-installed-p p)
@@ -72,19 +74,6 @@
                ;; (message "exp: %S" expression)
                (eval expression))))))
      nil))
-
-;; https://curiousprogrammer.wordpress.com/2009/06/08/error-handling-in-emacs-lisp/
-(defmacro call-safely (func &rest clean-up)
-  "Call FUNC safely, when catch an exception, do CLEAN-UP."
-  `(unwind-protect
-       (let (retval)
-         (condition-case ex
-             (setq retval (progn ,func))
-           ('error
-            (message (format "Caught exception: [%s]" ex))
-            (setq retval (cons 'exception (list ex)))))
-         retval)
-     ,@clean-up))
 
 (defmacro require-packages (packages &rest body)
   "PACKAGES, BODY."

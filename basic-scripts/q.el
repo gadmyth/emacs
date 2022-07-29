@@ -51,5 +51,18 @@
     (t
      (setq ,var (bound-or-default ,value-var ,default)))))
 
+;; https://curiousprogrammer.wordpress.com/2009/06/08/error-handling-in-emacs-lisp/
+(defmacro call-safely (func &rest clean-up)
+  "Call FUNC safely, when catch an exception, do CLEAN-UP."
+  `(unwind-protect
+       (let (retval)
+         (condition-case ex
+             (setq retval (progn ,func))
+           ('error
+            (message (format "Caught exception: [%s]" ex))
+            (setq retval (cons 'exception (list ex)))))
+         retval)
+     ,@clean-up))
+
 (provide 'q)
 ;;; q.el ends here
