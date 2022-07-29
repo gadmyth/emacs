@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'scales)
+
 (defun revert-buffer-with-default-coding-system ()
   "."
   (let ((coding-system-for-read 'utf-8-unix))
@@ -26,7 +28,9 @@
 
 (add-hook 'after-save-hook #'compile-emacs-init-file)
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
+(require-package
+  'flycheck
+  (add-hook 'after-init-hook #'global-flycheck-mode))
 
 (setq backup-directory-alist (quote (("." . "~/.backups"))))
 
