@@ -207,19 +207,23 @@
 ;;; tag
 (setq org-export-with-tags nil)
 
+
 ;;; babel language
+(require-package 'ob-restclient)
+(require-package 'ob-jq)
+
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((ditaa . t)
+ `((ditaa . t)
    (plantuml . t)
    (dot . t)
-   (restclient . t)
    (shell . t)
    (ruby . t)
    (python . t)
    (gnuplot . t)
    (sql . t)
-   ;(jq . t)
+   (restclient . ,(featurep 'ob-restclient))
+   (jq . ,(featurep 'ob-jq))
    ))
 
 ;;; headline levels
