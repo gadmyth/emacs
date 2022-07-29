@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.24
-;; Package-Version: 20220721.001
+;; Version: 1.2.25
+;; Package-Version: 20220729.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -487,11 +487,11 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse--fixup-window-config window-config)
     (window-state-put window-config (frame-root-window) 'safe)))
 
-(defun load-eyebrowse-config ()
+(defun* load-eyebrowse-config ()
   "Load eyebrowse workspace from file."
   (interactive)
   (when (commit-editmsg-terminal-frame-p)
-    (return))
+    (return-from load-eyebrowse-config))
   (let ((loading-success-p)
         (file-name (eyebrowse-file-name)))
     (eyebrowse-init-original)
