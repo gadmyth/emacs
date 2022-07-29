@@ -263,7 +263,9 @@ Copied some codes from window-numbering.el."
   (interactive)
   (run-or-raise-next
    (lambda (buffer)
-     (eq 'term-mode (with-current-buffer buffer major-mode)))
+     (let ((mode (with-current-buffer buffer major-mode)))
+       (or (eq 'term-mode mode)
+           (eq 'shell-mode mode))))
    (lambda ()
      (interactive)
      ;; TODO: bash path in different OS, or use multi-term
