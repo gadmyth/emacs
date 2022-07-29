@@ -7,9 +7,9 @@
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (eval-after-load "vc-hooks" '(define-key vc-prefix-map "=" 'vc-ediff))
 (eval-after-load "vc-hooks" '(define-key vc-prefix-map "k" 
-							   (lambda (&optional historic not-urgent)
-								 (interactive (list current-prefix-arg t))
-								 (mapc (lambda (file) (delete-file file)) (cadr (vc-deduce-fileset t))))))
+                               (lambda (&optional historic not-urgent)
+                                 (interactive (list current-prefix-arg t))
+                                 (mapc (lambda (file) (delete-file file)) (cadr (vc-deduce-fileset t))))))
 
 
 (require-package
@@ -28,8 +28,8 @@
  )
  
 (when window-system
-  (require 'diff-hl)
-  (global-diff-hl-mode t))
+  (require-package 'diff-hl
+                   (global-diff-hl-mode t)))
 
 (setq mode-require-final-newline nil)
 
