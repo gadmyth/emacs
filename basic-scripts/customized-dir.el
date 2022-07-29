@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.4
-;; Package-Version: 20220428.001
-;; Package-Requires: ivy, counsel
+;; Version: 1.0.5
+;; Package-Version: 20220729.001
+;; Package-Requires: counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-script/customer-dir.el
@@ -34,6 +34,7 @@
 ;;; Code:
 
 
+(defvar *customized-dir* nil)
 
 (defmacro wrap-function-with-default-directory (func)
   "Call the FUNC with `default-directory as DIR."
@@ -44,9 +45,11 @@
 (defvar *customized-dir-action-list*
   (remove-if
    #'null
-   `(,(when (featurep 'counsel)
-        ("counsel-git" . ,(wrap-function-with-default-directory #'counsel-git))
-        ("counsel-git-grep" . ,(wrap-function-with-default-directory #'counsel-git-grep)))
+   `(
+     ,(when (featurep 'counsel)
+        `("counsel-git" . ,(wrap-function-with-default-directory #'counsel-git)))
+     ,(when (featurep 'counsel)
+        `("counsel-git-grep" . ,(wrap-function-with-default-directory #'counsel-git-grep)))
      ("remove-customerized-dir" . remove-customized-dir)
      ("dir" . dired)
      ("vc-dir" . vc-dir))))
@@ -54,18 +57,16 @@
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
-  (let* ((default-candidate (car (seq-filter
-                                  (lambda (ele)
-                                    (string-prefix-p ele default-directory))
-                                  *customized-dir*)))
-         (dir (completing-read "Switch to dir: " *customized-dir* nil t nil default-candidate))
-         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t nil nil nil)))
-    (let ((f (cdr action)))
+  (let* ((default (car (seq-filter
+                        (lambda (ele) (string-prefix-p ele default-directory))
+                        *customized-dir*)))
+         (dir (completing-read "Switch to dir: " *customized-dir* nil t nil nil default))
+         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t)))
+    (let ((f (assoc-default action *customized-dir-action-list*)))
       (funcall f dir))))
 
 (defvar +customized-dir-file-name+ "~/.customized-dir-save")
 (defvar +dired-al-mode-header+ "  drwx------.  0 user user     4096 Mar  0 00:00 ")
-(defvar *customized-dir* nil)
 (add-to-list 'auto-coding-alist '("\\.customized-dir-save\\'" . utf-8))
 
 (defun load-customized-dir ()
