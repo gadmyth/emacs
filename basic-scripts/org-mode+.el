@@ -3,9 +3,9 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: org-mode+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20220630.001
-;; Package-Requires: org, dash, browse-url+
+;; Version: 1.0.2
+;; Package-Version: 20220729.001
+;; Package-Requires: org, browse-url+
 ;; Keywords: org-mode
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/org-mode+.el
@@ -34,8 +34,8 @@
 ;;; Code:
 
 (require 'dired)
-(require 'dash)
 (require 'browse-url+)
+(require 'ol)
 
 (defvar *org-cap-temp*)
 (defvar *temp-org-capture-buffer* nil)
