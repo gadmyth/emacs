@@ -4,7 +4,7 @@
 
 (require-package
  'pdf-tools
- (pdf-tools-install)
+ (call-safely (pdf-tools-install))
  (setq-default pdf-view-display-size 2.0)
  (add-hook 'pdf-view-mode-hook
            (lambda ()
