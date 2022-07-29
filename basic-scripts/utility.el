@@ -65,6 +65,7 @@
 (defun load-must-files ()
   "."
   (interactive)
+  (message "*** load must files...")
   (mapc (lambda (filename)
 		  (if (not (load-exist-buffer filename))
 			  (if (file-exists-p filename)

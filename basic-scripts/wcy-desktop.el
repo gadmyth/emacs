@@ -6,8 +6,8 @@
 ;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
 
-;; Version: 2.0.2
-;; Package-Version: 20220107.001
+;; Version: 2.0.3
+;; Package-Version: 20220729.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -102,7 +102,8 @@
                    (let ((directory (plist-get x :directory)))
                      (when (file-directory-p directory)
                        (let ((default-directory directory))
-                         (multi-term)))))
+                         (when (featurep 'multi-term)
+                           (multi-term))))))
                   (t
                    (message "The type is process, TODO"))))
            ((eq type 'buffer)
