@@ -35,12 +35,6 @@
 
 
 
-(provide 'customized-dir)
-;;; customized-dir.el ends here
-
-(require 'ivy)
-(require 'counsel)
-
 (defmacro wrap-function-with-default-directory (func)
   "Call the FUNC with `default-directory as DIR."
   `(lambda (dir)
@@ -48,29 +42,26 @@
        (call-interactively ,func))))
 
 (defvar *customized-dir-action-list*
-  `(("counsel-git" . ,(wrap-function-with-default-directory #'counsel-git))
-    ("counsel-git-grep" . ,(wrap-function-with-default-directory #'counsel-git-grep))
-    ("remove-customerized-dir" . remove-customized-dir)
-    ("dir" . dired)
-    ("vc-dir" . vc-dir)))
+  (remove-if
+   #'null
+   `(,(when (featurep 'counsel)
+        ("counsel-git" . ,(wrap-function-with-default-directory #'counsel-git))
+        ("counsel-git-grep" . ,(wrap-function-with-default-directory #'counsel-git-grep)))
+     ("remove-customerized-dir" . remove-customized-dir)
+     ("dir" . dired)
+     ("vc-dir" . vc-dir))))
 
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
-  (ivy-read "Switch to dir: " *customized-dir*
-            :action
-            (lambda (dir)
-              (ivy-read "Choose the action:"
-                        *customized-dir-action-list*
-                        :action
-                        (lambda (pair)
-                          (let ((f (cdr pair)))
-                            (funcall f dir)))))
-            :preselect
-            (car (seq-filter
-                  (lambda (ele)
-                    (string-prefix-p ele default-directory))
-                  *customized-dir*))))
+  (let* ((default-candidate (car (seq-filter
+                                  (lambda (ele)
+                                    (string-prefix-p ele default-directory))
+                                  *customized-dir*)))
+         (dir (completing-read "Switch to dir: " *customized-dir* nil t nil default-candidate))
+         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t nil nil nil)))
+    (let ((f (cdr action)))
+      (funcall f dir))))
 
 (defvar +customized-dir-file-name+ "~/.customized-dir-save")
 (defvar +dired-al-mode-header+ "  drwx------.  0 user user     4096 Mar  0 00:00 ")
