@@ -155,10 +155,10 @@
   (interactive)
   (eyebrowse-list-window-configs (eyebrowse--get 'window-configs) nil))
 
-(defun eyebrowse-list-configs-with-action (action &optional buffer)
-  "ACTION: , BUFFER."
+(defun eyebrowse-list-configs-with-action (action &optional buffer current-config-as-default-p)
+  "ACTION: , BUFFER, CURRENT-CONFIG-AS-DEFAULT-P."
   (interactive)
-  (eyebrowse-list-window-configs-with-action (eyebrowse--get 'window-configs) buffer action))
+  (eyebrowse-list-window-configs-with-action (eyebrowse--get 'window-configs) buffer action current-config-as-default-p))
 
 (defun eyebrowse-list-window-configs (configs buffer)
   "CONFIGS, BUFFER."
@@ -172,14 +172,14 @@
               (config (assq slot window-configs)))
          (select-buffer-window-safely-at-config buffer config))))))
 
-(defun eyebrowse-list-window-configs-with-action (window-configs &optional buffer action)
-  "WINDOW-CONFIGS: , BUFFER: , ACTION."
+(defun eyebrowse-list-window-configs-with-action (window-configs &optional buffer action current-config-as-default-p)
+  "WINDOW-CONFIGS: , BUFFER: , ACTION, CURRENT-CONFIG-AS-DEFAULT-P."
   (let* ((current-config (eyebrowse-get-current-config))
          (last-config (eyebrowse-get-last-config))
          (current-slot (nth 0 current-config))
          (current-tag (nth 2 current-config))
          (last-slot (nth 0 last-config))
-         (default-slot (nth 0 (or last-config current-config)))
+         (default-slot (nth 0 (or (and current-config-as-default-p current-config) last-config)))
          (default-candidate)
          (prompt "Select eyebrowse action: ")
          (collections))
@@ -265,7 +265,9 @@
 (defun eyebrowse-modify-config (&rest _)
   "."
   (interactive)
-  (eyebrowse-list-with-actions *eyebrowse-modify-action-alist*))
+  (let* ((current-config (eyebrowse-current-config-string))
+         (prompt (format "Select eyebrowse action for current config (%s): " current-config)))
+    (eyebrowse-list-with-actions *eyebrowse-modify-action-alist* prompt)))
 
 (defvar *eyebrowse-modify-buffer-action-alist*
   '(("lock buffer's config" . eyebrowse-lock-buffer-config)
@@ -274,7 +276,9 @@
 (defun eyebrowse-modify-buffer-config (&rest _)
   "."
   (interactive)
-  (eyebrowse-list-with-actions *eyebrowse-modify-buffer-action-alist*))
+  (let* ((current-config (eyebrowse-current-config-string))
+         (prompt (format "Select eyebrowse action for current buffer, current config is (%s): " current-config)))
+    (eyebrowse-list-with-actions *eyebrowse-modify-buffer-action-alist* prompt)))
 
 (defvar *eyebrowse-switch-buffer-action-alist*
   '(("switch to the buffer" . select-buffer-window-safely)
@@ -285,13 +289,15 @@
   "ARGS."
   (interactive)
   (eyebrowse-message "actions args: %S" args)
-  (apply #'eyebrowse-list-with-actions *eyebrowse-switch-buffer-action-alist* args))
+  (let ((prompt (format "Config: (%s), current (%s), target (%s): "
+                        (eyebrowse-current-config-string)
+                        (buffer-name (current-buffer))
+                        (car args))))
+    (apply #'eyebrowse-list-with-actions *eyebrowse-switch-buffer-action-alist* prompt args)))
 
-(defun eyebrowse-list-with-actions (actions &rest args)
-  "Select one of ACTIONS, and choose action from eyebrowse configs, call the action with ARGS."
-  (let* ((current-config (eyebrowse-current-config-string))
-         (prompt (format "Select eyebrowse action (%s): " current-config))
-         (action (completing-read prompt actions nil t))
+(defun eyebrowse-list-with-actions (actions prompt &rest args)
+  "Select one of ACTIONS of PROMPT, and choose action from eyebrowse configs, call the action with ARGS."
+  (let* ((action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
       (eyebrowse-message "list actions, actions: %s, args: %s" actions args)
@@ -325,7 +331,8 @@
               (config (eyebrowse-get-config-with-slot slot)))
          (eyebrowse-message "locked, buffer: %s" buffer)
          (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))
-   buffer))
+   buffer
+   t))
 
 (defun eyebrowse-free-buffer-config (&optional buffer)
   "Free the current BUFFER that binding to a certain eyebrowse config."
