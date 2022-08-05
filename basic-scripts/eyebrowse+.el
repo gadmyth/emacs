@@ -602,8 +602,9 @@ COPY from eyebrowse--load-window-config."
 (defun save-eyebrowse-config (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
-  (let ((file-name (eyebrowse-file-name frame)))
-    (message "Saving eyebrowse config to file %S ..." file-name)
+  (let ((file-name (eyebrowse-file-name frame))
+        (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+    (message "%s Saving eyebrowse config to file %S ..." time-string file-name)
     (eyebrowse-update-window-config)
     (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
            (frame-params (eyebrowse-frame-parameters frame))
