@@ -551,10 +551,10 @@ COPY from eyebrowse--load-window-config."
           (dolist (pair frame-params)
             (setf (alist-get (car pair) default-frame-alist nil t 'equal) (cdr pair))))))))
 
-(defun frame-index ()
-  "."
+(defun frame-index (&optional frame buffer)
+  "Get the frame index of FRAME, if FRAME is null, use BUFFER."
   (let* ((frames (frame-list))
-         (current-frame (window-frame (get-buffer-window)))
+         (current-frame (or frame (window-frame (get-buffer-window buffer))))
          (max-index (- (length frames) 1))
          (index (- max-index (-elem-index current-frame frames))))
     index))
