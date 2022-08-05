@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.2.25
-;; Package-Version: 20220729.001
+;; Version: 1.3.0
+;; Package-Version: 20220805.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -661,6 +661,8 @@ COPY from eyebrowse--load-window-config."
     mode-line-remote
     " "
     (:eval (propertized-buffer-identification "%b"))
+    " "
+    mode-line-percent-position
     " "
     "(%l,%c)"
     vc-mode
