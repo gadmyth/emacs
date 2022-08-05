@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.4
-;; Package-Version: 20220716.001
+;; Version: 1.0.6.5
+;; Package-Version: 20220805.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -53,7 +53,8 @@
          (filename (buffer-file-name buffer))
          (bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'string-equal))
          (remark (alist-get "remark" bookmark nil t 'string-equal)))
-    (when (or (not bookmark) cover-p)
+    (cond
+     ((or (not bookmark) cover-p)
       (setq bookmark `((eyebrowse . ,(eyebrowse--get 'current-slot))
                        (buffername . , buffername)
                        (filename . ,filename)
@@ -84,7 +85,9 @@
       ;; define the bookmark key
       (eyebrowse-define-bookmark-key bookmark-key)
       (when (not cover-p)
-        (message "Add bookmark %s suceed!" bookmark-key)))))
+        (message "Add bookmark %s suceed!" bookmark-key)))
+     (t
+      (message "Bookmark \"%s\" exist, can't override!" bookmark-key)))))
 
 (defun eyebrowse-define-bookmark-key (bookmark-key)
   "Define the BOOKMARK-KEY into eyebrowse-xmonad-mode-map."
