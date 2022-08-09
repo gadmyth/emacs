@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.8
-;; Package-Version: 20220529.001
+;; Version: 1.0.9
+;; Package-Version: 20220809.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -130,6 +130,32 @@
   (let ((value *scratch-current-node*))
     (and (stringp value)
          (string-prefix-p "http"))))
+
+(defun scratch-open-org-link ()
+  "Open link of *scratch-current-node*."
+  (when-let ((link *scratch-current-node*))
+    (org-open-link-from-string link)))
+
+(defun scratch-open-org-link-checker ()
+  "."
+  (let ((value *scratch-current-node*))
+    (and (stringp value)
+         (org-link-p value))))
+
+(defun org-link-p (s)
+  "Check S is a org link or not."
+  (pcase (with-temp-buffer
+           (let ((org-inhibit-startup nil))
+             (insert s)
+             (org-mode)
+             (goto-char (point-min))
+             (org-element-link-parser)))
+    (`nil
+     nil)
+    (link t)
+    (_
+     (message "Can't recognize the org link type")
+     nil)))
 
 (defun scratch-parent-path (path)
   "Get the PATH's parent path."
@@ -431,6 +457,7 @@
     (define-key map (kbd "C-c +") (scratch-generate-action #'scratch-add-node #'scratch-add-node-checker))
     (define-key map (kbd "C-c -") (scratch-generate-action #'scratch-delete-node #'scratch-delete-node-checker))
     (define-key map (kbd "C-c C-l") (scratch-generate-action #'scratch-open-link #'scratch-open-link-checker))
+    (define-key map (kbd "C-c C-o C-l") (scratch-generate-action #'scratch-open-org-link #'scratch-open-org-link-checker))
     (define-key map (kbd "C-c C-c") (scratch-generate-action #'scratch-copy-node #'scratch-copy-node-checker))
     (define-key map (kbd "C-c C-e") (scratch-generate-action #'scratch-edit-in-buffer #'scratch-edit-in-buffer-checker))
     (define-key map (kbd "C-c ~") (scratch-generate-action #'scratch-rename-node #'scratch-rename-node-checker))
