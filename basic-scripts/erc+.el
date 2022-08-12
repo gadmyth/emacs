@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.6
-;; Package-Version: 20220729.001
+;; Version: 1.0.7
+;; Package-Version: 20220812.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -51,6 +51,7 @@
 (defconst *erc-forbidden-targets-file-name* (expand-file-name "~/.erc_forbidden_targets"))
 (defconst *erc-forbidden-targets-actions* '(("jump" . erc-jump-to-buffer)
                                             ("reset unread count" . erc-reset-forbidden-taget-unread-count)
+                                            ("reset all unread count" . erc-reset-all-forbidden-tagets-unread-count)
                                             ("unforbidden" . erc-unforbidden-target)))
 
 (defun erc-toggle-debug ()
@@ -545,6 +546,13 @@ With PARSED message and PROC."
 (defun erc-reset-forbidden-taget-unread-count (target)
   "Reset the forbidden TARGET's unread message count to zero."
   (when target
+    (let ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*))))
+      (when (and count (> count 0))
+        (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) 0)))))
+
+(defun erc-reset-all-forbidden-tagets-unread-count (_)
+  "Reset all the forbidden targets' unread message count to zero."
+  (seq-doseq (target *erc-forbidden-targets*)
     (let ((count (cdr (assoc (intern target) *erc-forbidden-targets-unread-count*))))
       (when (and count (> count 0))
         (setf (alist-get (intern target) *erc-forbidden-targets-unread-count*) 0)))))
