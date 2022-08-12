@@ -113,7 +113,9 @@
   (when (> (length *org-cap-temp*) 0)
     (let* ((link (alist-get "link" *org-cap-temp* nil nil #'string-equal))
            (description (alist-get "description" *org-cap-temp* nil nil #'string-equal))
-           (content (format "[[%s][%s]]" link description)))
+           (content (if (> (length description) 0)
+                        (format "[[%s][%s]]" link description)
+                      link)))
       (insert content)
       (setq *org-cap-temp* nil))))
 
