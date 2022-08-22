@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: browse-url+.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20220614.002
+;; Version: 1.0.4
+;; Package-Version: 20220822.001
 ;; Package-Requires: w3m, xwidget, xwwp
 ;; Keywords: browse url
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -51,6 +51,7 @@
 
 (defun browse-url-select-function (url)
   "Select function from list to open the URL."
+  (interactive "sPlease input the url: ")
   (let* ((action-list *browse-url-function-list*)
          (action (intern (completing-read "Select the browser: "
                                           action-list nil t)))
