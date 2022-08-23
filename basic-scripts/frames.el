@@ -3,11 +3,8 @@
 ;;; Code:
 
 (require 'frame)
-(require 'async)
 (require 'eyebrowse+)
 
-(defvar *max-frame-width* 0)
-(defvar *max-frame-height* 0)
 
 (setq frame-title-format
       '(:eval
@@ -22,44 +19,20 @@
           (format "%s - [%s, %s, %s]" (or file-name buffer-name)
                   locked-conf eb-conf last-conf))))
 
-(defadvice toggle-frame-maximized (before mark-frame-maxsize activate)
-  "AFTER: , ACTIVATE: ."
-  (message "toggle-frame-maximized advice")
-  (async-start
-   (lambda ()
-     (sleep-for 0.5)
-     0.5)
-   (lambda (result)
-     (message "after toggle-frame-maximized %f seconds" result)
-     (let* ((frame (selected-frame))
-            (fullscreen-value (frame-parameter frame 'fullscreen)))
-       (message "width: %d, height: %d, %s" (frame-width frame) (frame-height frame) fullscreen-value)
-       (when (or (eq fullscreen-value 'maximized)
-                 (eq fullscreen-value 'fullboth))
-         (setq *max-frame-width*  (frame-width frame)
-               *max-frame-height* (frame-height frame))
-         (message "max-width: %d, max-height: %d" *max-frame-width* *max-frame-height*))))))
-
 (defun set-suitable-frame-size-inner (frame)
   "FRAME: ."
   (set-frame-size
    frame
-   (round (* *max-frame-width* 0.5))
-   (round (* *max-frame-height* 0.8))))
+   (round (* (display-pixel-width) 0.5))
+   (round (* (display-pixel-height) 0.8))
+   t))
 
 (defun set-suitable-frame-size ()
   "."
   (interactive)
   (let ((frame (selected-frame)))
-    (if (frame-parameter frame 'fullscreen)
-        (progn
-          (set-frame-parameter frame 'fullscreen nil)
-          (async-start
-           (lambda ()
-             (sleep-for 0.5))
-           (lambda (result)
-             (set-suitable-frame-size-inner (selected-frame)))))
-      (set-suitable-frame-size-inner frame))))
+    (set-frame-parameter frame 'fullscreen nil)
+    (set-suitable-frame-size-inner (selected-frame))))
 
 (if (boundp 'tool-bar-mode) (tool-bar-mode (bound-or-default *tool-bar-mode* t)))
 (if (boundp 'menu-bar-mode) (menu-bar-mode (bound-or-default *menu-bar-mode* t)))
