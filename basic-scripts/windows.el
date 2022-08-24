@@ -265,7 +265,8 @@ Copied some codes from window-numbering.el."
    (lambda (buffer)
      (let ((mode (with-current-buffer buffer major-mode)))
        (or (eq 'term-mode mode)
-           (eq 'shell-mode mode))))
+           (eq 'shell-mode mode)
+           (eq 'eshell-mode mode))))
    (lambda ()
      (interactive)
      ;; TODO: bash path in different OS, or use multi-term
