@@ -294,20 +294,35 @@
                  (point))))
       (kill-region begin end))))
 
-(defun kill-the-whole-line-ring-save (start end)
+(defun kill-the-whole-line-ring-save (&optional start end)
   "START, END."
   (interactive "r")
-  (if (region-active-p)
-      (kill-ring-save start end)
-    (save-excursion
-      (let ((begin (progn
-                     (beginning-of-visual-line)
-                     (point)))
-            (end (progn
-                   (end-of-visual-line)
-                   (point))))
-        (kill-ring-save begin end)
-        (message "*** line copied ***")))))
+  (let ((region-active-p (region-active-p))
+        text-beg
+        text-end)
+    (setq text-beg (if region-active-p start (line-beginning-position))
+          text-end (if region-active-p end (line-end-position)))
+    (cond
+     ((> text-end text-beg)
+      (pcase window-system
+        ('x
+         (cond
+          ((executable-find "xclip")
+           (let* ((content (buffer-substring-no-properties text-beg text-end))
+                  (command (format "echo -n \"%s\" | xclip -sel c" content)))
+             (call-process-shell-command command)
+             (deactivate-mark)))
+          (t
+           (kill-ring-save begin end))))
+        (_
+         (kill-ring-save begin end)))
+      (if region-active-p
+          (message "*** region copied ***")
+        (message "*** line copied ***")))
+     (t
+      (message "Can't copy empty content!")
+      (if region-active-p
+          (deactivate-mark))))))
 
 (defun mark-the-whole-line ()
   "."
