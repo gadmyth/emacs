@@ -4,7 +4,7 @@
 
 (when (eq window-system 'x)
   (setq select-enable-clipboard t)
-  (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
+  (setq interprogram-paste-function 'x-selection-value)
   (setq x-stretch-cursor t)
   )
 
