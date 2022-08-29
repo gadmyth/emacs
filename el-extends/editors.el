@@ -309,7 +309,7 @@
          (cond
           ((executable-find "xclip")
            (let* ((content (buffer-substring-no-properties text-beg text-end))
-                  (command (format "echo -n \"%s\" | xclip -sel c" content)))
+                  (command (format "xclip -sel c <<< \"%s\"" content)))
              (call-process-shell-command command)
              (deactivate-mark)))
           (t
