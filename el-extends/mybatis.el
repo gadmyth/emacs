@@ -126,7 +126,8 @@
                 (let ((map-id (substring-no-properties line (match-beginning 1) (match-end 1)))
                       (map-type (substring-no-properties line (match-beginning 2) (match-end 2))))
                   ;; (message "parsed resultMap: map-id: %s, map-type: %s" map-id map-type)
-                  (setq found `(,map-id ,map-type))))))
+                  (setq found `(,map-id ,map-type)))
+              (forward-line))))
         found))))
 
 (defun generate-mybatis-insert-values ()
@@ -158,7 +159,8 @@
         (while (< (point) end)
           (let* ((column (parse-mybatis-result-column-string))
                  (jdbc-type (parse-mybatis-result-jdbc-type-string)))
-            (push (generate-mybatis-update-value column jdbc-type) list)
+            (when (and column jdbc-type)
+              (push (generate-mybatis-update-value column jdbc-type) list))
             (forward-line 1))
           (reverse list))))))
 
@@ -174,7 +176,8 @@
         (while (< (point) end)
           (let* ((column (parse-mybatis-result-column-string))
                  (jdbc-type (parse-mybatis-result-jdbc-type-string)))
-            (push (generate-sql-column-definition column jdbc-type) list)
+            (when (and column jdbc-type)
+              (push (generate-sql-column-definition column jdbc-type) list))
             (forward-line 1))
           (reverse list))))))
 
@@ -203,11 +206,13 @@
   "."
   (interactive)
   (let ((table-name (read-string "Please input table name: ")))
+    (message "<update id=\"update\" parameterType=\"%s\">" (cadr (parse-mybatis-result-map)))
     (message "update %s" table-name)
     (message "<set>")
     (generate-mybatis-update-values)
     (message "</set>")
-    (message "where id = #{id,jdbcType=BIGINT}")))
+    (message "where id = #{id,jdbcType=BIGINT}")
+    (message "</update>")))
 
 (defun generate-create-table-sql ()
   "."
