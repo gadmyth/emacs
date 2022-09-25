@@ -313,9 +313,9 @@
              (call-process-shell-command command)
              (deactivate-mark)))
           (t
-           (kill-ring-save begin end))))
+           (kill-ring-save text-beg text-end))))
         (_
-         (kill-ring-save begin end)))
+         (kill-ring-save text-beg text-end)))
       (if region-active-p
           (message "*** region copied ***")
         (message "*** line copied ***")))
