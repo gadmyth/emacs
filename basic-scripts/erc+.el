@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.0.7
-;; Package-Version: 20220812.001
+;; Version: 1.0.9
+;; Package-Version: 20221013.002
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -274,9 +274,17 @@ With PARSED message and PROC."
          (buffer-name (or channel
                           (and (string-equal target erc-nick) short-sender)
                           target)))
+    (unless buffer-name
+      (setq buffer-name (choose-erc-buffer-name)))
     (erc-debug-message "nick click, data: %s, short-sender: %s, channel: %s, buffer-name: %s" data short-sender channel buffer-name)
     (erc-jump-to-buffer buffer-name)))
 
+(defun choose-erc-buffer-name ()
+  "."
+  (let* ((erc-buffer-list (erc-buffer-list))
+         (buffer-name-list (mapcar (lambda (buffer) (buffer-name buffer)) erc-buffer-list))
+         (name (completing-read "Please choose an erc buffer: " buffer-name-list)))
+    name))
 
 (defun display-and-switch-to-buffer (buffer-or-name)
   "Display buffer of BUFFER-OR-NAME, and switch to the buffer's window."
@@ -317,12 +325,14 @@ With PARSED message and PROC."
          (channel (and (string-prefix-p "#" target) target))
          (buffer-name (or channel
                           (and (string-equal target erc-nick) short-sender)
-                          target))
-         (content (completing-read (format "Reply the chat %s: " buffer-name) nil nil t)))
-    (with-current-buffer (get-buffer buffer-name)
-      (goto-char (point-max))
-      (insert content)
-      (erc-send-current-line))))
+                          target)))
+    (unless buffer-name
+      (setq buffer-name (choose-erc-buffer-name)))
+    (let ((content (completing-read (format "Reply the chat %s: " buffer-name) nil nil t)))
+      (with-current-buffer (get-buffer buffer-name)
+        (goto-char (point-max))
+        (insert content)
+        (erc-send-current-line)))))
 
 (defun erc-button-file-callback (data)
   "When click the nick name erc-button, response with the DATA."
