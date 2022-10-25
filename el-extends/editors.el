@@ -304,27 +304,23 @@
           text-end (if region-active-p end (line-end-position)))
     (cond
      ((> text-end text-beg)
-      (pcase window-system
-        ('x
-         (cond
-          ((executable-find "xclip")
-           (let* ((content (buffer-substring-no-properties text-beg text-end))
-                  (mktemp-cmd (executable-find "mktemp"))
-                  (tmp-file-path (shell-command-to-string (format "%s /tmp/emacs.king-ring.XXXX" mktemp-cmd)))
-                  (tmp-file-path (replace-regexp-in-string "\n" "" tmp-file-path))
-                  (xclip-cmd (executable-find "xclip"))
-                  (command (format "cat %s | xclip -sel c" tmp-file-path xclip-cmd)))
-             (message "content: %s" content)
-             (message "temp file: %s" tmp-file-path)
-             (message "command: %s" command)
-             (write-region content nil tmp-file-path)
-             (call-process-shell-command command)
-             (delete-file tmp-file-path)
-             (deactivate-mark)))
-          (t
-           (kill-ring-save text-beg text-end))))
-        (_
-         (kill-ring-save text-beg text-end)))
+      (cond
+       ((executable-find "xclip")
+        (let* ((content (buffer-substring-no-properties text-beg text-end))
+               (mktemp-cmd (executable-find "mktemp"))
+               (tmp-file-path (shell-command-to-string (format "%s /tmp/emacs.king-ring.XXXX" mktemp-cmd)))
+               (tmp-file-path (replace-regexp-in-string "\n" "" tmp-file-path))
+               (xclip-cmd (executable-find "xclip"))
+               (command (format "cat %s | xclip -sel c" tmp-file-path xclip-cmd)))
+          (message "content: %s" content)
+          (message "temp file: %s" tmp-file-path)
+          (message "command: %s" command)
+          (write-region content nil tmp-file-path)
+          (call-process-shell-command command)
+          (delete-file tmp-file-path)
+          (deactivate-mark)))
+       (t
+        (kill-ring-save text-beg text-end)))
       (if region-active-p
           (message "*** region copied ***")
         (message "*** line copied ***")))
