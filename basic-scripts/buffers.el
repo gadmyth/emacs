@@ -3,7 +3,7 @@
 ;;; Code:
 
 
-(global-linum-mode 0)
+(global-display-line-numbers-mode 0)
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
 
