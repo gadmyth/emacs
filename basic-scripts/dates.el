@@ -7,22 +7,22 @@
 
 (defconst +date-command+ (if (eq window-system 'ns) "gdate" "date"))
 
-(defun quick-on-timesmap (timestamp)
-  "Do some quick actions on TIMESTAMP."
+(defun quick-on-content (content)
+  "Do some quick actions on CONTENT."
   (cond ((equal current-prefix-arg '(4))
-         (message "current-timestamp: %S" timestamp))
+         (message "content: %S" content))
         ((equal current-prefix-arg 1)
-         (insert (number-to-string timestamp)))
+         (insert (format "%S" content)))
         ((equal current-prefix-arg 2)
-         (kill-new (number-to-string timestamp))
-         (message "current-timestamp: [%S] yanked." timestamp))))
+         (kill-new (format "%S" content))
+         (message "content: [%S] yanked." content))))
 
 (defun current-timestamp ()
   "."
   (interactive)
   (let ((timestamp (time-convert nil 'integer)))
     (when (called-interactively-p 'any)
-      (quick-on-timesmap timestamp))
+      (quick-on-content timestamp))
     timestamp))
 
 (defun tomorrow-timestamp ()
@@ -38,7 +38,7 @@
            (low (cadr encoded-time))
            (timestamp (+ (ash high 16) low)))
       (when (called-interactively-p 'any)
-        (quick-on-timesmap timestamp))
+        (quick-on-content timestamp))
       timestamp)))
 
 (defun system-current-timestamp ()
@@ -56,7 +56,7 @@
          (emacs-time (encode-time list-time))
          (timestamp (time-convert emacs-time 'integer)))
     (when (called-interactively-p 'any)
-      (quick-on-timesmap timestamp))
+      (quick-on-content timestamp))
     timestamp))
 
 (defun system-string-to-timestamp (date-str)
@@ -69,18 +69,20 @@
 
 (defun timestamp-to-string-with-format (timestamp time-format)
   "TIMESTAMP: , TIME-FORMAT."
-  (interactive "sInput the timestamp: ")
   (let* ((timestamp (if (stringp timestamp) (string-to-number timestamp)
                       timestamp))
          (date-str (format-time-string time-format timestamp)))
+    (quick-on-content date-str)
     date-str))
 
 (defun timestamp-to-normal-string (timestamp)
   "TIMESTAMP."
+  (interactive "sInput the timestamp: ")
   (timestamp-to-string-with-format timestamp "%Y-%m-%d %H:%M:%S"))
 
 (defun timestamp-to-short-string (timestamp)
   "TIMESTAMP."
+  (interactive "sInput the timestamp: ")
   (timestamp-to-string-with-format timestamp "%Y-%m-%d"))
 
 (defun current-time-normal-string ()
