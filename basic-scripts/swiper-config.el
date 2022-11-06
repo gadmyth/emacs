@@ -24,27 +24,38 @@
   "Otherwise, counsel-grep the word at point, if current-prefix-arg is not null, toggle the superword-mode."
   (interactive)
   (let* ((file-name (buffer-file-name (current-buffer)))
-         (func (cond ((not file-name) #'swiper)
-                     (t #'counsel-grep))))
-    (if (and (mark) (region-active-p))
-        (progn
-          (deactivate-mark)
-          (funcall func (buffer-substring-no-properties (region-beginning) (region-end))))
-      (let* ((should-toggle (not (null current-prefix-arg)))
-             (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
-             (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
-        (if should-toggle (superword-mode toggle-value))
-        (let ((word (word-at-point t)))
-          (if should-toggle (superword-mode origin-value))
-          (message "should toggle: %S, current is origin-value: %S, toggle-value: %S" should-toggle origin-value toggle-value)
-          (message "string-at-point is [%s]" word)
-          (let ((counsel-grep-base-command))
-            (when file-name
-              (cond ((equal ".gz" (ffap-file-suffix file-name))
-                     (setq counsel-grep-base-command "zgrep -E -n -e %s %s"))
-                    (t
-                     (setq counsel-grep-base-command "grep -E -n -e %s %s"))))
-            (funcall func word)))))))
+         func
+         word)
+    ;; determine the func
+    (cond
+     ((not file-name)
+      (setq func #'swiper))
+     (t
+      (setq func #'counsel-grep)
+      ;; determine the counsel-grep-base-command
+      (cond
+       ((equal ".gz" (ffap-file-suffix file-name))
+        (setq counsel-grep-base-command "zgrep -E -n -e %s %s"))
+       (t
+        (setq counsel-grep-base-command "grep -E -n -e %s %s")))))
+    ;; determine the word to search
+    (cond
+     ((region-active-p)
+      (setq word (buffer-substring-no-properties (region-beginning) (region-end)))
+      (message "string-at-region is [%s]" word)
+      (deactivate-mark))
+    (t
+     (let* ((should-toggle (not (null current-prefix-arg)))
+            (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
+            (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
+       (if should-toggle (superword-mode toggle-value))
+       (setq word (word-at-point t))
+       (if should-toggle (superword-mode origin-value))
+       (message "should toggle: %S, current is origin-value: %S, toggle-value: %S"
+                should-toggle origin-value toggle-value)
+       (message "string-at-point is [%s]" word))))
+    ;; execute the func
+    (funcall func word)))
 
 (global-set-key (kbd "C-S-s") 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
