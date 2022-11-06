@@ -294,14 +294,12 @@
                  (point))))
       (kill-region begin end))))
 
-(defun kill-the-whole-line-ring-save (&optional start end)
+(defun kill-the-whole-line-ring-save ()
   "START, END."
-  (interactive "r")
-  (let ((region-active-p (region-active-p))
-        text-beg
-        text-end)
-    (setq text-beg (if region-active-p start (line-beginning-position))
-          text-end (if region-active-p end (line-end-position)))
+  (interactive)
+  (let* ((region-active-p (region-active-p))
+         (text-beg (if region-active-p (region-beginning) (line-beginning-position)))
+         (text-end (if region-active-p (region-end) (line-end-position))))
     (cond
      ((> text-end text-beg)
       (cond
