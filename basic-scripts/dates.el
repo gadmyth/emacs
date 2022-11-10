@@ -10,12 +10,12 @@
 (defun quick-on-content (content)
   "Do some quick actions on CONTENT."
   (cond ((equal current-prefix-arg '(4))
-         (message "content: %S" content))
+         (message "content: %s" content))
         ((equal current-prefix-arg 1)
-         (insert (format "%S" content)))
+         (insert (format "%s" content)))
         ((equal current-prefix-arg 2)
-         (kill-new (format "%S" content))
-         (message "content: [%S] yanked." content))))
+         (kill-new (format "%s" content))
+         (message "content: [%s] yanked." content))))
 
 (defun current-timestamp ()
   "."
@@ -89,27 +89,13 @@
   "."
   (interactive)
   (let ((time-string (current-time-string-with-format "%Y-%m-%d %H:%M:%S")))
-    (when (called-interactively-p 'any)
-      (quick-on-time-string time-string))
     time-string))
 
 (defun current-time-short-string ()
   "."
   (interactive)
   (let ((time-string (current-time-string-with-format "%Y-%m-%d")))
-    (when (called-interactively-p 'any)
-      (quick-on-time-string time-string))
     time-string))
-
-(defun quick-on-time-string (time-string)
-  "Do some quick actions on TIME-STRING."
-  (cond ((equal current-prefix-arg '(4))
-         (message "current time normal string is: [%s]" time-string))
-        ((eq current-prefix-arg 1)
-         (insert time-string))
-        ((eq current-prefix-arg 2)
-         (kill-new time-string)
-         (message "current time normal string: [%S] yanked." time-string))))
 
 (defun current-time-string-with-format (time-format)
   "PREFIX-ARG, TIME-FORMAT."
