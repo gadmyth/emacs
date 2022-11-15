@@ -457,7 +457,7 @@
     (define-key map (kbd "C-c +") (scratch-generate-action #'scratch-add-node #'scratch-add-node-checker))
     (define-key map (kbd "C-c -") (scratch-generate-action #'scratch-delete-node #'scratch-delete-node-checker))
     (define-key map (kbd "C-c C-l") (scratch-generate-action #'scratch-open-link #'scratch-open-link-checker))
-    (define-key map (kbd "C-c C-o C-l") (scratch-generate-action #'scratch-open-org-link #'scratch-open-org-link-checker))
+    (define-key map (kbd "C-c C->") (scratch-generate-action #'scratch-open-org-link #'scratch-open-org-link-checker))
     (define-key map (kbd "C-c C-c") (scratch-generate-action #'scratch-copy-node #'scratch-copy-node-checker))
     (define-key map (kbd "C-c C-e") (scratch-generate-action #'scratch-edit-in-buffer #'scratch-edit-in-buffer-checker))
     (define-key map (kbd "C-c ~") (scratch-generate-action #'scratch-rename-node #'scratch-rename-node-checker))
