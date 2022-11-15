@@ -25,7 +25,7 @@
   (interactive)
   (let* ((file-name (buffer-file-name (current-buffer)))
          func
-         word)
+         (word (region-or-word-at-point)))
     ;; determine the func
     (cond
      ((not file-name)
@@ -38,24 +38,47 @@
         (setq counsel-grep-base-command "zgrep -E -n -e %s %s"))
        (t
         (setq counsel-grep-base-command "grep -E -n -e %s %s")))))
-    ;; determine the word to search
+    ;; execute the func
+    (funcall func word)))
+
+(defun region-or-word-at-point ()
+  "."
+  (let (word)
     (cond
      ((region-active-p)
       (setq word (buffer-substring-no-properties (region-beginning) (region-end)))
       (message "string-at-region is [%s]" word)
       (deactivate-mark))
-    (t
-     (let* ((should-toggle (not (null current-prefix-arg)))
-            (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
-            (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
-       (if should-toggle (superword-mode toggle-value))
-       (setq word (word-at-point t))
-       (if should-toggle (superword-mode origin-value))
-       (message "should toggle: %S, current is origin-value: %S, toggle-value: %S"
-                should-toggle origin-value toggle-value)
-       (message "string-at-point is [%s]" word))))
-    ;; execute the func
-    (funcall func word)))
+     (t
+      (let* ((should-toggle (not (null current-prefix-arg)))
+             (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
+             (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
+        (if should-toggle (superword-mode toggle-value))
+        (setq word (word-at-point t))
+        (if should-toggle (superword-mode origin-value))
+        (message "should toggle: %S, current is origin-value: %S, toggle-value: %S"
+                 should-toggle origin-value toggle-value)
+        (message "string-at-point is [%s]" word))))
+    word))
+
+
+(defun counsel-git-with-word-at-point ()
+  "."
+  (interactive)
+  (let ((word (region-or-word-at-point)))
+    (funcall 'counsel-git word)))
+
+(defun counsel-git-grep-with-word-at-point ()
+  "."
+  (interactive)
+  (let ((word (region-or-word-at-point)))
+    (funcall 'counsel-git-grep word)))
+
+(defun counsel-ag-with-word-at-point ()
+  "."
+  (interactive)
+  (let ((word (region-or-word-at-point)))
+    (funcall 'counsel-ag word)))
 
 (global-set-key (kbd "C-S-s") 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
@@ -67,9 +90,9 @@
 ;;(global-set-key (kbd "<f1> l") 'counsel-load-library)
 ;;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
 ;;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-(global-set-key (kbd "C-c g f") 'counsel-git)
-(global-set-key (kbd "C-c g g") 'counsel-git-grep)
-(global-set-key (kbd "C-c g k") 'counsel-ag)
+(global-set-key (kbd "C-c g f") 'counsel-git-with-word-at-point)
+(global-set-key (kbd "C-c g g") 'counsel-git-grep-with-word-at-point)
+(global-set-key (kbd "C-c g k") 'counsel-ag-with-word-at-point)
 ;;(global-set-key (kbd "C-x l") 'counsel-locate)
 ;;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
 ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
