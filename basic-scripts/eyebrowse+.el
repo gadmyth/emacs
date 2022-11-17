@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.3.0
-;; Package-Version: 20220805.001
+;; Version: 1.3.1
+;; Package-Version: 20221117.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -95,7 +95,7 @@
    0 nil
    (lambda ()
      ;; load eyebrowse config from file after 0 second
-     (when (load-eyebrowse-config)
+     (when (load-eyebrowse-configs)
        ;; add the save function if loading success from file,
        ;; or it will be dangerous to overwrite the config to file.
        (run-hooks 'eyebrowse-lazy-load-hook)))))
@@ -259,8 +259,10 @@
     ("restore default config" . eyebrowse-restore-default-config)
     ("create config" . eyebrowse-create-window-config-with-tag)
     ("close config" . eyebrowse-close-window-config)
-    ("load config" . load-eyebrowse-config)
-    ("save config" . save-eyebrowse-config)))
+    ("load configs" . load-eyebrowse-configs)
+    ("save configs" . save-eyebrowse-configs)
+    ("load single config" . eyebrowse-load-config-from-file)
+    ("save single config" . eyebrowse-save-current-config-to-file)))
 
 (defun eyebrowse-modify-config (&rest _)
   "."
@@ -494,11 +496,11 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse--fixup-window-config window-config)
     (window-state-put window-config (frame-root-window) 'safe)))
 
-(defun* load-eyebrowse-config ()
+(defun* load-eyebrowse-configs ()
   "Load eyebrowse workspace from file."
   (interactive)
   (when (commit-editmsg-terminal-frame-p)
-    (return-from load-eyebrowse-config))
+    (cl-return-from load-eyebrowse-configs))
   (let ((loading-success-p)
         (file-name (eyebrowse-file-name)))
     (eyebrowse-init-original)
@@ -599,7 +601,7 @@ COPY from eyebrowse--load-window-config."
         (height (frame-parameter frame 'height)))
     `((top . ,top) (left . ,left) (width . ,width) (height . ,height))))
 
-(defun save-eyebrowse-config (&optional frame)
+(defun save-eyebrowse-configs (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
   (let ((file-name (eyebrowse-file-name frame))
@@ -612,6 +614,25 @@ COPY from eyebrowse--load-window-config."
            (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" rich-configs))))
       (with-temp-file file-name
         (insert content)))))
+
+(defun eyebrowse-save-current-config-to-file (filename)
+  "Save eyebrowse's current tag's config to FILENAME."
+  (interactive "FPlease select the file to save eyebrowse current config: ")
+  (eyebrowse-update-window-config)
+  (let* ((config (eyebrowse-get-current-config))
+         (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" config))))
+    (with-temp-file filename
+      (insert content))))
+
+(defun eyebrowse-load-config-from-file (filename)
+  "Load single eyebrowse config from FILENAME into current frame, overriding the window layout."
+  (interactive "fPlease select the eyebrowse config file to load: ")
+  (let* ((content (with-temp-buffer
+                    (insert-file-contents filename)
+                    (buffer-string)))
+         (config (read content)))
+    (message "now loading eyebrowse config file: %s" filename)
+    (eyebrowse-load-certain-config config)))
 
 (defun eyebrowse-sync-config ()
   "Sync the eyebrowse config from the first frame."
@@ -629,7 +650,7 @@ COPY from eyebrowse--load-window-config."
   (unless *eyebrowse-save-timer*
     (message "Now starting the *eyebrowse-save-timer* ...")
     (setq *eyebrowse-save-timer*
-          (run-with-idle-timer 600 600 #'save-eyebrowse-config))))
+          (run-with-idle-timer 600 600 #'save-eyebrowse-configs))))
 
 (defun stop-eyebrowse-save-timer ()
   "."
@@ -831,8 +852,8 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse-swap-init-function)
     (add-hook 'eyebrowse-lazy-load-hook
               (lambda ()
-                (add-hook 'delete-frame-functions #'save-eyebrowse-config)
-                (add-hook 'kill-emacs-hook #'save-eyebrowse-config)
+                (add-hook 'delete-frame-functions #'save-eyebrowse-configs)
+                (add-hook 'kill-emacs-hook #'save-eyebrowse-configs)
                 (add-hook 'before-make-frame-hook #'load-frame-geometry)
                 (set-eyebrowse-header-line-format)
                 (set-eyebrowse-mode-line-format)))
@@ -848,8 +869,8 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse-mode 1))
    (t
     (message "Now turn off the eyebrowse-plus-mode...")
-    (remove-hook 'delete-frame-functions #'save-eyebrowse-config)
-    (remove-hook 'kill-emacs-hook #'save-eyebrowse-config)
+    (remove-hook 'delete-frame-functions #'save-eyebrowse-configs)
+    (remove-hook 'kill-emacs-hook #'save-eyebrowse-configs)
     ;; header-line-format hook
     (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
     (remove-hook 'find-file-hook #'set-eyebrowse-mode-line-format)
