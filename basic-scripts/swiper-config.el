@@ -4,7 +4,7 @@
 
 (require 'swiper)
 (require 'counsel)
-(require 'thingatpt)
+(require 'thingatpt+)
 (require 'ffap)
 
 (ivy-mode 1)
@@ -40,27 +40,6 @@
         (setq counsel-grep-base-command "grep -E -n -e %s %s")))))
     ;; execute the func
     (funcall func word)))
-
-(defun region-or-word-at-point ()
-  "."
-  (let (word)
-    (cond
-     ((region-active-p)
-      (setq word (buffer-substring-no-properties (region-beginning) (region-end)))
-      (message "string-at-region is [%s]" word)
-      (deactivate-mark))
-     (t
-      (let* ((should-toggle (not (null current-prefix-arg)))
-             (origin-value (if (and (boundp 'superword-mode) superword-mode) 1 0))
-             (toggle-value (if (and (boundp 'superword-mode) (not superword-mode)) 1 0)))
-        (if should-toggle (superword-mode toggle-value))
-        (setq word (word-at-point t))
-        (if should-toggle (superword-mode origin-value))
-        (message "should toggle: %S, current is origin-value: %S, toggle-value: %S"
-                 should-toggle origin-value toggle-value)
-        (message "string-at-point is [%s]" word))))
-    word))
-
 
 (defun counsel-git-with-word-at-point ()
   "."
