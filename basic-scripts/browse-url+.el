@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'xwidget)
+(require 'clipboard+)
 
 (defvar *browse-url-function-list*
   `((browse-url-default-browser . browse-url)
@@ -47,7 +48,8 @@
        `(xwidget-webkit-browse-url . browse-url)))
     (browse-url-firefox . browse-url)
     (browse-url-chrome . browse-url)
-    (show-link-url . show-link-url)))
+    (show-link-url . show-link-url)
+    (copy-link-url . copy-link-url)))
 
 (defun browse-url-select-function (url)
   "Select function from list to open the URL."
@@ -67,6 +69,11 @@
 (defun show-link-url (url)
   "Show link's URL."
   (message "link url is: %s" url))
+
+(defun copy-link-url (url)
+  "Copy link's URL."
+  (try-kill-to-system-clipboad url)
+  (message "link url %s copied" url))
 
 (provide 'browse-url+)
 ;;; browse-url+.el ends here

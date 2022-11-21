@@ -1,4 +1,4 @@
-;;; package --- clipboard.el
+;;; package --- clipboard-config.el
 ;;; Commentary:
 ;;; Code:
 
@@ -8,5 +8,5 @@
   (setq x-stretch-cursor t)
   )
 
-(provide 'clipboard)
-;;; clipboard.el ends here
+(provide 'clipboard-config)
+;;; clipboard-config.el ends here

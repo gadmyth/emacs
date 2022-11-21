@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 's)
+(require 'clipboard+)
 
 (defvar *wrapper-content*)
 
@@ -299,33 +300,15 @@
   (interactive)
   (let* ((region-active-p (region-active-p))
          (text-beg (if region-active-p (region-beginning) (line-beginning-position)))
-         (text-end (if region-active-p (region-end) (line-end-position))))
+         (text-end (if region-active-p (region-end) (line-end-position)))
+         (content (buffer-substring-no-properties text-beg text-end)))
+    (try-kill-to-system-clipboad content)
     (cond
-     ((> text-end text-beg)
-      (cond
-       ((executable-find "xclip")
-        (let* ((content (buffer-substring-no-properties text-beg text-end))
-               (mktemp-cmd (executable-find "mktemp"))
-               (tmp-file-path (shell-command-to-string (format "%s /tmp/emacs.king-ring.XXXX" mktemp-cmd)))
-               (tmp-file-path (replace-regexp-in-string "\n" "" tmp-file-path))
-               (xclip-cmd (executable-find "xclip"))
-               (command (format "cat %s | xclip -sel c" tmp-file-path xclip-cmd)))
-          (message "content: %s" content)
-          (message "temp file: %s" tmp-file-path)
-          (message "command: %s" command)
-          (write-region content nil tmp-file-path)
-          (call-process-shell-command command)
-          (delete-file tmp-file-path)
-          (deactivate-mark)))
-       (t
-        (kill-ring-save text-beg text-end)))
-      (if region-active-p
-          (message "*** region copied ***")
-        (message "*** line copied ***")))
+     (region-active-p
+      (message "*** region copied ***")
+      (deactivate-mark))
      (t
-      (message "Can't copy empty content!")
-      (if region-active-p
-          (deactivate-mark))))))
+      (message "*** line copied ***")))))
 
 (defun mark-the-whole-line ()
   "."
