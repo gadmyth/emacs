@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.0.9
-;; Package-Version: 20220809.001
+;; Version: 1.1.0
+;; Package-Version: 20221124.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -476,9 +476,8 @@
   (interactive)
   (let ((file-name +scratch-list-file-name+))
     (message "Saving scratch list to file %S ..." file-name)
-    (let* ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *scratch-list*))))
-      (with-temp-file file-name
-        (insert content)))
+    (with-temp-file file-name
+      (print *scratch-list* (current-buffer)))
     (setq *scratch-list-modified* nil)))
 
 (defun load-scratch-list ()

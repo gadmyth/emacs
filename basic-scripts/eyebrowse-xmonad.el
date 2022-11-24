@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.5
-;; Package-Version: 20220805.001
+;; Version: 1.0.6.6
+;; Package-Version: 20221124.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -267,9 +267,8 @@
 (defun save-eyebrowse-bookmarks ()
   "."
   (when (> (length *eyebrowse-bookmarks*) 0)
-    (let ((content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" *eyebrowse-bookmarks*))))
-      (with-temp-file +eyebrowse-bookmarks-file-name+
-        (insert content)))))
+    (with-temp-file +eyebrowse-bookmarks-file-name+
+      (print *eyebrowse-bookmarks* (current-buffer)))))
 
 (defun load-eyebrowse-bookmarks ()
   "."

@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.3.1
-;; Package-Version: 20221117.001
+;; Version: 1.3.2
+;; Package-Version: 20221124.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -610,19 +610,17 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse-update-window-config)
     (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
            (frame-params (eyebrowse-frame-parameters frame))
-           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs)))
-           (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" rich-configs))))
+           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs))))
       (with-temp-file file-name
-        (insert content)))))
+        (print rich-configs (current-buffer))))))
 
 (defun eyebrowse-save-current-config-to-file (filename)
   "Save eyebrowse's current tag's config to FILENAME."
   (interactive "FPlease select the file to save eyebrowse current config: ")
   (eyebrowse-update-window-config)
-  (let* ((config (eyebrowse-get-current-config))
-         (content (replace-regexp-in-string "\\.\\.\\." "" (format "%S" config))))
+  (let ((config (eyebrowse-get-current-config)))
     (with-temp-file filename
-      (insert content))))
+      (print config (current-buffer)))))
 
 (defun eyebrowse-load-config-from-file (filename)
   "Load single eyebrowse config from FILENAME into current frame, overriding the window layout."
