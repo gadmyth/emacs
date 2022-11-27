@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: hi-lock+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20221120.001
+;; Version: 1.0.2
+;; Package-Version: 20221127.001
 ;; Package-Requires:
 ;; Keywords: hi-lock, highlight
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -124,8 +124,9 @@
   (let ((regexp (car (hi-lock--regexps-at-point))))
     (message "regexp: %s" regexp)
     (when regexp
-      (when (re-search-forward regexp nil t 2)
-        (goto-char (match-beginning 0))))))
+      (let ((case-fold-search nil))
+        (when (re-search-forward regexp nil t 2)
+          (goto-char (match-beginning 0)))))))
 
 (defun hi-lock/previous-heighlight-at-point ()
   "."
@@ -133,8 +134,9 @@
   (let ((regexp (car (hi-lock--regexps-at-point))))
     (message "regexp: %s" regexp)
     (when regexp
-      (when (re-search-backward regexp nil t)
-        (goto-char (match-beginning 0))))))
+      (let ((case-fold-search nil))
+        (when (re-search-backward regexp nil t)
+          (goto-char (match-beginning 0)))))))
 
 (global-set-key (kbd "C-S-h .") 'hi-lock/toggle-highlight-at-point)
 (global-set-key (kbd "C-S-h u") 'hi-lock/toggle-highlight-at-point)
