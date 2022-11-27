@@ -173,22 +173,41 @@ Copied some codes from window-numbering.el."
          (select-window (cdr cand))
          (switch-to-buffer buffer))))))
 
+(defmacro horizontal-delta (direction)
+  "DIRECTION."
+  `(cond
+    ;; right side can adjust
+    ((not (window-at-side-p nil 'right))
+     (if (equal ,direction 'left) -5 5))
+    ;; left side can adjust
+    ((not (window-at-side-p nil 'left))
+     (if (equal ,direction 'left) 5 -5))))
+
+(defmacro vertical-delta (direction)
+  "DIRECTION."
+  `(cond
+    ;; down side can adjust
+    ((not (window-at-side-p nil 'bottom))
+     (if (equal ,direction 'down) 5 -5))
+    ((not (window-at-side-p nil 'top))
+     (if (equal ,direction 'down) -5 5))))
+
 (defun adjust-window-size ()
   "."
   (interactive)
   (let* ((ev last-command-event)
          (base (event-basic-type ev)))
+    (message "base: %S" base)
     (pcase base
-      (?\] (enlarge-window-horizontally 5))
-      (?\[ (enlarge-window-horizontally -5))
-      (?h (enlarge-window-horizontally 5))
-      (?l (enlarge-window-horizontally -5))
-      (?6 (enlarge-window 5))
-      (?5 (enlarge-window -5))
-      (?j (enlarge-window 5))
-      (?k (enlarge-window -5))
+      (?\[ (enlarge-window-horizontally (horizontal-delta 'left)))
+      (?\] (enlarge-window-horizontally (horizontal-delta 'right)))
+      ('left (enlarge-window-horizontally (horizontal-delta 'left)))
+      ('right (enlarge-window-horizontally (horizontal-delta 'right)))
+      (?5 (enlarge-window (vertical-delta 'down)))
+      (?6 (enlarge-window (vertical-delta 'up)))
+      ('down (enlarge-window (vertical-delta 'down)))
+      ('up (enlarge-window (vertical-delta 'up)))
       (_ nil)))
-  (message "Use ctrl-[, ctrl-] for further adjustment")
   (set-transient-map
    (let ((map (make-sparse-keymap)))
      (define-key map (vector (append '(control) (list ?\[)))
