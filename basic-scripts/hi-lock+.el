@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: hi-lock+.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20221127.001
+;; Version: 1.0.3
+;; Package-Version: 20221128.001
 ;; Package-Requires:
 ;; Keywords: hi-lock, highlight
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -38,13 +38,25 @@
 
 (defvar *hi-lock-toggle-superword-p* nil)
 (defvar *hi-lock-word-bound-p* nil)
+(defvar *hi-lock-debug* nil)
+
+(defun hi-lock-toggle-debug ()
+  "."
+  (interactive)
+  (setq *hi-lock-debug* (not *hi-lock-debug*))
+  (message "turn %s the *hi-lock-debug*" (if *hi-lock-debug* "on" "off")))
+
+(defmacro hi-lock-message (format-string &rest ARGS)
+  "If debug is open, send message with FORMAT-STRING and ARGS."
+  `(if *hi-lock-debug*
+       (message ,format-string ,@ARGS)))
 
 (defun hi-lock/toggle-highlight-at-point ()
   "."
   (interactive)
   (let* ((ev last-command-event)
          (base (event-basic-type ev)))
-    (message "base: %S" base)
+    (hi-lock-message "base: %S" base)
     (pcase base
       (?. (hi-lock/do-highlight-at-point))
       (?s (hi-lock/redo-highlight-at-point))
@@ -55,7 +67,7 @@
       (?p (hi-lock/previous-heighlight-at-point))
       (_ nil)))
   (message "toggle-superword-p: %S, word bound: %S; s: toggle superword, w: toggle word bound, c: clear all, n: next, p: previous"
-           *hi-lock-toggle-superword-p* *hi-lock-word-bound-p*)
+                      *hi-lock-toggle-superword-p* *hi-lock-word-bound-p*)
   (set-transient-map
    (let ((map (make-sparse-keymap)))
      (define-key map (vector (list ?.))
@@ -122,7 +134,7 @@
   "."
   (interactive)
   (let ((regexp (car (hi-lock--regexps-at-point))))
-    (message "regexp: %s" regexp)
+    (hi-lock-message "regexp: %s" regexp)
     (when regexp
       (let ((case-fold-search nil))
         (when (re-search-forward regexp nil t 2)
@@ -132,7 +144,7 @@
   "."
   (interactive)
   (let ((regexp (car (hi-lock--regexps-at-point))))
-    (message "regexp: %s" regexp)
+    (hi-lock-message "regexp: %s" regexp)
     (when regexp
       (let ((case-fold-search nil))
         (when (re-search-backward regexp nil t)
