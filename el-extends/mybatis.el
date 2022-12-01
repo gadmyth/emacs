@@ -4,6 +4,8 @@
 
 
 (require 's)
+(require 'textmate)
+(require 'yasnippet)
 
 
 (defun parse-mybatis-result-line (prop)
@@ -254,16 +256,100 @@
              (jdbc-type . ,jdbc-type)))))
      raw-prop-list)))
 
+(defun parse-full-java-class-name ()
+  "."
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^package \\(.*\\);" nil t 1)
+    (when-let ((package (match-string-no-properties 1)))
+      (message "package is %s" package)
+      (re-search-forward "^public \\(class\\|interface\\) \\(.*\\) {" nil t 1)
+      (when-let ((class-name (match-string-no-properties 2)))
+        (message "class-name is %s" class-name)
+        (let ((full-class-name (format "%s.%s" package class-name)))
+          (message "full-class-name: %S" full-class-name)
+          full-class-name)))))
+
 (defun generate-mybatis-result-map-from-java-class ()
   "."
   (interactive)
-  (message "<resultMap id=\"BaseResultMap\" type=\"class\">")
+  (let ((full-class-name (parse-full-java-class-name)))
+    (message "<resultMap id=\"BaseResultMap\" type=\"%s\">" full-class-name))
   (seq-doseq (prop-pair (parse-properties-from-java-class))
     (message "<result column=\"%s\" jdbcType=\"%s\" property=\"%s\"/>"
              (assoc-default 'column prop-pair)
              (assoc-default 'jdbc-type prop-pair)
              (assoc-default 'property prop-pair)))
   (message "</resultMap>"))
+
+(defun mybatis-create-mapper-java-file ()
+  "."
+  (interactive)
+  (when-let ((project-root (textmate-find-project-root)))
+    (let* ((default-directory project-root)
+           (cmd (format "cd %s; find . -name mapper | grep -v target" default-directory))
+           (mapper-xml-directories (shell-command-to-string cmd))
+           (directories (string-split mapper-xml-directories)))
+      (message "directories: %S" (type-of directories))
+      (when (> (length directories) 0)
+        (let* ((directory (completing-read "Please select a directory: " directories nil t))
+               (file-name (read-string "Please input the mapper java file name: "))
+               (full-file-name (format "%s/%s/%s" default-directory directory file-name))
+               package-head)
+          (let ((cmd (format "cd %s; cd %s; egrep 'package .*;' $(ls | head -n 1)" default-directory directory)))
+            (setq package-head (shell-command-to-string cmd)))
+          (when (and
+                 (> (length full-file-name) 0)
+                 (not (file-exists-p full-file-name)))
+            (make-empty-file full-file-name)
+            (with-temp-file full-file-name
+              (with-current-buffer (current-buffer)
+                (java-mode)
+                (insert package-head)
+                (insert "\n")
+                (insert (format "public interface %s {\n\    \n}\n" (file-name-sans-extension file-name)))))
+            (find-file full-file-name)))))))
+
+(defun mybatis-create-mapper-xml-file ()
+  "."
+  (interactive)
+  (when-let ((project-root (textmate-find-project-root)))
+    (let* ((default-directory project-root)
+           (cmd (format "cd %s; find . -name mappers | grep -v target" default-directory))
+           (mapper-xml-directories (shell-command-to-string cmd))
+           (directories (string-split mapper-xml-directories)))
+      (message "directories: %S" (type-of directories))
+      (when (> (length directories) 0)
+        (let* ((directory (completing-read "Please select a directory: " directories nil t))
+               (file-name (read-string "Please input the mapper xml file name: "))
+               (full-file-name (format "%s/%s/%s" default-directory directory file-name))
+               (mapper-java-class ""))
+          ;; parse mapper-java-class
+          (let* ((mapper-java-class-name (read-string "Please input mapper java class name: "))
+                 (cmd (format "cd %s; find . -name %s -exec realpath {} +" default-directory mapper-java-class-name))
+                 (mapper-java-class-full-name (replace-regexp-in-string "\n" "" (shell-command-to-string cmd))))
+            (message "mapper-java-class-full-name: %s" mapper-java-class-full-name)
+            (message "exists: %S" (file-exists-p mapper-java-class-full-name))
+            (when (and
+                   (> (length mapper-java-class-full-name) 0)
+                   (file-exists-p mapper-java-class-full-name))
+              (with-temp-buffer
+                (insert-file-contents mapper-java-class-full-name)
+                (let ((class-name (parse-full-java-class-name)))
+                  (message "current-buffer: %s, class-name: %s" (current-buffer) class-name)
+                  (setq mapper-java-class class-name)))))
+          ;; create file and input template content
+          (when (and
+                 (> (length full-file-name) 0)
+                 (not (file-exists-p full-file-name)))
+            (make-empty-file full-file-name)
+            (with-temp-file full-file-name
+              (with-current-buffer (current-buffer)
+                (nxml-mode)
+                (yas-minor-mode)
+                (message "template param: %s" mapper-java-class)
+                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class)))
+            (find-file full-file-name)))))))
 
 (provide 'mybatis)
 ;;; mybatis.el ends here
