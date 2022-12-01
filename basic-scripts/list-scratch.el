@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.0
-;; Package-Version: 20221124.001
+;; Version: 1.1.1
+;; Package-Version: 20221201.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -477,7 +477,9 @@
   (let ((file-name +scratch-list-file-name+))
     (message "Saving scratch list to file %S ..." file-name)
     (with-temp-file file-name
-      (print *scratch-list* (current-buffer)))
+      (let ((eval-expression-print-length nil)
+            (eval-expression-print-level nil))
+        (print *scratch-list* (current-buffer))))
     (setq *scratch-list-modified* nil)))
 
 (defun load-scratch-list ()

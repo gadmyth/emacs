@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: notifications.el <gadmyth@gmail.com>
-;; Version: 1.2.1
-;; Package-Version: 20220716.001
+;; Version: 1.2.2
+;; Package-Version: 20221201.001
 ;; Package-Requires: timer, dates, codec, uuid
 ;; Keywords: notification, notify
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -331,8 +331,10 @@ above them."
 (defun save-notifications ()
   "."
   (remove-expired-notifications)
-    (with-temp-file +notifications-file-name+
-      (print *notifications* (current-buffer))))
+  (with-temp-file +notifications-file-name+
+    (let ((eval-expression-print-length nil)
+          (eval-expression-print-level nil))
+      (print *notifications* (current-buffer)))))
 
 (defun do-schedule-notification (id seconds)
   "Show notification message which id is ID after some SECONDS."

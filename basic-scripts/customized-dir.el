@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.6
-;; Package-Version: 20221124.001
+;; Version: 1.0.7
+;; Package-Version: 20221201.001
 ;; Package-Requires: counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -85,7 +85,9 @@
 (defun save-customized-dir-without-confirm ()
   "."
   (with-temp-file +customized-dir-file-name+
-    (print *customized-dir* (current-buffer))))
+    (let ((eval-expression-print-length nil)
+          (eval-expression-print-level nil))
+      (print *customized-dir* (current-buffer)))))
 
 (defun save-customized-dir ()
   "CONFIRMED: ."

@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: erc+.el <gadmyth@gmail.com>
-;; Version: 1.1.0
-;; Package-Version: 20221124.001
+;; Version: 1.1.1
+;; Package-Version: 20221201.001
 ;; Package-Requires: erc, s, text-mode, system-util, browse-url+
 ;; Keywords: erc+.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -614,7 +614,9 @@ With PARSED message and PROC."
   (let ((file-name *erc-forbidden-targets-file-name*))
     (message "Saving *erc-forbidden-targets* to file %S ..." file-name)
     (with-temp-file file-name
-      (print *erc-forbidden-targets* (current-buffer)))))
+      (let ((eval-expression-print-length nil)
+            (eval-expression-print-level nil))
+        (print *erc-forbidden-targets* (current-buffer))))))
 
 (defun delete-erc-forbidden-targets (target)
   "Delete a TARGET from *erc-forbidden-targets*."
