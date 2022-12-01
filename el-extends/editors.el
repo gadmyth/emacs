@@ -7,6 +7,19 @@
 
 (defvar *wrapper-content*)
 
+(defvar *editors-debug* nil)
+
+(defun editors-toggle-debug ()
+  "."
+  (interactive)
+  (setq *editors-debug* (not *editors-debug*))
+  (message "turn %s the *editors-debug*" (if *editors-debug* "on" "off")))
+
+(defmacro editors-debug-message (format-string &rest ARGS)
+  "If debug is open, send message with FORMAT-STRING and ARGS."
+  `(if *editors-debug*
+       (message ,format-string ,@ARGS)))
+
 (defun wrapping (wrapper)
   "WRAPPER: ."
   (let* ((word (word-at-point))
@@ -189,7 +202,7 @@
    (t
     (let* ((string (read-string "Please input string: "))
            (joined-string (string-join (split-string string "\n") ",")))
-      (message joined-string)
+      (editors-debug-message joined-string)
       joined-string))))
 
 (defun lower-camel-case ()
@@ -206,7 +219,7 @@
    (t
     (let* ((string (read-string "Please input string: "))
            (lower-camel-string (s-lower-camel-case string)))
-      (message lower-camel-string)
+      (editors-debug-message lower-camel-string)
       lower-camel-string))))
 
 (defun snake-case ()
@@ -223,7 +236,7 @@
    (t
     (let* ((string (read-string "Please input string: "))
            (snake-case-string (s-snake-case string)))
-      (message snake-case-string)
+      (editors-debug-message snake-case-string)
       snake-case-string))))
 
 (defun dash-case ()
@@ -305,10 +318,10 @@
     (try-kill-to-system-clipboad content)
     (cond
      (region-active-p
-      (message "*** region copied ***")
+      (editors-debug-message "*** region copied ***")
       (deactivate-mark))
      (t
-      (message "*** line copied ***")))))
+      (editors-debug-message "*** line copied ***")))))
 
 (defun mark-the-whole-line ()
   "."
