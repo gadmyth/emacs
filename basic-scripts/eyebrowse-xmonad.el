@@ -307,10 +307,15 @@
       (goto-char (point-min))
       (setq *eyebrowse-bookmarks* (read (current-buffer)))
       ;; define bookmark key
-      (dolist (bookmark *eyebrowse-bookmarks*)
-        (let ((key (car bookmark)))
-          (eyebrowse-define-bookmark-key key)))))
+      (redefine-eyebrowse-bookmark-keys)))
   t)
+
+(defun redefine-eyebrowse-bookmark-keys ()
+  "."
+  (dolist (bookmark *eyebrowse-bookmarks*)
+    (let ((key (car bookmark)))
+      (message "redefine: %s" key)
+      (eyebrowse-define-bookmark-key key))))
 
 (define-minor-mode eyebrowse-xmonad-mode
   "Toggle `eyebrowse-xmonad-mode."
