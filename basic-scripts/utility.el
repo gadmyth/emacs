@@ -77,9 +77,8 @@
 					(write-file filename))))))
 		*must-loading-files*))
 
-(defun show-symbol-at-point ()
+(defun symbol-at-region-or-at-point ()
   "."
-  (interactive)
   (let* ((sym (and (region-active-p)
                    (let ((region-string (buffer-substring-no-properties (region-beginning) (region-end))))
                      (when (> (length region-string) 0)
@@ -88,6 +87,12 @@
          (sym (or sym (let ((symbol-string (read-string "Please input the symbol: ")))
                         (when (> (length symbol-string) 0)
                           (intern symbol-string))))))
+    sym))
+
+(defun show-symbol-at-point ()
+  "."
+  (interactive)
+  (let* ((sym (symbol-at-region-or-at-point)))
     (message "Symbol: [%S] is function: [%S], value: [%S]"
              sym
              (fboundp sym)
@@ -99,14 +104,7 @@
 (defun set-symbol-value-at-point ()
   "."
   (interactive)
-  (let* ((sym (and (region-active-p)
-                   (let ((region-string (buffer-substring-no-properties (region-beginning) (region-end))))
-                     (when (> (length region-string) 0)
-                       (intern region-string)))))
-         (sym (or sym (symbol-at-point)))
-         (sym (or sym (let ((symbol-string (read-string "Please input the symbol: ")))
-                        (when (> (length symbol-string) 0)
-                          (intern symbol-string))))))
+  (let* ((sym (symbol-at-region-or-at-point)))
     (let* ((type (completing-read "Please select the value type: " '(string number)))
            (value
             (pcase type
@@ -116,6 +114,15 @@
       (when value
         (setf (symbol-value sym) value)))))
 
+(defun execute-function-at-point ()
+  "."
+  (interactive)
+  (let ((sym (symbol-at-region-or-at-point)))
+    (cond ((fboundp sym)
+           (message "Now execute function [%S]" sym)
+           (funcall (symbol-function sym)))
+          (t
+           (message "Symbol [%S] is not a function")))))
 
 (defun find-library-at-point ()
   "."

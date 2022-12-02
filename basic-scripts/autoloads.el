@@ -10,18 +10,10 @@
 
 ;;;***
 
-;;;### (autoloads nil "customized-dir" "customized-dir.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from customized-dir.el
-
-(register-definition-prefixes "customized-dir" '("*customized-dir*" "+customized-dir-file-name+" "+dired-al-mode-header+" "add-customized-dir" "customized-dir" "load-customized-dir" "remove-customized-dir" "save-customized-dir" "switch-to-customized-dir" "wrap-function-with-default-directory"))
-
-;;;***
-
 ;;;### (autoloads nil "dates" "dates.el" (0 0 0 0))
 ;;; Generated autoloads from dates.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dates" '("+date-command+" "current-time" "org-current-timestamp" "quick-on-time" "reformat-time-string" "string-to-timestamp" "system-" "timestamp-to-" "tomorrow-timestamp")))
+(register-definition-prefixes "dates" '("+date-command+" "current-time" "org-current-timestamp" "quick-on-content" "reformat-time-string" "string-to-timestamp" "system-" "timestamp-to-" "tomorrow-timestamp"))
 
 ;;;***
 
@@ -48,14 +40,14 @@ trees.
 ;;;### (autoloads nil "frames" "frames.el" (0 0 0 0))
 ;;; Generated autoloads from frames.el
 
-(register-definition-prefixes "frames" '("*blink-cursor-mode*" "*m" "*scroll-bar-mode*" "*tool-bar-mode*" "get-workspace" "goto-workspace-by-number" "set-suitable-frame-size"))
+(register-definition-prefixes "frames" '("adjust-frame-" "get-workspace" "goto-workspace-by-number" "move-frame-" "scale-frame-" "set-suitable-frame-size"))
 
 ;;;***
 
 ;;;### (autoloads nil "packages" "packages.el" (0 0 0 0))
 ;;; Generated autoloads from packages.el
 
-(register-definition-prefixes "packages" '("+option-packages+" "+required-packages+" "+tool-packages+" "package-archives-host"))
+(register-definition-prefixes "packages" '("+option-packages+" "+required-packages+" "+tool-packages+"))
 
 ;;;***
 
@@ -66,25 +58,9 @@ trees.
 
 ;;;***
 
-;;;### (autoloads nil "utility" "utility.el" (0 0 0 0))
-;;; Generated autoloads from utility.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "utility" '("*find-grep-dired--dir*" "*must-loading-files*" "clean-svn" "copy-buffer-string" "ensure-mkdir" "find" "load-" "open-image-at-point" "set-symbol-value-at-point" "show-symbol-at-point" "switch-default-dir" "trim-")))
-
-;;;***
-
-;;;### (autoloads nil "wcy-desktop" "wcy-desktop.el" (0 0 0 0))
-;;; Generated autoloads from wcy-desktop.el
-
-(defvar wcy-desktop-file-name "~/.wcy_desktop_save")
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "wcy-desktop" '("wcy-desktop-")))
-
-;;;***
-
 ;;;### (autoloads nil nil ("annot.el" "avy-config.el" "calendar-config.el"
-;;;;;;  "clipboard.el" "fonts.el" "ido-config.el" "mode-bars.el"
-;;;;;;  "projectile-config.el" "redis-config.el") (0 0 0 0))
+;;;;;;  "customized-dir.el" "ido-config.el" "mode-bars.el" "redis-config.el"
+;;;;;;  "utility.el" "wcy-desktop.el") (0 0 0 0))
 
 ;;;***
 
