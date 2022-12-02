@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.7
-;; Package-Version: 20221201.001
+;; Version: 1.0.6.8
+;; Package-Version: 20221202.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -247,20 +247,25 @@
     (define-key map (kbd "H-7") (define-eyebrowse-extend-switch-config-function 7))
     (define-key map (kbd "H-8") (define-eyebrowse-extend-switch-config-function 8))
     (define-key map (kbd "H-9") (define-eyebrowse-extend-switch-config-function 9))
-    (define-key map (kbd "H-m") #'goto-main-window)
-    (define-key map (kbd "H-S") #'switch-to-scratch-buffer)
-    (define-key map (kbd "H-M") #'switch-to-message-buffer)
+    (define-key map (kbd "<H-f1>") #'switch-to-scratch-buffer)
+    (define-key map (kbd "<H-f2>") #'switch-to-message-buffer)
     (define-key map (kbd "<H-S-return>") #'run-or-raise-next-terminal)
     (define-key map (kbd "<H-tab>") #'goto-next-window)
     (define-key map (kbd "<H-iso-lefttab>") #'goto-previous-window)
     (define-key map (kbd "<H-return>") #'swap-to-main-window)
     (define-key map (kbd "<H-backspace>") #'goto-last-window)
-    (define-key map (kbd "H-s") #'swap-window-in-current-frame)
-    (define-key map (kbd "H-c") #'copy-window-in-current-frame)
-    (define-key map (kbd "H-h") #'adjust-window-size)
-    (define-key map (kbd "H-l") #'adjust-window-size)
-    (define-key map (kbd "H-j") #'adjust-window-size)
-    (define-key map (kbd "H-k") #'adjust-window-size)
+    ;; (define-key map (kbd "H-m") #'goto-main-window)
+    (define-key map (kbd "H-M-s") #'swap-window-in-current-frame)
+    (define-key map (kbd "H-M-c") #'delete-window)
+    ;; (define-key map (kbd "H-c") #'copy-window-in-current-frame)
+    (define-key map (kbd "H-<left>") #'windmove-left)
+    (define-key map (kbd "H-<right>") #'windmove-right)
+    (define-key map (kbd "H-<up>") #'windmove-up)
+    (define-key map (kbd "H-<down>") #'windmove-down)
+    (define-key map (kbd "H-M-<left>") #'adjust-window-size)
+    (define-key map (kbd "H-M-<right>") #'adjust-window-size)
+    (define-key map (kbd "H-M-<up>") #'adjust-window-size)
+    (define-key map (kbd "H-M-<down>") #'adjust-window-size)
     map)
   "Initial key map for `eyebrowse-xmonad-mode'.")
 
