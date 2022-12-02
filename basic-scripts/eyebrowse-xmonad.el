@@ -124,14 +124,16 @@
 
 (defun eyebrowse-delete-bookmark (bookmark-key)
   "Delete the exist bookmark of BOOKMARK-KEY."
-  (interactive "sPlease input the bookmark key to delete: ")
-  (message "delete bookmark: %s" bookmark-key)
-  (let ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
-    ;; remove bookmark
-    (setf (alist-get bookmark-key *eyebrowse-bookmarks* :remove :remove 'equal) :remove)
-    ;; undefine bookmark key
-    (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key)) nil)
-    (message "Delete bookmark %s suceed!" bookmark-key)))
+  (let* ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal))
+         (remark (cdr (assq 'remark (cdr bookmark)))))
+    (when (yes-or-no-p (format "Ensure to delete bookmark %s: %s ? " bookmark-key remark))
+      (message "delete bookmark: %s" bookmark-key)
+      (let ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
+        ;; remove bookmark
+        (setf (alist-get bookmark-key *eyebrowse-bookmarks* :remove :remove 'equal) :remove)
+        ;; undefine bookmark key
+        (define-key eyebrowse-xmonad-mode-map (kbd (format "H-%s" bookmark-key)) nil)
+        (message "Delete bookmark %s suceed!" bookmark-key)))))
 
 (defun eyebrowse-clear-bookmark ()
   "."
