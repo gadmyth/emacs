@@ -13,8 +13,10 @@
 (require-package
  'winner
  (winner-mode 1)
- (global-set-key (kbd "<H-up>") #'winner-undo)
- (global-set-key (kbd "<H-down>") #'winner-redo))
+ ;; page up
+ (global-set-key (kbd "H-<prior>") #'winner-undo)
+ ;; page down
+ (global-set-key (kbd "H-<next>") #'winner-redo))
 
 (require 'cl-seq)
 
