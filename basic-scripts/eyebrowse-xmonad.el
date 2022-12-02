@@ -41,6 +41,10 @@
 
 (defvar *eyebrowse-bookmarks* nil)
 
+(defvar *eyebrowse-current-bookmark-key* nil)
+
+(defvar *eyebrowse-last-bookmark-key* nil)
+
 (defconst +eyebrowse-bookmarks-file-name+ (expand-file-name "~/.eyebrowse_bookmarks"))
 
 (defvar eyebrowse-bookmark-search-size 16)
@@ -141,6 +145,8 @@
   (interactive "sPlease input the bookmark key to jump: ")
   (let ((bookmark (alist-get bookmark-key *eyebrowse-bookmarks* nil t 'equal)))
     (when bookmark
+      (setq *eyebrowse-last-bookmark-key* *eyebrowse-current-bookmark-key*)
+      (setq *eyebrowse-current-bookmark-key* bookmark-key)
       (let* ((eyebrowse-slot (cdr (assq 'eyebrowse bookmark)))
              (buffername (cdr (assq 'buffername bookmark)))
              (window (get-buffer-window buffername))
@@ -156,6 +162,12 @@
          ((file-exists-p filename)
           (find-file filename)))
         (goto-char position)))))
+
+(defun switch-to-last-eyebrowse-bookmark ()
+  "."
+  (interactive)
+  (when (not (equal *eyebrowse-current-bookmark-key* *eyebrowse-last-bookmark-key*))
+    (eyebrowse-jump-to-bookmark *eyebrowse-last-bookmark-key*)))
 
 (defun define-eyebrowse-bookmarks-keymap ()
   "."
@@ -238,6 +250,7 @@
 (defvar eyebrowse-xmonad-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "H-`") #'eyebrowse-switch-to-last-config)
+    (define-key map (kbd "H-~") #'switch-to-last-eyebrowse-bookmark)
     (define-key map (kbd "H-1") (define-eyebrowse-extend-switch-config-function 1))
     (define-key map (kbd "H-2") (define-eyebrowse-extend-switch-config-function 2))
     (define-key map (kbd "H-3") (define-eyebrowse-extend-switch-config-function 3))
