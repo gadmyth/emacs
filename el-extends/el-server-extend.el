@@ -41,11 +41,9 @@
                         html-file-mtime
                         (time-less-p org-file-mtime html-file-mtime)
                         (not force-refresh))
-                   (let* ((path (elnode-http-pathinfo httpcon))
-                          (new-path (concat (string-remove-suffix "org" path) "html"))
-                          (new-url (format "http://%s:%s%s" remote-host local-port new-path)))
-                     (message "rediect org file to html file: %s" new-url)
-                     (elnode-send-redirect httpcon new-url))
+                   (progn
+                     (message "directly return the generated html file: %s" html-file)
+                     (elnode-send-file httpcon html-file))
                  (with-current-buffer (find-file-noselect org-file)
                    (progn
                      (when (string-equal mode-name "not loaded yet")
@@ -60,8 +58,9 @@
                          (setq org-export-show-temporary-export-buffer t)
                          (with-current-buffer exported-buffer
                            (let ((org-html (buffer-substring-no-properties (point-min) (point-max))))
-                             (write-file html-file)
-                             (elnode-send-html httpcon org-html)))))))))))))))
+                             (write-file html-file)))
+                         (kill-buffer exported-buffer)
+                         (elnode-send-file httpcon html-file)))))))))))))
 
 (defmacro org-dir-compiled-handler-maker (dir)
   "DIR: ."
