@@ -208,6 +208,7 @@
 
 (my-elnode-add-handlers
  `(("^/orgs/\\(.*\\)$" . ,(org-dir-compiled-handler-maker "~/org/doc/"))
+   ("^/essay/\\(.*\\)$" . ,(org-dir-compiled-handler-maker "~/org/essay/"))
    ("^/homo/\\(.*\\.html\\)$" . ,(elnode-webserver-handler-maker "~/org/homo_public_html/"))
    ("^/homo/\\(.*\\.*\\)$" . ,(org-dir-compiled-handler-maker "~/org/homogenius/"))
    ("^/script/\\(.*\\.html\\)$" . ,(org-dir-compiled-handler-maker (expand-file-name "scriptlets" +emacs-context-directory+)))
