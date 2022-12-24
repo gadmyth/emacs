@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.3.3
-;; Package-Version: 20221201.001
+;; Version: 1.3.4
+;; Package-Version: 20221224.001
 ;; Package-Requires: eyebrowse, s, dash, network-util, weathers
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -612,8 +612,8 @@ COPY from eyebrowse--load-window-config."
            (frame-params (eyebrowse-frame-parameters frame))
            (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs))))
       (with-temp-file file-name
-        (let ((eval-expression-print-length nil)
-              (eval-expression-print-level nil))
+        (let ((print-length nil)
+              (print-level nil))
           (print rich-configs (current-buffer)))))))
 
 (defun eyebrowse-save-current-config-to-file (filename)
@@ -621,8 +621,8 @@ COPY from eyebrowse--load-window-config."
   (interactive "FPlease select the file to save eyebrowse current config: ")
   (eyebrowse-update-window-config)
   (let ((config (eyebrowse-get-current-config)))
-    (let ((eval-expression-print-length nil)
-          (eval-expression-print-level nil))
+    (let ((print-length nil)
+          (print-level nil))
       (with-temp-file filename
         (print config (current-buffer))))))
 

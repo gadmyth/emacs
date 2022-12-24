@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.0.6.9
-;; Package-Version: 20221202.002
+;; Version: 1.0.7
+;; Package-Version: 20221224.001
 ;; Package-Requires: eyebrowse, s, windows, minibuffer+
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -295,8 +295,8 @@
   "."
   (when (> (length *eyebrowse-bookmarks*) 0)
     (with-temp-file +eyebrowse-bookmarks-file-name+
-      (let ((eval-expression-print-length nil)
-            (eval-expression-print-level nil))
+      (let ((print-length nil)
+            (print-level nil))
         (print *eyebrowse-bookmarks* (current-buffer))))))
 
 (defun load-eyebrowse-bookmarks ()

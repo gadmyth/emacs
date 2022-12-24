@@ -6,8 +6,8 @@
 ;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
 
-;; Version: 2.0.4
-;; Package-Version: 20221201.001
+;; Version: 2.0.5
+;; Package-Version: 20221224.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -50,8 +50,8 @@
 (defun  wcy-desktop-on-kill-emacs ()
   "Save the buffer list, this should be part of `kill-emacs-hook."
   (with-temp-file wcy-desktop-file-name
-    (let ((eval-expression-print-length nil)
-          (eval-expression-print-level nil))
+    (let ((print-length nil)
+          (print-level nil))
       (print
        (mapcar #'(lambda(b)
                    (with-current-buffer b
