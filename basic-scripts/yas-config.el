@@ -161,7 +161,8 @@
           (yas-next-field)
         (progn
           (insert p)
-          (yas-next-field))))))
+          (yas-next-field))))
+    (yas-exit-all-snippets)))
 
 (defun yas-expand-snippet-with-region ()
   "."
