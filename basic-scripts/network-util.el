@@ -126,7 +126,7 @@
 
 (defun turn-on-env-proxy ()
   "."
-  (do-switch-proxy "127.0.0.1:1080"))
+  (do-switch-env-proxy "127.0.0.1:1080"))
 
 (defun turn-off-env-proxy ()
   "."
@@ -149,29 +149,46 @@
 (defun switch-w3m-proxy ()
   "ENABLE's value is t or nil."
   (interactive)
-  (when (featurep 'w3m)
-    (let* ((enable (y-or-n-p "Turn on the w3m proxy? ")))
-      (if enable (turn-on-w3m-proxy)
-        (turn-off-w3m-proxy)))))
+  (let* ((enable (y-or-n-p "Turn on the w3m proxy? ")))
+    (when enable (turn-on-w3m-proxy)
+          (turn-off-w3m-proxy)))
+    (show-w3m-proxy))
+
+(defun show-w3m-proxy ()
+  "."
+  (interactive)
+  (if (featurep 'w3m)
+      (message "w3m proxy: %S" w3m-command-arguments-alist)
+    (message "w3m is not installed or not supported!")))
 
 (defun turn-on-w3m-proxy ()
   "."
-  (when (featurep 'w3m)
-    (setq w3m-command-arguments-alist
-          '(("" "-o" "http_proxy=http://127.0.0.1:8118"
-             "-o" "https_proxy=http://127.0.0.1:8118")))))
+  (if (featurep 'w3m)
+      (setq w3m-command-arguments-alist
+            '(("" "-o" "http_proxy=http://127.0.0.1:8118"
+               "-o" "https_proxy=http://127.0.0.1:8118")))
+    (message "w3m is not installed or not supported!")))
 
 (defun turn-off-w3m-proxy ()
   "."
-  (when (featurep 'w3m)
-    (setq w3m-command-arguments-alist nil)))
+  (if (featurep 'w3m)
+      (setq w3m-command-arguments-alist nil)
+    (message "w3m is not installed or not supported!")))
 
 (defun switch-url-proxy ()
   "ENABLE's value is t or nil."
   (interactive)
   (let* ((enable (y-or-n-p "Turn on the url proxy? ")))
     (if enable (turn-on-url-proxy)
-      (turn-off-url-proxy))))
+      (turn-off-url-proxy))
+    (show-url-proxy)))
+
+(defun show-url-proxy ()
+  "."
+  (interactive)
+  (message "url proxy, http: %s, https: %s"
+           (assoc-default "http" url-proxy-services #'string-equal)
+           (assoc-default "https" url-proxy-services #'string-equal)))
 
 (defun turn-on-url-proxy ()
   "."
