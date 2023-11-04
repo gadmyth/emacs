@@ -256,6 +256,20 @@
       (message dash-case-string)
       dash-case-string))))
 
+(defvar *join-line-seperator* ?\s)
+
+(defun join-line-replace-seperator ()
+  "."
+  (cond
+   ((eq *join-line-seperator* ?\s)
+    ;; do nothing
+    t)
+   ((eq *join-line-seperator* "")
+    (delete-char 1))
+   (t
+    (delete-char 1)
+    (insert *join-line-seperator*))))
+
 (defun join-the-line ()
   "."
   (interactive)
@@ -263,8 +277,10 @@
          (base (event-basic-type ev)))
     (pcase base
       (?\j (forward-line)
-           (join-line))
-      (?\k (join-line))
+           (join-line)
+           (join-line-replace-seperator))
+      (?\k (join-line)
+           (join-line-replace-seperator))
       ('up (forward-line -1))
       ('down (forward-line))
       (?\/ (undo))
