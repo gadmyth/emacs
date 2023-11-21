@@ -34,6 +34,8 @@
 ;;; Code:
 
 
+(require 'textmate)
+
 (defvar *customized-dir* nil)
 
 (defmacro wrap-function-with-default-directory (func)
@@ -57,11 +59,12 @@
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
-  (let* ((default (caar *customized-dir-action-list*))
-         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t nil nil default))
-         (default (car (seq-filter
-                        (lambda (ele) (string-prefix-p ele default-directory))
-                        *customized-dir*)))
+  (let* ((action (completing-read "Choose the action:" *customized-dir-action-list* nil t))
+         (default (textmate-project-root))
+         (default (or default
+                      (car (seq-filter
+                            (lambda (ele) (string-prefix-p ele default-directory))
+                            *customized-dir*))))
          (dir (completing-read "Switch to dir: " *customized-dir* nil t nil nil default)))
     (let ((f (assoc-default action *customized-dir-action-list*)))
       (funcall f dir))))
