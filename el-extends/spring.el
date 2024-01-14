@@ -253,6 +253,38 @@
   (java-create-property prop-name type)
   (java-create-setter-getter prop-name type))
 
+(defun java-expand-properties ()
+  "."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward-regexp "^\s*\\([^\s],.*\\);$" nil t 1)
+      (let* ((matcher (match-string 1))
+             (list (s-split "," matcher))
+             (type (parse-java-type (car list)))
+             (property (cadr list))
+             (comment (caddr list)))
+        (replace-match (format "private %s %s;" type property))
+        (indent-according-to-mode)))))
+
+(defun java-expand-property (line)
+  "Expand java property from LINE like i:count."
+  (let* ((list (s-split "," line))
+         (type (java-parse-type (car list)))
+         (property (cadr list)))
+    (relpace)
+    (message "type: %s, property: %s" type property)))
+
+(defun java-parse-type (type)
+  "Parse TYPE from type short inference."
+  (pcase type
+    ("l" "long")
+    ("i" "int")
+    ("I" "Integer")
+    ("s" "String")
+    ("T" "Date")
+    (_ (error "Unknown type: %S" type))))
+
 (defun spring-goto-mapper-xml-file (mapper &optional finish-block)
   "MAPPER, FINISH-BLOCK."
   (interactive "sMapper: \nsMethod: ")
