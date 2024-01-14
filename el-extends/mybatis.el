@@ -136,27 +136,6 @@
             (forward-line))))
       found)))
 
-(defun mybatis-generate-insert-columns ()
-  "."
-  (interactive)
-  (let ((list))
-    (save-excursion
-      (goto-char 0)
-      (let ((start (progn (search-forward "<resultMap" nil t 1)
-                          (point)))
-            (end (progn (search-forward "</resultMap>" nil t 1)
-                        (point))))
-        (goto-char start)
-        (while (< (point) end)
-          (forward-line 1)
-          (let* ((column (mybatis-parse-result-column-string)))
-            (when column
-              (push column list))))))
-    ;; insert column
-    (dolist (column (reverse list))
-      (mybatis-generate-insert-column column)
-      (indent-according-to-mode))))
-
 (defun mybatis-generate-insert-values ()
   "."
   (interactive)
@@ -327,15 +306,20 @@
                               (insert-file-contents file-name)
                               (parse-full-java-class-name))))
       (yas-expand-snippet-with-params "mybatis-mapper-result-map" full-class-name)
-      (seq-doseq (prop-pair (with-temp-buffer
-                              (insert-file-contents file-name)
-                              (parse-properties-from-java-class)))
-        (yas-expand-snippet-with-params
-         "mybatis-result-column"
-         (assoc-default 'column prop-pair)
-         (assoc-default 'jdbc-type prop-pair)
-         (assoc-default 'property prop-pair))
-        (newline-and-indent)))))
+      (let* ((prop-pairs (with-temp-buffer
+                           (insert-file-contents file-name)
+                           (parse-properties-from-java-class)))
+             (len (length prop-pairs))
+             (i 0))
+        (seq-doseq (prop-pair prop-pairs)
+          (yas-expand-snippet-with-params
+           "mybatis-result-column"
+           (assoc-default 'column prop-pair)
+           (assoc-default 'jdbc-type prop-pair)
+           (assoc-default 'property prop-pair))
+          (when (< i (- len 1))
+            (newline-and-indent)
+            (setq i (+ i 1))))))))
 
 (defun mybatis-create-mapper-java-file ()
   "."
@@ -351,7 +335,7 @@
                (file-name (read-string "Please input the mapper java file name: "))
                (full-file-name (format "%s/%s/%s.java" default-directory directory file-name))
                package-head)
-          (let ((cmd (format "cd %s; cd %s; egrep 'package .*;' $(ls | head -n 1)" default-directory directory)))
+          (let ((cmd (format "cd %s; cd %s; grep -E 'package .*;' $(ls | head -n 1)" default-directory directory)))
             (setq package-head (shell-command-to-string cmd)))
           (when (and
                  (> (length full-file-name) 0)
@@ -378,6 +362,7 @@
         (let* ((directory (completing-read "Please select a directory: " directories nil t))
                (file-name (read-string "Please input the mapper xml file name: "))
                (full-file-name (format "%s/%s/%s.xml" default-directory directory file-name))
+               (ext-full-file-name (format "%s/%s/%sExt.xml" default-directory directory file-name))
                (mapper-java-class ""))
           ;; parse mapper-java-class
           (let* ((mapper-java-class-name (read-string "Please input mapper java class name: "))
@@ -395,6 +380,17 @@
                   (setq mapper-java-class class-name)))))
           ;; create file and input template content
           (when (and
+                 (> (length ext-full-file-name) 0)
+                 (not (file-exists-p ext-full-file-name))
+                 (y-or-n-p "Create extension mapper xml file? ")))
+            (make-empty-file ext-full-file-name)
+            (with-temp-file ext-full-file-name
+              (with-current-buffer (current-buffer)
+                (nxml-mode)
+                (yas-minor-mode)
+                (message "template param: %s" mapper-java-class)
+                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class)))
+          (when (and
                  (> (length full-file-name) 0)
                  (not (file-exists-p full-file-name)))
             (make-empty-file full-file-name)
@@ -403,7 +399,14 @@
                 (nxml-mode)
                 (yas-minor-mode)
                 (message "template param: %s" mapper-java-class)
-                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class)))
+                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class)
+                (mybatis-create-result-map-from-java-class)
+                (re-search-forward "</resultMap>")
+                (newline-and-indent 2)
+                (mybatis-generate-insert-block)
+                (re-search-forward "</insert>")
+                (newline-and-indent 2)
+                (mybatis-generate-update-block)))
             (find-file full-file-name)))))))
 
 (provide 'mybatis)
