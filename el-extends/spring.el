@@ -258,14 +258,21 @@
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (while (search-forward-regexp "^\s*\\([^\s],.*\\);$" nil t 1)
+    (while (search-forward-regexp "^\s*\\([^\s]+:.*\\);$" nil t 1)
       (let* ((matcher (match-string 1))
-             (list (s-split "," matcher))
-             (type (parse-java-type (car list)))
-             (property (cadr list))
-             (comment (caddr list)))
+             (list (s-split ":" matcher))
+             (type (java-parse-type (nth 1 list)))
+             (property (nth 0 list))
+             (comment (nth 2 list)))
+	(message "%S, %S" type comment)
         (replace-match (format "private %s %s;" type property))
-        (indent-according-to-mode)))))
+	(indent-according-to-mode)
+	(when comment
+	  (beginning-of-line)
+	  (newline-and-indent)
+	  (previous-line)
+	  (insert (format "// %s" comment))
+	  (indent-according-to-mode))))))
 
 (defun java-expand-property (line)
   "Expand java property from LINE like i:count."
