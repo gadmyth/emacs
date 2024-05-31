@@ -382,14 +382,14 @@
           (when (and
                  (> (length ext-full-file-name) 0)
                  (not (file-exists-p ext-full-file-name))
-                 (y-or-n-p "Create extension mapper xml file? ")))
+                 (y-or-n-p "Create extension mapper xml file? "))
             (make-empty-file ext-full-file-name)
             (with-temp-file ext-full-file-name
               (with-current-buffer (current-buffer)
                 (nxml-mode)
                 (yas-minor-mode)
                 (message "template param: %s" mapper-java-class)
-                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class)))
+                (yas-expand-snippet-with-params "mybatis-xml-file" mapper-java-class))))
           (when (and
                  (> (length full-file-name) 0)
                  (not (file-exists-p full-file-name)))
