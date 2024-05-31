@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: q.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20220511.001
+;; Version: 1.1
+;; Package-Version: 20240531.001
 ;; Package-Requires:
 ;; Keywords: q.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -63,6 +63,25 @@
             (setq retval (cons 'exception (list ex)))))
          retval)
      ,@clean-up))
+
+(defmacro define-debug-message (module)
+  (let ((debug-message-sym (intern (format "%S-debug-message" module)))
+        (debug-flag-sym (intern (format "%s-debug-flag" module)))
+        (toggle-debug-sym (intern (format "%S-toggle-debug" module))))
+    `(progn
+       (defvar ,debug-flag-sym nil "debug message flag var")
+       
+       (defun ,toggle-debug-sym ()
+         "."
+         (interactive)
+         (setq ,debug-flag-sym (not ,debug-flag-sym))
+         (message "turn %s the %s" (if ,debug-flag-sym "on" "off") ,debug-flag-sym))
+       
+       (defmacro ,debug-message-sym (format-string &rest ARGS)
+         "If debug is open, send message with FORMAT-STRING and ARGS."
+         `(if ,,debug-flag-sym
+              (message ,format-string ,@ARGS)))
+     )))
 
 (provide 'q)
 ;;; q.el ends here
