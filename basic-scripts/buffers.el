@@ -44,7 +44,8 @@
                                            (setq rich-name (format "%s (%s)" bname (with-current-buffer buffer default-directory))))
                                          (cons rich-name bname)))
                                      quick-buffers))
-         (name (completing-read "Switch to buffer: " quick-buffer-names nil t nil nil nil))
+         (default (if (> (length quick-buffer-names) 0) (car (car quick-buffer-names)) nil))
+         (name (completing-read "Switch to buffer: " quick-buffer-names nil t nil nil default))
          (buffer (get-buffer (assoc-default name quick-buffer-names #'string=))))
     (if (buffer-live-p buffer)
         (progn

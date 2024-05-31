@@ -186,13 +186,6 @@
 (global-set-key (kbd "C-x M-S-<down>") 'adjust-frame-position)
 
 
-(if (boundp 'tool-bar-mode) (tool-bar-mode (bound-or-default *tool-bar-mode* t)))
-(if (boundp 'menu-bar-mode) (menu-bar-mode (bound-or-default *menu-bar-mode* t)))
-(if (boundp 'blink-cursor-mode) (blink-cursor-mode (bound-or-default *blink-cursor-mode* t)))
-(if (boundp 'scroll-bar-mode) (scroll-bar-mode (bound-or-default *scroll-bar-mode* t)))
-
-(put 'scroll-left 'disabled nil)
-
 (defun get-workspace (index from-end)
   "Get frame by INDEX, FROM-END means index from the end of frames list."
   "Workspace is frame."

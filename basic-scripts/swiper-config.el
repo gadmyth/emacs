@@ -61,9 +61,11 @@
 
 (global-set-key (kbd "C-S-s") 'counsel-grep-with-word-at-point)
 (global-set-key (kbd "C-c r") 'ivy-resume)
-(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+;; use ido, comment the following line
+;;(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 ;;(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+;; use ido, comment the following line
+;;(global-set-key (kbd "C-x C-f") 'counsel-find-file)
 ;;(global-set-key (kbd "<f1> f") 'counsel-describe-function)
 ;;(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
 ;;(global-set-key (kbd "<f1> l") 'counsel-load-library)

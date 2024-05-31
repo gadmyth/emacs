@@ -65,6 +65,16 @@
         (shr-fill-swap))
     (shr-fill-restore)))
 
+(defun eww-disable-images ()
+  "Disable the loading of images in EWW."
+  (interactive)
+  (setq-local shr-put-image-function (lambda (spec alt &optional flags) ())))
+
+(defun eww-enable-images ()
+  "Enable the loading of images in EWW."
+  (interactive)
+  (setq-local shr-put-image-function 'shr-put-image))
+
 ;(shr-no-fill-mode 1)
 
 (provide 'eww-config)

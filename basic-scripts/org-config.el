@@ -181,7 +181,7 @@
 
 (eval-after-load "org"
   '(progn
-	 (setq org-startup-indented t)
+     (setq org-startup-indented t)
      (setq org-startup-folded "showall")
      (require-package 'valign (valign-mode))))
 

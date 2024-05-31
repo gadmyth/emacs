@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.2
-;; Package-Version: 20221224.001
+;; Version: 1.1.3
+;; Package-Version: 20240531.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -326,7 +326,7 @@
     (seq-doseq (elem list)
       (if (null index)
           (setq index 0)
-        (incf index))
+        (cl-incf index))
       (when (funcall fn ele elem)
         (setq result index)))
     result))

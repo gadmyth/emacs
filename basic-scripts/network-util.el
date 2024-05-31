@@ -6,6 +6,9 @@
 
 (defvar *network-util-debug* nil)
 
+(defvar *proxy-list* '((socks5 . "127.0.0.1:1080")
+                       (privoxy . "127.0.0.1:8118")))
+
 (defmacro network-util-debug-message (format-string &rest ARGS)
   "If debug is open, send message with FORMAT-STRING and ARGS."
   `(if *network-util-debug*
@@ -124,9 +127,18 @@
     (if enable (turn-on-env-proxy)
       (turn-off-env-proxy))))
 
+(defun choose-proxy ()
+  "."
+  (let* ((proxy-name (completing-read "Please choose a proxy: " *proxy-list* nil t nil nil 'socks5))
+         (proxy (assoc proxy-name *proxy-list* #'string-equal)))
+    proxy))
+
 (defun turn-on-env-proxy ()
   "."
-  (do-switch-env-proxy "127.0.0.1:1080"))
+  (let ((proxy (choose-proxy)))
+    (when proxy
+      (do-switch-env-proxy (format "%s://%s" (car proxy) (cdr proxy)))
+      (show-env-proxy))))
 
 (defun turn-off-env-proxy ()
   "."
@@ -144,7 +156,7 @@
   (let ((http-proxy (getenv "http_proxy"))
         (https-proxy (getenv "https_proxy"))
         (all-proxy (getenv "all_proxy")))
-    (message "http_proxy: %s\nhttps_proxy: %s\nall_proxy: %s" http-proxy https-proxy all-proxy)))
+    (message "proxy is:\n\nhttp_proxy: %s\nhttps_proxy: %s\nall_proxy: %s" http-proxy https-proxy all-proxy)))
 
 (defun switch-w3m-proxy ()
   "ENABLE's value is t or nil."
@@ -152,7 +164,7 @@
   (let* ((enable (y-or-n-p "Turn on the w3m proxy? ")))
     (when enable (turn-on-w3m-proxy)
           (turn-off-w3m-proxy)))
-    (show-w3m-proxy))
+  (show-w3m-proxy))
 
 (defun show-w3m-proxy ()
   "."
@@ -164,9 +176,12 @@
 (defun turn-on-w3m-proxy ()
   "."
   (if (featurep 'w3m)
-      (setq w3m-command-arguments-alist
-            '(("" "-o" "http_proxy=http://127.0.0.1:8118"
-               "-o" "https_proxy=http://127.0.0.1:8118")))
+      (let ((proxy (choose-proxy)))
+        (setq w3m-command-arguments-alist
+              `((""
+                 "-o" (format "http_proxy=%s" ,proxy)
+                 "-o" (format "https_proxy=%s" ,proxy))))
+        (show-url-proxy))
     (message "w3m is not installed or not supported!")))
 
 (defun turn-off-w3m-proxy ()
@@ -183,17 +198,26 @@
       (turn-off-url-proxy))
     (show-url-proxy)))
 
+;; url package use the url-proxy-services: url-retrieve, url-retrieve-synchronously
 (defun show-url-proxy ()
   "."
   (interactive)
-  (message "url proxy, http: %s, https: %s"
+  (message "url proxy:\n\nhttp: %S\nhttps: %S\nsocks5: %S"
            (assoc-default "http" url-proxy-services #'string-equal)
-           (assoc-default "https" url-proxy-services #'string-equal)))
+           (assoc-default "https" url-proxy-services #'string-equal)
+           (assoc-default "socks5" url-proxy-services #'string-equal)))
 
 (defun turn-on-url-proxy ()
   "."
-  (setq url-proxy-services '(("http" . "127.0.0.1:8118")
-                             ("https" . "127.0.0.1:8118"))))
+  (let ((proxy (choose-proxy)))
+    (when proxy
+      (setq url-proxy-services
+            (pcase (car proxy)
+              ('privoxy
+               `(("http" . ,(cdr proxy))
+                 ("https" . ,(cdr proxy))))
+              ('socks5
+               `(("socks5" . ,(cdr proxy)))))))))
 
 (defun turn-off-url-proxy ()
   "."

@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: minibuffer+.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20211205.001
+;; Version: 1.0.1
+;; Package-Version: 20240531.001
 ;; Package-Requires: minibuffer
 ;; Keywords: minibuffer+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -35,6 +35,7 @@
 
 
 (require 'minibuffer)
+(require 'delsel)
 
 (defvar *minibuffer-func* nil)
 

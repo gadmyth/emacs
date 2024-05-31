@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.8
-;; Package-Version: 20221224.001
+;; Version: 1.0.9
+;; Package-Version: 20240531.001
 ;; Package-Requires: counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -43,7 +43,7 @@
        (call-interactively ,func))))
 
 (defvar *customized-dir-action-list*
-  (remove-if
+  (cl-remove-if
    #'null
    `(
      ,(when (featurep 'counsel)
@@ -57,7 +57,8 @@
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
-  (let* ((action (completing-read "Choose the action:" *customized-dir-action-list* nil t))
+  (let* ((default (caar *customized-dir-action-list*))
+         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t nil nil default))
          (default (car (seq-filter
                         (lambda (ele) (string-prefix-p ele default-directory))
                         *customized-dir*)))

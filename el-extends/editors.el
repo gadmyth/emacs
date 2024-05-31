@@ -2,23 +2,13 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'q)
 (require 's)
 (require 'clipboard+)
 
 (defvar *wrapper-content*)
 
-(defvar *editors-debug* nil)
-
-(defun editors-toggle-debug ()
-  "."
-  (interactive)
-  (setq *editors-debug* (not *editors-debug*))
-  (message "turn %s the *editors-debug*" (if *editors-debug* "on" "off")))
-
-(defmacro editors-debug-message (format-string &rest ARGS)
-  "If debug is open, send message with FORMAT-STRING and ARGS."
-  `(if *editors-debug*
-       (message ,format-string ,@ARGS)))
+(define-debug-message editors)
 
 (defun wrapping (wrapper)
   "WRAPPER: ."
@@ -131,80 +121,6 @@
       (re-search-backward "^" nil t)
       (replace-regexp word new-word nil (line-beginning-position) (line-end-position)))))
 
-(defun sql-in-collection (start end)
-  "Format and insert sql IN collection from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
-           (lines (split-string region-string "\n"))
-           (lines-with-action (mapcar (lambda (str) (format "'%s'" str)) lines)))
-      (goto-char end)
-      (insert "\n" "(" (string-join lines-with-action ",") ")" "\n"))))
-
-(defun split-string-of-region (start end)
-  "Format and insert sql IN collection from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
-           (seperator (read-string "Please input the seperator: "))
-           (lines (split-string region-string seperator)))
-      (goto-char end)
-      (insert "\n")
-      (seq-doseq (line lines)
-        (seq-doseq (column (split-string line seperator))
-          (let ((column (s-trim column)))
-            (when (> (length column) 0)
-              (insert (s-trim column) "\n"))))))))
-
-(defun count-line-of-region (start end)
-  "Format and insert sql IN collection from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
-           (seperator (read-string "Please input the seperator: "))
-           (lines (split-string region-string seperator)))
-      (message "line count is %d" (length lines)))))
-
-(defun cut-string-of-region (start end)
-  "Format and insert sql IN collection from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
-           (lines (split-string region-string "\n"))
-           (column-index (read-number "Please input the cut column index: ")))
-      (goto-char end)
-      (insert "\n")
-      (seq-doseq (line lines)
-        (insert (nth column-index (split-string line)) "\n")))))
-
-(defun join-to-string-list (start end)
-  "Join list to a string list from START to END of region."
-  (interactive "r")
-  (when (region-active-p)
-    (let* ((region-string (buffer-substring-no-properties start end))
-           (lines (split-string region-string "\n"))
-           (lines-with-action (mapcar (lambda (str) (format "\"%s\"" str)) lines)))
-      (goto-char end)
-      (insert "\n" "(" (string-join lines-with-action " ") ")" "\n"))))
-
-(defun join-with-comma ()
-  "Format and insert sql IN collection from START to END of region."
-  (interactive)
-  (cond
-   ((region-active-p)
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (region-string (buffer-substring-no-properties start end))
-           (lines (split-string region-string "\n"))
-           (lines-with-action lines))
-      (goto-char end)
-      (insert "\n" (string-join lines-with-action ",") "\n")))
-   (t
-    (let* ((string (read-string "Please input string: "))
-           (joined-string (string-join (split-string string "\n") ",")))
-      (editors-debug-message joined-string)
-      joined-string))))
-
 (defun lower-camel-case ()
   "Replace the string of region with lower camel case format."
   (interactive)
@@ -256,118 +172,6 @@
       (message dash-case-string)
       dash-case-string))))
 
-(defvar *join-line-seperator* ?\s)
-
-(defun join-line-replace-seperator ()
-  "."
-  (cond
-   ((eq *join-line-seperator* ?\s)
-    ;; do nothing
-    t)
-   ((eq *join-line-seperator* "")
-    (delete-char 1))
-   (t
-    (delete-char 1)
-    (insert *join-line-seperator*))))
-
-(defun join-the-line ()
-  "."
-  (interactive)
-  (let* ((ev last-command-event)
-         (base (event-basic-type ev)))
-    (pcase base
-      (?\j (forward-line)
-           (join-line)
-           (join-line-replace-seperator))
-      (?\k (join-line)
-           (join-line-replace-seperator))
-      ('up (forward-line -1))
-      ('down (forward-line))
-      (?\/ (undo))
-      (_ nil)))
-  (message "Use j to join the next line, use k join the previous line")
-  (set-transient-map
-   (let ((map (make-sparse-keymap)))
-     (define-key map (vector (list ?\j))
-       (lambda () (interactive) (join-the-line)))
-     (define-key map (vector (list ?\k))
-       (lambda () (interactive) (join-the-line)))
-     (define-key map (kbd "<up>")
-       (lambda () (interactive) (join-the-line)))
-     (define-key map (kbd "<down>")
-       (lambda () (interactive) (join-the-line)))
-     (define-key map (vector (append '(control) (list ?\/)))
-       (lambda () (interactive) (join-the-line)))
-     map)))
-
-;; ------ line editor -------
-
-(defun kill-to-beginning-of-line ()
-  "."
-  (interactive)
-  (save-excursion
-    (let ((end (point))
-          (begin (progn
-                   (beginning-of-visual-line)
-                   (point))))
-    (kill-region begin end))))
-
-(defun kill-the-whole-line ()
-  "."
-  (interactive)
-  (save-excursion
-    (let ((begin (progn
-                   (beginning-of-visual-line)
-                   (point)))
-          (end (progn
-                 (end-of-visual-line)
-                 (point))))
-      (kill-region begin end))))
-
-(defun kill-the-whole-line-ring-save ()
-  "START, END."
-  (interactive)
-  (let* ((region-active-p (region-active-p))
-         (text-beg (if region-active-p (region-beginning) (line-beginning-position)))
-         (text-end (if region-active-p (region-end) (line-end-position)))
-         (content (buffer-substring-no-properties text-beg text-end)))
-    (try-kill-to-system-clipboad content)
-    (cond
-     (region-active-p
-      (editors-debug-message "*** region copied ***")
-      (deactivate-mark))
-     (t
-      (editors-debug-message "*** line copied ***")))))
-
-(defun mark-the-whole-line ()
-  "."
-  (interactive)
-  (beginning-of-visual-line)
-  (push-mark-command nil)
-  (end-of-visual-line))
-
-(defun remove-all-text-properties-region (beg end)
-  "Remove all the text properties with region from BEG to END."
-  (interactive "r")
-  (when (region-active-p)
-    (set-text-properties beg end nil)))
-
-;; ----- global keys for line editor -----
-
-;; C-k: kill-line from current point to end of line
-;; C-S-u: kill-to-beginning-of-line
-;; C-S-k: kill the whole line
-;; M-w origin key bind to kill-ring-save, original function is copy region
-
-(global-set-key (kbd "C-S-u") 'kill-to-beginning-of-line)
-(global-set-key (kbd "C-S-k") 'kill-the-whole-line)
-(global-set-key (kbd "M-w") 'kill-the-whole-line-ring-save)
-(global-set-key (kbd "C-S-l") 'mark-the-whole-line)
-
-;; define the *global-join-map*
-(defvar *global-join-map* (make-sparse-keymap))
-(define-key (current-global-map) (kbd "C-x j j") 'join-the-line)
-(define-key (current-global-map) (kbd "C-x j k") 'join-the-line)
 
 (provide 'editors)
 ;;; editors.el ends here

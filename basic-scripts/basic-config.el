@@ -18,5 +18,19 @@
 (require 'warnings)
 (setq display-warning-minimum-level :emergency)
 
+(if (boundp 'tool-bar-mode)
+    (tool-bar-mode (bound-or-default *tool-bar-mode* t)))
+
+(if (boundp 'menu-bar-mode)
+    (menu-bar-mode (bound-or-default *menu-bar-mode* t)))
+
+(if (boundp 'blink-cursor-mode)
+    (blink-cursor-mode (bound-or-default *blink-cursor-mode* t)))
+
+(if (boundp 'scroll-bar-mode)
+    (scroll-bar-mode (bound-or-default *scroll-bar-mode* t)))
+
+(put 'scroll-left 'disabled nil)
+
 (provide 'basic-config)
 ;;; basic-config.el ends here
