@@ -51,6 +51,8 @@
 
 (defvar +scratch-list-file-name+ (expand-file-name "~/.scratch_list"))
 
+(defvar +scratch-meta-file-name+ (expand-file-name "~/.scratch_meta"))
+
 (defvar *scratch-list-modified* nil)
 
 (defvar *scratch-list-idle-save-timer* nil)
@@ -195,7 +197,7 @@
          (scratch-update-current-node)
          (list-scratch)))
       (_
-       (let* ((node-type (completing-read "Please select the node type: " '(".." string list vector org-capture) nil t nil))
+       (let* ((node-type (completing-read "Please select the node type: " '(".." string link list vector org-capture) nil t nil))
               (key)
               (value))
          (pcase node-type
@@ -203,6 +205,8 @@
             (list-scratch))
            ("string"
             (scratch-add-string-type-node current-node))
+           ("link"
+            (scratch-add-link-type-node current-node))
            ("list"
             (scratch-add-list-type-node current-node))
            ("vector"
@@ -228,6 +232,18 @@
      (t
       (setq value (read-string (format "Please input value for %s: " key) default))
       (scratch-do-add-node key value)))))
+
+(defun scratch-add-link-type-node (current-node)
+  "Add link type node under CURRENT-NODE."
+  (let* ((key (completing-read "Please input link name: " (cons ".." current-node)))
+         (default (json-pointer-get current-node (scratch-concat-path "/" key) t))
+         (value))
+    (cond
+     ((string= key "..")
+      (list-scratch))
+     (t
+      (setq value (read-string (format "Please input value for %s: " key) default))
+      (scratch-do-add-node key (cons value (cons "type" "link")))))))
 
 (defun scratch-add-list-type-node (current-node)
   "Add list type node under CURRENT-NODE."
