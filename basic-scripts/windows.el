@@ -68,7 +68,7 @@
                                (window-width (get-buffer-window))
                              (window-height (get-buffer-window))))
          (ratio (string-to-number
-                 (completing-read "Select the split ratio: " '("0.5" "0.8" "0.75" "0.618" "0.33" "0.25" "0.2" "0.1") nil t)))
+                 (completing-read "Select the split ratio: " '("0.5" "0.8" "0.75" "0.618" "0.33" "0.25" "0.2" "0.1") nil t nil nil "0.5")))
          (split-window-size (round (* full-window-size ratio))))
     (select-window (split-window nil (* -1 split-window-size) side))
     (if switch-to-scratch-buffer-p
