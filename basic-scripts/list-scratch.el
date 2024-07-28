@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.3
-;; Package-Version: 20240531.001
+;; Version: 1.1.4
+;; Package-Version: 20240728.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -197,7 +197,7 @@
          (scratch-update-current-node)
          (list-scratch)))
       (_
-       (let* ((node-type (completing-read "Please select the node type: " '(".." string link list vector org-capture) nil t nil))
+       (let* ((node-type (completing-read "Please select the node type: " '(.. string link list vector org-capture) nil t nil nil '..))
               (key)
               (value))
          (pcase node-type
@@ -370,7 +370,7 @@
                           ((null current-node) "*")))
          (path *scratch-current-path*)
          (list current-node)
-         (key (completing-read (format "%s %s: " node-type path) list nil t))
+         (key (completing-read (format "%s %s: " node-type path) list nil t nil nil (caar list)))
          (value (assoc-default key current-node))
          (list-action))
     (list-scratch-debug-message "key: %S, value: %S" key value)
