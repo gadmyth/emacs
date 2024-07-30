@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.0.9
-;; Package-Version: 20240531.001
+;; Version: 1.1.0
+;; Package-Version: 20240830.001
 ;; Package-Requires: counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -59,7 +59,8 @@
 (defun switch-to-customized-dir (&rest _)
   "."
   (interactive)
-  (let* ((action (completing-read "Choose the action:" *customized-dir-action-list* nil t))
+  (let* ((default (caar *customized-dir-action-list*))
+         (action (completing-read "Choose the action:" *customized-dir-action-list* nil t nil nil default))
          (default (textmate-project-root))
          (default (or default
                       (car (seq-filter
