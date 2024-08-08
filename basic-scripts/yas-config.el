@@ -21,12 +21,16 @@
   ;; return nil forever
   nil)
 
-(add-hook
- 'yas-global-mode-hook
- (lambda ()
-   (when (and (bound-and-true-p *snippets-default-directory*)
-              (file-directory-p *snippets-default-directory*))
-     (add-to-list 'yas-snippet-dirs *snippets-default-directory*))))
+(defvar *yas-snippet-extra-dirs* nil)
+
+(defun yas-add-extra-dirs ()
+  (when (bound-and-true-p *yas-snippet-extra-dirs*)
+    (dolist (d *yas-snippet-extra-dirs*)
+      (let ((dir (expand-file-name d)))
+        (when (file-directory-p dir)
+          (add-to-list 'yas-snippet-dirs dir))))))
+
+(add-hook 'yas-global-mode-hook #'yas-add-extra-dirs)
 
 (setq yas-indent-line 'fixed)
 
