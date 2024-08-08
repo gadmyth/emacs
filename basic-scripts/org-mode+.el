@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: org-mode+.el <gadmyth@gmail.com>
-;; Version: 1.0.2
-;; Package-Version: 20220729.001
+;; Version: 1.0.3
+;; Package-Version: 20220808.001
 ;; Package-Requires: org, browse-url+
 ;; Keywords: org-mode
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -271,6 +271,13 @@
 
 (enhance-org-open-link)
 
+(defun org-copy-block-contents ()
+  "."
+  (interactive)
+  (when-let ((content (plist-get (cadr (org-element-at-point)) :value)))
+    (kill-new content)
+    (message "Org block content copied!")))
+
 (global-set-key (kbd "<f7>") 'org-capture-mark)
 (global-set-key (kbd "<M-f7>") 'org-capture-insert-temp)
 (global-set-key (kbd "<f8>") 'org-make-element-link)
@@ -280,6 +287,7 @@
 ;; config for create a link with id property
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c C-.") 'org-time-stamp-inactive)
+(global-set-key (kbd "C-c w") 'org-copy-block-contents)
 
 (provide 'org-mode+)
 ;;; org-mode+.el ends here
