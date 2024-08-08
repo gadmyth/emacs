@@ -40,9 +40,7 @@
   (when (not (null dir))
 	(setq default-directory dir)))
 
-(defvar *must-loading-files*
-	  (mapcar (lambda (n) (expand-file-name n))
-			  '("~/org/notes.org" "~/org/task.org" "~/org/timeline.org" "~/unix-config/.emacs")))
+(defvar *must-loading-files* nil)
 
 (defun ensure-mkdir (dirname)
   "DIRNAME: ."
@@ -67,15 +65,16 @@
   (interactive)
   (message "*** load must files...")
   (mapc (lambda (filename)
-		  (if (not (load-exist-buffer filename))
-			  (if (file-exists-p filename)
-				  (find-file-noselect filename nil nil nil)
-				(progn
-				  (let ((dir (file-name-directory filename)))
-					(ensure-mkdir dir))
-				  (with-current-buffer (create-file-buffer filename)
-					(write-file filename))))))
-		*must-loading-files*))
+          (let ((filename (expand-file-name filename)))
+            (if (not (load-exist-buffer filename))
+                (if (file-exists-p filename)
+                    (find-file-noselect filename nil nil nil)
+                  (progn
+                    (let ((dir (file-name-directory filename)))
+                      (ensure-mkdir dir))
+                    (with-current-buffer (create-file-buffer filename)
+                      (write-file filename)))))))
+        *must-loading-files*))
 
 (defun copy-buffer-string ()
   "."
