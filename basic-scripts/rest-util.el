@@ -50,5 +50,23 @@
         (message "parsed cookie to store: [%s: %s]\n\n" cookie-key cookie-value)
         (url-cookie-store cookie-key cookie-value nil domain "/" secure-p)))))
 
+(defun print-cookies ()
+  "Print cookies for a given URL."
+  (interactive)
+  (let* ((url (read-string "Please input url: "))
+         (path (read-string "Please input path: "))
+         (secure-p (y-or-n-p "is https? "))
+         (cookies (url-cookie-retrieve url path secure-p)))
+    (if cookies
+        (dolist (cookie cookies)
+          (let ((name (url-cookie-name cookie))
+                (value (url-cookie-value cookie))
+                (domain (url-cookie-domain cookie))
+                (path (url-cookie-localpart cookie))
+                (secure (url-cookie-secure cookie)))
+            (message "Cookie:\n\tName: %s\n\tValue: %s;\n\tDomain: %s;\n\tPath: %s;\n\tSecure: %s"
+                     name value domain path (if secure "Yes" "No"))))
+      (message "No cookies found for %s" url))))
+
 (provide 'rest-util)
 ;;; rest-util.el ends here
