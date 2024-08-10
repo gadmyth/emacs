@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: customized-dir.el <gadmyth@gmail.com}>
-;; Version: 1.1.0
-;; Package-Version: 20240830.001
+;; Version: 1.1.1
+;; Package-Version: 20240810.001
 ;; Package-Requires: counsel
 ;; Keywords: customized-dir.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -78,6 +78,7 @@
   "."
   (interactive)
   (when (file-readable-p +customized-dir-file-name+)
+    (setq *customized-dir* nil)
     (with-temp-buffer
       (insert-file-contents +customized-dir-file-name+)
       (goto-char (point-min))
