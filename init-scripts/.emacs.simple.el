@@ -60,6 +60,13 @@
 (require-package 'list-scratch
                  (global-set-key (kbd "<f12>") (toggle-minibuffer 'list-scratch)))
 
+;; bookmarks
+(require-package 'bookmarks
+                 (bookmarks-mode)
+                 (global-set-key (kbd "<f2>") (toggle-minibuffer 'bookmarks-list-bookmarks))
+                 (global-set-key (kbd "<M-f2>") (toggle-minibuffer 'bookmarks-modify-bookmark))
+                 (global-set-key (kbd "<C-f2>") 'bookmarks-switch-to-last-bookmark))
+
 ;; vc
 (require 'version-controll)
 
