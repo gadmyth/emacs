@@ -10,6 +10,14 @@
   (unless eredis--current-process
     (eredis-connect "localhost" 6379)))
 
+(defun r-connect-server ()
+  "."
+  (interactive)
+  (unless eredis--current-process
+    (let ((host (read-string "Please input redis host (localhost as default): " nil nil "localhost"))
+          (port (read-number "Please input redis port (6379 as default): " 6379)))
+      (eredis-connect host port))))
+
 (defun r-get (key &optional debug)
   "KEY."
   (interactive "sget redis value for key: ")
