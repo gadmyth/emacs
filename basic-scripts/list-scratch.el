@@ -5,7 +5,7 @@
 ;; Author: list-scratch.el <gadmyth@gmail.com>
 ;; Version: 1.1.5
 ;; Package-Version: 20240811.001
-;; Package-Requires: json-pointer, dates
+;; Package-Requires: json-pointer, dates, q
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/list-scratch.el
@@ -36,6 +36,7 @@
 
 (require 'json-pointer)
 (require 'dates)
+(require 'q)
 
 (defvar *scratch-list* '(("root" . nil)))
 
@@ -46,8 +47,6 @@
 (defvar *scratch-current-key* "root")
 
 (defvar *scratch-current-node* nil)
-
-(defvar *list-scratch-debug* nil)
 
 (defvar *scratch-list-loaded* nil)
 
@@ -61,17 +60,9 @@
 
 (defvar *scratch-list-idle-delay* 300)
 
+(define-debug-message list-scratch)
 
-(defun list-scratch-toggle-debug ()
-  "."
-  (interactive)
-  (setq *list-scratch-debug* (not *list-scratch-debug*))
-  (message "turn %s the *list-scratch-debug*" (if *list-scratch-debug* "on" "off")))
 
-(defmacro list-scratch-debug-message (format-string &rest ARGS)
-  "If debug is open, send message with FORMAT-STRING and ARGS."
-  `(if *list-scratch-debug*
-       (message ,format-string ,@ARGS)))
 
 (defun scratch-update-current-node ()
   "."
