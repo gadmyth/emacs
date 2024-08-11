@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.4
-;; Package-Version: 20240728.001
+;; Version: 1.1.5
+;; Package-Version: 20240811.001
 ;; Package-Requires: json-pointer, dates
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -40,6 +40,8 @@
 (defvar *scratch-list* '(("root" . nil)))
 
 (defvar *scratch-current-path* "/root")
+
+(defvar *scratch-path-index* (make-hash-table :test 'equal))
 
 (defvar *scratch-current-key* "root")
 
@@ -175,6 +177,8 @@
 
 (defun scratch-level-up ()
   "."
+  (list-scratch-debug-message "up: path: %s, idx: %d" *scratch-current-path* ivy--index)
+  (puthash *scratch-current-path* ivy--index *scratch-path-index*)
   (scratch-node-level-up)
   (list-scratch))
 
@@ -286,12 +290,14 @@
 
 (defun scratch-delete-node ()
   "Delete the sub node under *scratch-current-node*."
-  (let* ((current-node *scratch-current-node*)
+  (let* ((index ivy--index)
+         (current-node *scratch-current-node*)
          (node-type (type-of current-node))
          (current-node (or (and (consp current-node) current-node)
                            (and (vectorp current-node) (append current-node nil))
                            current-node))
-         (key (completing-read "Please input key to delete: " (cons ".." current-node)))
+         (default (nth index current-node))
+         (key (completing-read "Please input key to delete: " (cons ".." current-node) nil t nil nil default))
          (path))
     (cond
      ((string= key "..")
@@ -370,10 +376,12 @@
                           ((null current-node) "*")))
          (path *scratch-current-path*)
          (list current-node)
-         (key (completing-read (format "%s %s: " node-type path) list nil t nil nil (caar list)))
+         (index (gethash path *scratch-path-index* 0))
+         (key (completing-read (format "%s %s: " node-type path) list nil t nil nil (nth index list)))
          (value (assoc-default key current-node))
          (list-action))
-    (list-scratch-debug-message "key: %S, value: %S" key value)
+    (list-scratch-debug-message "down: key: %S, value: %S, idx: %d" key value ivy--index)
+    (puthash *scratch-current-path* ivy--index *scratch-path-index*)
     (cond
      ((consp value)
       (list-scratch-debug-message "value is list")
