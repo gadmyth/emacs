@@ -3,7 +3,7 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.5
+;; Version: 1.1.6
 ;; Package-Version: 20240811.001
 ;; Package-Requires: json-pointer, dates, q
 ;; Keywords: list-scratch.el
@@ -168,8 +168,16 @@
 
 (defun scratch-level-up ()
   "."
-  (list-scratch-debug-message "up: path: %s, idx: %d" *scratch-current-path* ivy--index)
-  (puthash *scratch-current-path* ivy--index *scratch-path-index*)
+  (list-scratch-debug-message "up: path: %s" *scratch-current-path*)
+  (let* ((key (file-name-nondirectory *scratch-current-path*))
+         (current-node *scratch-current-node*)
+         (current-line (ivy-state-current ivy-last))
+         (index (cond
+                 ((consp current-node) (first-element-index current-line current-node (lambda (str e) (string-equal str (car e)))))
+                 ((vectorp current-node) (first-element-index current-line current-node #'string-equal))
+                 (t 0))))
+    (puthash *scratch-current-path* index *scratch-path-index*))
+  ;; (puthash *scratch-current-path* ivy--index *scratch-path-index*)
   (scratch-node-level-up)
   (list-scratch))
 
@@ -367,12 +375,13 @@
                           ((null current-node) "*")))
          (path *scratch-current-path*)
          (list current-node)
-         (index (gethash path *scratch-path-index* 0))
-         (key (completing-read (format "%s %s: " node-type path) list nil t nil nil (nth index list)))
+         (index (or (gethash path *scratch-path-index* 0) 0))
+         (default (nth index list))
+         (key (completing-read (format "%s %s: " node-type path) list nil t nil nil default))
          (value (assoc-default key current-node))
          (list-action))
-    (list-scratch-debug-message "down: key: %S, value: %S, idx: %d" key value ivy--index)
-    (puthash *scratch-current-path* ivy--index *scratch-path-index*)
+    (list-scratch-debug-message "down: key: %S, value: %S" key value)
+    (puthash *scratch-current-path* (first-element-index key current-node (lambda (str e) (string-equal str (car e)))) *scratch-path-index*)
     (cond
      ((consp value)
       (list-scratch-debug-message "value is list")
@@ -401,7 +410,9 @@
 (defun list-scratch-string-with-param (path key value)
   "List string type string with VALUE of KEY under PATH."
   (let* ((list (list value))
-         (action-name (completing-read (format "%s's value: " (scratch-concat-path path key)) list)))))
+         (index (or (gethash path *scratch-path-index* 0) 0))
+         (default (nth index list))
+         (action-name (completing-read (format "%s's value: " (scratch-concat-path path key)) list nil t nil nil default)))))
 
 (defun scratch-concat-path (parent path)
   "Concat PARENT with PATH."
@@ -438,7 +449,9 @@
       (seq-doseq (item current-node) (push item list))
       (setq list (reverse list)))
     ;; select value
-    (let ((value (completing-read (format "%s %s: " node-type path) list)))
+    (let* ((index (or (gethash path *scratch-path-index* 0) 0))
+           (default (nth index list))
+           (value (completing-read (format "%s %s: " node-type path) list nil t nil nil default)))
       (list-scratch-debug-message "value: %s" value)
       (let ((index-path (format "[%d]" (first-element-index value current-node #'string=))))
         (scratch-level-down index-path)
