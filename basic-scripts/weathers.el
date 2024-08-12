@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.7
-;; Package-Version: 20220518.001
+;; Version: 1.0.8
+;; Package-Version: 20240812.001
 ;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -36,7 +36,7 @@
 (require 'request)
 (require 'dates)
 (require 'hmac-sha1)
-
+(require 'q)
 
 (defconst +weather-api-url+ "http://api.seniverse.com/v3/weather/now.json")
 
@@ -54,20 +54,7 @@
 
 (defvar *weather-fetch-timer* nil)
 
-(defvar *weathers-debug* nil)
-
-(defmacro weathers-debug-message (format-string &rest ARGS)
-  "If debug is open, send message with FORMAT-STRING and ARGS."
-  `(if *weathers-debug*
-       (message ,format-string ,@ARGS)))
-
-(defun weathers-toggle-debug ()
-  "."
-  (interactive)
-  (setq *weathers-debug* (not *weathers-debug*))
-  (message "turn %s the %s"
-           (if *weathers-debug* "on" "off")
-           (symbol-name '*weathers-debug*)))
+(define-debug-message weathers)
 
 (defun refresh-weather ()
   "."
