@@ -14,5 +14,20 @@
 
 (add-to-list 'yas-snippet-dirs (expand-file-name "~/snippets"))
 
+;; eyebrowse
+(require-package 'eyebrowse+
+                 (eyebrowse-plus-mode 1)
+                 (global-set-key (kbd "<f5>") (toggle-minibuffer 'eyebrowse-list-configs))
+                 (global-set-key (kbd "<M-f5>") (toggle-minibuffer 'eyebrowse-modify-config))
+                 (global-set-key (kbd "<C-f5>") 'eyebrowse-last-window-config)
+                 ;; eyebrowse xmonad
+                 (require-package 'eyebrowse-xmonad (eyebrowse-xmonad-mode 1))
+                 ;; eyebrowse header line
+                 (require-package 'eyebrowse-header-line (eyebrowse-header-line-mode 1))
+                 )
+;; mode-line
+(require-package 'mode-line+ (mode-line-plus-mode 1))
+
+
 (provide 'post-customize)
 ;;; post-customize.el ends here
