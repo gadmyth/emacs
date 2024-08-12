@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.3.4
-;; Package-Version: 20221224.001
-;; Package-Requires: eyebrowse, s, dash, network-util, weathers
+;; Version: 1.4.0
+;; Package-Version: 20240812.001
+;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL:  https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/eyebrowse+.el
@@ -34,29 +34,21 @@
 ;;; Code:
 
 (require 'eyebrowse)
+(require 'q)
 (require 's)
 (require 'dash)
-(require 'network-util)
-(require 'weathers)
 
-(defvar *eyebrowse-debug* nil)
 (defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
+
 (defvar *eyebrowse-default-configs* nil)
+
 (defvar eyebrowse-lazy-load-hook nil)
+
 (defvar *eyebrowse-init-function-swapped* nil)
+
 (defvar *eyebrowse-save-timer* nil)
 
-(defun eyebrowse-toggle-debug ()
-  "."
-  (interactive)
-  (setq *eyebrowse-debug* (not *eyebrowse-debug*))
-  (message "turn %s the *eyebrowse-debug*" (if *eyebrowse-debug* "on" "off")))
-
-(defface eyebrowse-time-face
-  '((((class color) (background light)) (:foreground "sea green" :weight bold))
-    (((class color) (background dark)) (:foreground "SteelBlue3" :weight bold)))
-  "Face for eyebrowse time."
-  :group 'eyebrowse+)
+(define-debug-message eyebrowse)
 
 (defface current-eyebrowse-config-face
   '((((class color) (background light)) (:foreground "forest green" :weight bold))
@@ -100,11 +92,6 @@
        ;; or it will be dangerous to overwrite the config to file.
        (run-hooks 'eyebrowse-lazy-load-hook)))))
 
-(defmacro eyebrowse-message (format-string &rest ARGS)
-  "If debug is open, send message with FORMAT-STRING and ARGS."
-  `(if *eyebrowse-debug*
-       (message ,format-string ,@ARGS)))
-
 (defun eyebrowse-get-current-config ()
   "."
   (let* ((slot (eyebrowse--get 'current-slot))
@@ -147,7 +134,7 @@
 (defun eyebrowse-config-slot (config-string)
   "CONFIG-STRING."
   (if (s-contains? ":" config-string)
-      (string-to-number (first (split-string config-string ":")))
+      (string-to-number (cl-first (split-string config-string ":")))
     (string-to-number config-string)))
 
 (defun eyebrowse-list-configs (&rest _)
@@ -166,7 +153,7 @@
    configs buffer
    (lambda (element)
      (if (not (-contains? collections element))
-         (eyebrowse-message "eyebrowse config %S does not exist!" element)
+         (eyebrowse-debug-message "eyebrowse config %S does not exist!" element)
        (let* ((slot (eyebrowse-config-slot element))
               (window-configs (eyebrowse--get 'window-configs))
               (config (assq slot window-configs)))
@@ -187,7 +174,7 @@
       (let* ((slot (nth 0 window-config))
              (tag (nth 2 window-config))
              (element (eyebrowse-config-string window-config)))
-        (eyebrowse-message "window config: %S" element)
+        (eyebrowse-debug-message "window config: %S" element)
         (cond ((= current-slot slot)
                (setq element (propertize element 'face 'current-eyebrowse-config-face)))
               ((= last-slot slot)
@@ -196,7 +183,7 @@
           (setq default-candidate (eyebrowse-config-string (eyebrowse-get-config-with-slot default-slot))))
         (push element collections)))
     (setf collections (reverse collections))
-    (eyebrowse-message "collections: %S" collections)
+    (eyebrowse-debug-message "collections: %S" collections)
     (let ((selected (completing-read prompt collections nil t nil nil default-candidate)))
       (funcall action selected))))
 
@@ -212,7 +199,7 @@
     ;; if has target slot, switch to config
     (when target-slot
       (eyebrowse-switch-to-window-config target-slot)
-      (eyebrowse-message "switch to config %s" target-conf-string))
+      (eyebrowse-debug-message "switch to config %s" target-conf-string))
     
 
     ;; if buffer is not locked to an config, show the actions to just switch buffer or lock config
@@ -223,7 +210,7 @@
          (buffer-file-name (get-buffer buffer)))
         (funcall #'eyebrowse-switch-buffer-with-actions buffer)
       (progn
-        (eyebrowse-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
+        (eyebrowse-debug-message "select buffer %s at config %s, locked config: %s" buffer target-conf-string locked-conf-string)
         (select-buffer-window-safely buffer)))))
 
 (defun select-buffer-window-safely (buffer &optional name)
@@ -290,7 +277,7 @@
 (defun eyebrowse-switch-buffer-with-actions (&rest args)
   "ARGS."
   (interactive)
-  (eyebrowse-message "actions args: %S" args)
+  (eyebrowse-debug-message "actions args: %S" args)
   (let ((prompt (format "Config: (%s), current (%s), target (%s): "
                         (eyebrowse-current-config-string)
                         (buffer-name (current-buffer))
@@ -302,7 +289,7 @@
   (let* ((action (completing-read prompt actions nil t))
          (func (alist-get action actions nil nil #'string=)))
     (when func
-      (eyebrowse-message "list actions, actions: %s, args: %s" actions args)
+      (eyebrowse-debug-message "list actions, actions: %s, args: %s" actions args)
       (if args
           (apply func args)
         (call-interactively func)))))
@@ -328,10 +315,10 @@
   (eyebrowse-list-configs-with-action
    (lambda (element)
      (if (not (-contains? collections element))
-         (eyebrowse-message "eyebrowse config %S does not exist!" element)
+         (eyebrowse-debug-message "eyebrowse config %S does not exist!" element)
        (let* ((slot (eyebrowse-config-slot element))
               (config (eyebrowse-get-config-with-slot slot)))
-         (eyebrowse-message "locked, buffer: %s" buffer)
+         (eyebrowse-debug-message "locked, buffer: %s" buffer)
          (eyebrowse-lock-with-config (or buffer (current-buffer)) config))))
    buffer
    t))
@@ -390,9 +377,9 @@
    ((eyebrowse-get-lock-buffer-config buffer)
     (select-buffer-window-safely-at-config buffer))
    (t
-    (eyebrowse-message "selected buffer: %S" buffer)
+    (eyebrowse-debug-message "selected buffer: %S" buffer)
     (let ((configs (eyebrowse--filter-window-config buffer t)))
-      (eyebrowse-message "filted window config: %S" (length configs))
+      (eyebrowse-debug-message "filted window config: %S" (length configs))
       (cond
        ((zerop (length configs))
         (select-buffer-window-safely-at-config buffer))
@@ -411,17 +398,17 @@
       (eyebrowse--walk-window-config
        window-config
        (lambda (item)
-         (eyebrowse-message "item car: %S" (car item))
+         (eyebrowse-debug-message "item car: %S" (car item))
          (when (eq (car item) 'buffer)
            (let* ((buffer-name (cadr item))
                   (buffer (get-buffer buffer-name))
                   (matched (string-equal buffer-name target-buffer-name)))
              (cond
               ((not buffer)
-               (eyebrowse-message "Replaced deleted %s buffer with *scratch*" buffer-name)
+               (eyebrowse-debug-message "Replaced deleted %s buffer with *scratch*" buffer-name)
                (setf (cadr item) "*scratch*"))
               (matched
-               (eyebrowse-message "matched buffer: %s" (buffer-name buffer))
+               (eyebrowse-debug-message "matched buffer: %s" (buffer-name buffer))
                (if (not (-contains? filtered-window-config window-config))
                    (push window-config filtered-window-config))))))))
       (when (and (string-prefix-p "*" target-buffer-name)
@@ -483,7 +470,7 @@ If FRAME is nil, update the current frame."
          (tag (nth 2 first-config)))
     (when (and (= (length window-configs) 1)
                (zerop (length tag)))
-      (eyebrowse-message "rename first eyebrowse config as \"default\"")
+      (eyebrowse-debug-message "rename first eyebrowse config as \"default\"")
       (eyebrowse-rename-window-config 1 "default")
       (force-reset-eyebrowse-header-line-format)
       (force-reset-eyebrowse-mode-line-format))))
@@ -496,7 +483,7 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse--fixup-window-config window-config)
     (window-state-put window-config (frame-root-window) 'safe)))
 
-(defun* load-eyebrowse-configs ()
+(defun load-eyebrowse-configs ()
   "Load eyebrowse workspace from file."
   (interactive)
   (when (commit-editmsg-terminal-frame-p)
@@ -560,22 +547,6 @@ COPY from eyebrowse--load-window-config."
          (max-index (- (length frames) 1))
          (index (- max-index (-elem-index current-frame frames))))
     index))
-
-(defun frame-index-string ()
-  "Use number unicode for frame index from https://unicode-table.com."
-  (let ((frame-index (frame-parameter nil 'eyebrowse-frame-index)))
-    (cond ((null frame-index) "")
-          ((eq frame-index 0) "➊")
-          ((eq frame-index 1) "➋")
-          ((eq frame-index 2) "➌")
-          ((eq frame-index 3) "➍")
-          ((eq frame-index 4) "➎")
-          ((eq frame-index 5) "➏")
-          ((eq frame-index 6) "➐")
-          ((eq frame-index 7) "➑")
-          ((eq frame-index 8) "➒")
-          ((eq frame-index 9) "❿")
-          (t (number-to-string frame-index)))))
 
 (defun eyebrowse-next-new-file-name ()
   "."
@@ -672,57 +643,7 @@ COPY from eyebrowse--load-window-config."
          (eyebrowse-switch-to-window-config ,slot)))
     map))
 
-(defvar eyebrowse-mode-line-format
-  '("%e"
-    (:eval
-     (when (featurep 'window-numbering)
-       (window-numbering-get-number-string)))
-    mode-line-front-space
-    mode-line-mule-info
-    mode-line-client
-    mode-line-modified
-    mode-line-remote
-    " "
-    (:eval (propertized-buffer-identification "%b"))
-    " "
-    mode-line-percent-position
-    " "
-    "(%l,%c)"
-    vc-mode
-    " | "
-    ;; time info
-    (:eval (time-info-format))
-    ;; local ip
-    (:eval (current-ip-with-seperator))
-    ;; public ip
-    (:eval (public-ip-with-seperator))
-    ;; weather
-    (:eval (weather-with-seperator))))
-
-(defun time-info-format ()
-  "."
-  (let* ((time-string (format-time-string "%Y-%m-%d %H:%M %a" (current-time)))
-         (time-string-list (s-split " " time-string))
-         (date-string (car time-string-list))
-         (time-string (propertize (cadr time-string-list) 'face 'eyebrowse-time-face))
-         (week-string (caddr time-string-list)))
-    (format "%s %s %s" date-string time-string week-string)))
-
-(defun current-ip-with-seperator ()
-  "."
-  (let ((ip (current-ip)))
-    (if (> (length ip) 0) (list " | " ip) "")))
-
-(defun public-ip-with-seperator ()
-  "."
-  (let ((ip (fetched-public-ip)))
-    (if (> (length ip) 0) (list " | " ip) "")))
-
-(defun weather-with-seperator ()
-  "."
-  (let ((weather (fetched-weather)))
-    (if (> (length weather) 0) (list " | " weather) "")))
-
+;; unused
 (defun eyebrowse-buffer-format ()
   "."
   (let* ((locked-conf (and (boundp '*eyebrowse-locked-config-slot*)
@@ -749,98 +670,9 @@ COPY from eyebrowse--load-window-config."
                         'help-echo help-echo)
             )))
 
-(defvar eyebrowse-config-format
-  '(:eval
-    (list
-     " "
-     (let ((index (frame-index-string)))
-       (if index (list index " ") ""))
-     "["
-     (-interpose
-      ", "
-      (let ((current-slot (eyebrowse--get 'current-slot))
-            (last-slot (eyebrowse--get 'last-slot))
-            (help-echo "mouse-1: Switch to indicated workspace"))
-        (mapcar (lambda (config)
-                  (let* ((slot (car config))
-                         (config-string (eyebrowse-config-string config))
-                         (config-string (if (and (boundp '*eyebrowse-locked-config-slot*)
-                                                 (eq slot *eyebrowse-locked-config-slot*))
-                                            (format "%s*" config-string)
-                                          config-string))
-                         (face)
-                         (local-map))
-                    (cond ((eq slot current-slot)
-                           (setq face 'current-eyebrowse-config-face))
-                          ((eq slot last-slot)
-                           (setq face 'last-eyebrowse-config-face)
-                           (setq local-map (eyebrowse-make-keymap slot)))
-                          (t
-                           (setq local-map (eyebrowse-make-keymap slot))))
-                    (propertize config-string 'face face
-                                'mouse-face 'mode-line-highlight
-                                'slot slot
-                                'local-map local-map
-                                'help-echo help-echo)))
-                (eyebrowse--get 'window-configs))))
-     "]")))
-
-(defmacro walk-all-frame-windows (&rest body)
-  "Walk all windows in all frame for each execute the BODY."
-  `(walk-windows (lambda (window)
-                   (with-current-buffer (window-buffer window)
-                     ,@body))
-                 nil t))
-
-(defun set-eyebrowse-header-line-format ()
-  "."
-  (interactive)
-  (when (or (not header-line-format)
-            current-prefix-arg)
-    (when (window-live-p (get-buffer-window))
-      (with-current-buffer (current-buffer)
-        (eyebrowse-message "set-eyebrowse-header-line-format, buffer: %s" (current-buffer))
-        (setq-local header-line-format eyebrowse-config-format)))))
-
-(defun set-eyebrowse-mode-line-format ()
-  "."
-  (interactive)
-  (when (or (not (equal mode-line-format eyebrowse-mode-line-format))
-            current-prefix-arg)
-    (when (window-live-p (get-buffer-window))
-      (with-current-buffer (current-buffer)
-        (eyebrowse-message "set-eyebrowse-mode-line-format, buffer: %s" (current-buffer))
-        (setq-local mode-line-format eyebrowse-mode-line-format)))))
-
-(defun reset-eyebrowse-header-line-format ()
-  "."
-  (interactive)
-  (when (not (equal header-line-format eyebrowse-config-format))
-    (eyebrowse-message "reset-eyebrowse-header-line-format, buffer: %s" (current-buffer))
-    (setq-local header-line-format eyebrowse-config-format)))
-
-(defun reset-eyebrowse-mode-line-format ()
-  "."
-  (interactive)
-  (when (not (equal mode-line-format eyebrowse-mode-line-format))
-    (eyebrowse-message "reset-eyebrowse-mode-line-format, buffer: %s" (current-buffer))
-    (setq-local mode-line-format eyebrowse-mode-line-format)))
-
-(defun force-reset-eyebrowse-header-line-format ()
-  "."
-  (interactive)
-  (eyebrowse-message "force-reset-eyebrowse-mode-line-format, buffer: %s" (current-buffer))
-  (setq-local header-line-format eyebrowse-config-format))
-
-(defun force-reset-eyebrowse-mode-line-format ()
-  "."
-  (interactive)
-  (eyebrowse-message "force-reset-eyebrowse-mode-line-format, buffer: %s" (current-buffer))
-  (setq-local mode-line-format eyebrowse-mode-line-format))
 
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "H-~") 'force-reset-eyebrowse-header-line-format)
     map)
   "Initial key map for `eyebrowse-plus-mode'.")
 
@@ -850,38 +682,20 @@ COPY from eyebrowse--load-window-config."
   :global t
   (cond
    (eyebrowse-plus-mode
-    (message "Now turn on the eyebrowse-plus-mode...")
+    (message "turn on the eyebrowse-plus-mode")
     (eyebrowse-swap-init-function)
     (add-hook 'eyebrowse-lazy-load-hook
               (lambda ()
                 (add-hook 'delete-frame-functions #'save-eyebrowse-configs)
                 (add-hook 'kill-emacs-hook #'save-eyebrowse-configs)
                 (add-hook 'before-make-frame-hook #'load-frame-geometry)
-                (set-eyebrowse-header-line-format)
-                (set-eyebrowse-mode-line-format)))
-    ;; set mode-line-buffer-identification
-    ;; (setq-default mode-line-buffer-identification eyebrowse-buffer-name-format)
-    (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
-    (add-hook 'find-file-hook #'set-eyebrowse-mode-line-format)
-    (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
-    (add-hook 'window-configuration-change-hook #'set-eyebrowse-mode-line-format)
-    (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
-    (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
+                ))
     (start-eyebrowse-save-timer)
     (eyebrowse-mode 1))
    (t
-    (message "Now turn off the eyebrowse-plus-mode...")
+    (message "turn off the eyebrowse-plus-mode")
     (remove-hook 'delete-frame-functions #'save-eyebrowse-configs)
     (remove-hook 'kill-emacs-hook #'save-eyebrowse-configs)
-    ;; header-line-format hook
-    (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
-    (remove-hook 'find-file-hook #'set-eyebrowse-mode-line-format)
-    (remove-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
-    (remove-hook 'window-configuration-change-hook #'set-eyebrowse-mode-line-format)
-    (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
-    (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-mode-line-format)
-    (walk-all-frame-windows
-     (setq-local header-line-format nil))
     (stop-eyebrowse-save-timer)
     (eyebrowse-mode 0))))
 
