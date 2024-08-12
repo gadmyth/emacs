@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: bookmarks.el <gadmyth@gmail.com>
-;; Version: 1.0.0
-;; Package-Version: 20240810.001
+;; Version: 1.0.1
+;; Package-Version: 20240812.001
 ;; Package-Requires: s, minibuffer+
 ;; Keywords: bookmark
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -35,6 +35,8 @@
 
 
 (require 's)
+
+(require 'minibuffer+)
 
 (defvar *bookmarks* nil)
 
