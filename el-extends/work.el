@@ -110,5 +110,14 @@ Version 2017-05-24"
          (major-mode-language (replace-regexp-in-string "-mode" "" major-mode-string)))
     (insert (format "# -*- %s -*-\n" major-mode-language))))
 
+(defvar +scriptlets-directory+ (expand-file-name "scriptlets" +emacs-context-directory+))
+
+(defun open-current-file-in-intellij-idea ()
+   (interactive)
+   (when-let ((path (buffer-file-name (current-buffer))))
+     (shell-command-to-string (format "source %s; open-file-in-intellij-idea %d %s" (expand-file-name "idea.sh" +scriptlets-directory+) (line-number-at-pos) path))))
+
+(global-set-key (kbd "<f11>") #'open-current-file-in-intellij-idea)
+
 (provide 'work)
 ;;; work.el ends here
