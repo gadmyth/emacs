@@ -3,24 +3,13 @@
 ;;; Code:
 
 (require 'dates)
-
-(defvar *network-util-debug* nil)
+(require 'q)
 
 (defvar *proxy-list* '((socks5 . "127.0.0.1:1080")
                        (privoxy . "127.0.0.1:8118")))
 
-(defmacro network-util-debug-message (format-string &rest ARGS)
-  "If debug is open, send message with FORMAT-STRING and ARGS."
-  `(if *network-util-debug*
-       (message ,format-string ,@ARGS)))
 
-(defun network-util-toggle-debug ()
-  "."
-  (interactive)
-  (setq *network-util-debug* (not *network-util-debug*))
-  (message "turn %s the %s"
-           (if *network-util-debug* "on" "off")
-           (symbol-name '*network-util-debug*)))
+(define-debug-message network-util)
 
 (defun current-ip ()
   "."
