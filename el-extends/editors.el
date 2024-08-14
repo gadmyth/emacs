@@ -138,6 +138,28 @@
       (editors-debug-message lower-camel-string)
       lower-camel-string))))
 
+(defun s-lower-case (s)
+  "Convert S to lowercase; copied from s.el and mofified."
+  (declare (side-effect-free t))
+  (s-join "" (s--mapcar-head 'downcase 'downcase (s-split-words s))))
+
+(defun lower-case ()
+  "Replace the string of region with lower camel case format."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
+           (lower-string (s-lower-case region-string)))
+      (delete-region start end)
+      (insert lower-string)))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (lower-string (s-lower-case string)))
+      (editors-debug-message lower-string)
+      lower-string))))
+
 (defun snake-case ()
   "Replace the string of region with snake case format."
   (interactive "r")
