@@ -3,8 +3,8 @@
 ;; Copyright (C) 2024 Gadmyth
 
 ;; Author: mode-line+.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20240812.001
+;; Version: 1.0.1
+;; Package-Version: 20240814.001
 ;; Package-Requires: q, network-util, weathers
 ;; Keywords: mode line
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -139,12 +139,16 @@
     (add-hook 'find-file-hook #'set-mode-line-plus-format)
     (add-hook 'window-configuration-change-hook #'set-mode-line-plus-format)
     ;; (add-hook 'eyebrowse-post-window-switch-hook #'reset-mode-line-plus-format)
+    (add-hook 'weather-fetched-hook 'force-mode-line-update)
+    (add-hook 'public-ip-fetched-hook 'force-mode-line-update)
     )
    (t
     (message "turn off the mode-line-plus-mode")
     (remove-hook 'find-file-hook #'set-mode-line-plus-format)
     (remove-hook 'window-configuration-change-hook #'set-mode-line-plus-format)
     ;; (remove-hook 'eyebrowse-post-window-switch-hook #'reset-mode-line-plus-format)
+    (remove-hook 'weather-fetched-hook 'force-mode-line-update)
+    (remove-hook 'public-ip-fetched-hook 'force-mode-line-update)
     )
    ))
 

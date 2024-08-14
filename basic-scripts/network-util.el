@@ -11,6 +11,11 @@
 
 (define-debug-message network-util)
 
+(defcustom public-ip-fetched-hook nil
+  "Hook when public ip fetch finished."
+  :type 'hook
+  :group 'network-util)
+
 (defun current-ip ()
   "."
   (interactive)
@@ -75,6 +80,7 @@
                     (let* ((ip data))
                       (network-util-debug-message "public ip fetched: [%S]" ip)
                       (setq *fetched-public-ip* ip)
+                      (run-hooks 'public-ip-fetched-hook)
                       (network-util-debug-message "*fetched-public-ip* set as: [%S]" *fetched-public-ip*))))))))
 
 (defvar *public-ip-fetch-timer* nil)
@@ -93,6 +99,7 @@
   "."
   (when (zerop (length *fetched-public-ip*))
     (when (not *public-ip-fetch-timer*)
+      (refresh-public-ip)
       (setq *public-ip-fetch-timer*
             (run-with-idle-timer 300 300 #'refresh-public-ip))))
   *fetched-public-ip*)

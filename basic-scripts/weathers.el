@@ -54,6 +54,11 @@
 
 (defvar *weather-fetch-timer* nil)
 
+(defcustom weather-fetched-hook nil
+  "Hook when weather fetch finished."
+  :type 'hook
+  :group 'weather)
+
 (define-debug-message weathers)
 
 (defun refresh-weather ()
@@ -104,7 +109,8 @@
                                (temperature (cdr (assoc 'temperature (cdr now))))
                                (format-result (format "%s:%s(%s)" loc-name weather temperature)))
                           (weathers-debug-message "weather result fetched: %s" format-result)
-                          (setq *weather-api-result* format-result)))))
+                          (setq *weather-api-result* format-result)
+                          (run-hooks 'weather-fetched-hook)))))
           :error (cl-function
                   (lambda (&key error-thrown &allow-other-keys&rest _)
                     (message "error: %S" error-thrown))))))))
@@ -114,6 +120,7 @@
   (when (or (null *weather-api-result*)
             (zerop (length *weather-api-result*)))
     (when (not *weather-fetch-timer*)
+      (refresh-weather)
       (setq *weather-fetch-timer*
             (run-with-idle-timer 300 300 #'refresh-weather))))
   *weather-api-result*)
