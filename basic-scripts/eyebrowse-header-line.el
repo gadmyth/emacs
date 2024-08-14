@@ -3,8 +3,8 @@
 ;; Copyright (C) 2024 Gadmyth
 
 ;; Author: eyebrowse-header-line.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20240812.001
+;; Version: 1.0.1
+;; Package-Version: 20240814.001
 ;; Package-Requires: eyebrowse, eyebrowse+, q
 ;; Keywords: eyebrowse, header-line
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -135,15 +135,15 @@
     (add-hook 'find-file-hook #'set-eyebrowse-header-line-format)
     (add-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
     (add-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
-    ))
-  (t
-   (message "Now turn off the eyebrowse-header-line-mode...")
-   ;; header-line-format hook
-   (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
-   (remove-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
-   (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
-   (walk-all-frame-windows
-    (setq-local header-line-format nil))
+    )
+   (t
+    (message "Now turn off the eyebrowse-header-line-mode...")
+    ;; header-line-format hook
+    (remove-hook 'find-file-hook #'set-eyebrowse-header-line-format)
+    (remove-hook 'window-configuration-change-hook #'set-eyebrowse-header-line-format)
+    (remove-hook 'eyebrowse-post-window-switch-hook #'reset-eyebrowse-header-line-format)
+    (walk-all-frame-windows
+     (setq-local header-line-format nil)))
    ))
 
 (provide 'eyebrowse-header-line)
