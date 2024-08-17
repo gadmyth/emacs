@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.6
-;; Package-Version: 20240811.001
+;; Version: 1.1.7
+;; Package-Version: 20240817.001
 ;; Package-Requires: json-pointer, dates, q
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -339,6 +339,29 @@
   "."
   (not (string= path "/root")))
 
+(defun ivy-just-insert-current ()
+  "Copied from ivy-just-insert-current and modified."
+  (let ((end (and ivy--directory
+                  (ivy--dirname-p (ivy-state-current ivy-last))
+                  -1)))
+    (insert (substring-no-properties
+             (ivy-state-current ivy-last) 0 end))))
+
+(defun scratch-insert-node ()
+  "Insert current node's content."
+  (let ((current-node *scratch-current-node*))
+    (cond
+     ((vectorp current-node)
+      (ivy-just-insert-current))
+     ((stringp current-node)
+      (insert *scratch-current-node*))
+     )))
+
+(defun scratch-insert-node-checker ()
+  "."
+  (or (stringp *scratch-current-node*)
+      (vectorp *scratch-current-node*)))
+
 (defun first-element-index (ele list &optional test-fn)
   "Return first index of ELE in LIST, using TEST-FN to compare."
   (let ((fn (or test-fn #'eq))
@@ -488,7 +511,8 @@
     (define-key map (kbd "C-c C->") (scratch-generate-action #'scratch-open-org-link #'scratch-open-org-link-checker))
     (define-key map (kbd "C-c C-c") (scratch-generate-action #'scratch-copy-node #'scratch-copy-node-checker))
     (define-key map (kbd "C-c C-e") (scratch-generate-action #'scratch-edit-in-buffer #'scratch-edit-in-buffer-checker))
-    (define-key map (kbd "C-c ~") (scratch-generate-action #'scratch-rename-node #'scratch-rename-node-checker))
+    (define-key map (kbd "C-c C-r") (scratch-generate-action #'scratch-rename-node #'scratch-rename-node-checker))
+    (define-key map (kbd "C-<return>") (scratch-generate-action #'scratch-insert-node #'scratch-insert-node-checker))
     (define-key map (kbd "C-<up>") (scratch-generate-action #'scratch-level-up #'scratch-level-up-checker))
     map)
   "Initial key map for `scratch-list-mode'.")
