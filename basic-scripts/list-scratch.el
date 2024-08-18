@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: list-scratch.el <gadmyth@gmail.com>
-;; Version: 1.1.7
-;; Package-Version: 20240817.001
+;; Version: 1.1.8
+;; Package-Version: 20240820.001
 ;; Package-Requires: json-pointer, dates, q
 ;; Keywords: list-scratch.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -37,6 +37,8 @@
 (require 'json-pointer)
 (require 'dates)
 (require 'q)
+
+(defvar *scratch-list-p* nil)
 
 (defvar *scratch-list* '(("root" . nil)))
 
@@ -378,6 +380,7 @@
 (defun list-scratch ()
   "."
   (interactive)
+  (setq *scratch-list-p* t)
   (cond
    ((or (null *scratch-current-node*) (consp *scratch-current-node*))
     (list-scratch-debug-message "list-scratch-list")
@@ -432,6 +435,7 @@
 
 (defun list-scratch-string-with-param (path key value)
   "List string type string with VALUE of KEY under PATH."
+  (setq *scratch-list-p* t)
   (let* ((list (list value))
          (index (or (gethash path *scratch-path-index* 0) 0))
          (default (nth index list))
@@ -572,13 +576,21 @@
            *scratch-list-idle-delay*
            #'save-scratch-list-when-modified))))
 
-(defun scratch-list-setup-minibuffer-mode ()
+(defun scratch-list-raise-minibuffer ()
   "."
-  (when (window-minibuffer-p)
+  (when (and (window-minibuffer-p)
+             *scratch-list-p*)
     (scratch-list-mode t)))
 
+(defun scratch-list-quit-minibuffer ()
+  "."
+  (when (bound-and-true-p scratch-list-mode)
+    (setq *scratch-list-p* nil)
+    (scratch-list-mode 0)))
+
 (add-hook 'kill-emacs-hook #'save-scratch-list)
-(add-hook 'minibuffer-setup-hook 'scratch-list-setup-minibuffer-mode)
+(add-hook 'minibuffer-setup-hook 'scratch-list-raise-minibuffer)
+(add-hook 'minibuffer-exit-hook 'scratch-list-quit-minibuffer)
 
 (load-scratch-list)
 (start-scratch-list-idle-saver)
