@@ -109,6 +109,19 @@
     (java-goto-class class
                      #'(lambda (buffer) (java-goto-method method)))))
 
+(defun java-jump-to-class-properties ()
+  "."
+  (interactive)
+  (let* ((pair (java-resolve-class-method))
+         (class (car pair))
+         (property (cdr pair)))
+    (when (string-match "\\(set\\|get\\|is\\)\\(.*\\)" property)
+      (setq property (s-lower-camel-case
+                      (substring property (match-beginning 2) (match-end 2)))))
+    (message "java-jump-to-class-properties: %S, %S" class property)
+    (java-goto-class class
+                     #'(lambda (buffer) (java-goto-property property)))))
+
 (defun java-list-class-method (&optional action)
   "ACTION."
   (interactive)
@@ -208,10 +221,12 @@
 
 (defconst +java-property-regexp+ "^\s*?private\s*\\([^\s]*\\)\s*\\([^\s]*\\);\s*?$")
 
-(defun java-goto-property ()
+(defconst +java-property-with-args-regexp+ "^\s*?private\s*\\([^\s]*\\)\s*\\(%s\\);\s*?$")
+
+(defun java-goto-property (property)
   "."
   (interactive)
-  (scj-goto-with-regexp +java-property-regexp+ "The property name: " "No property here."))
+  (scj-goto-with-regexp (format +java-property-with-args-regexp+ property) "The property name: " "No property here."))
 
 (defun java-class-properties ()
   "."
