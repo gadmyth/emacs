@@ -14,14 +14,12 @@
          ;; (full-cmd (format "git ls-files | grep -E \"%s(Impl)?\\>.*?.%s\"" class extension))
          (full-cmd (format "git grep --full-name -l -E \"class %s[ {]|implements.*[, ] *%s,?[ {]|enum %s[ {]\"" class class class))
          (cands (split-string (shell-command-to-string full-cmd) "\n" t)))
-    (cl-flet ((candidate-action (filename)
-                             (let ((buffer (if noselect (find-file-noselect filename) (find-file filename))))
-                               (if finish-block (funcall finish-block buffer)))))
+    (cl-flet ((action (filename)
+                (let ((buffer (if noselect (find-file-noselect filename) (find-file filename))))
+                  (if finish-block (funcall finish-block buffer)))))
       (if (equal 1 (length cands))
           (candidate-action (car cands))
-        (ivy-read "Select class: " (reverse cands) :action
-                  (lambda (candidate)
-                    (candidate-action candidate)))))))
+        (ivy-read "Select class: " (reverse cands) :action action)))))
 
 (defun java-goto-class-at-point ()
   "."
@@ -399,16 +397,14 @@
   (interactive)
   (let ((default-directory (expand-file-name (counsel-locate-git-root)))
         (cands (git-ls-files  "application.*.properties")))
-    (cl-flet ((list-properties
-            (properties-file)
-            (with-current-buffer (find-file-noselect properties-file)
-              (let ((collections (java-property-file-candidates)))
-                (ivy-read "Select property: " (reverse collections) :action nil)))))
+    (cl-flet ((action
+                (properties-file)
+                (with-current-buffer (find-file-noselect properties-file)
+                  (let ((collections (java-property-file-candidates)))
+                    (ivy-read "Select property: " (reverse collections) :action nil)))))
       (if (equal 1 (length cands))
-          (list-properties (car cands))
-        (ivy-read "Select class: " (reverse cands) :action
-                  (lambda (candidate)
-                    (list-properties candidate)))))))
+          (action (car cands))
+        (ivy-read "Select class: " (reverse cands) :action action)))))
 
 
 (defun spring-git-grep-at-point ()
