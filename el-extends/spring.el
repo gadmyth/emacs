@@ -296,7 +296,7 @@
   (interactive "sMapper: \nsMethod: ")
   (let* ((default-directory (expand-file-name (counsel-locate-git-root)))
          (extension "xml")
-         (full-cmd (format "git ls-files | egrep \"\\<%s\\>.%s\"" mapper extension))
+         (full-cmd (format "git ls-files | grep -E \"\\<%s\\>.%s\"" mapper extension))
          (cands (split-string (shell-command-to-string full-cmd) "\n" t)))
     (if (equal 1 (length cands))
         (progn
@@ -389,7 +389,7 @@
   "REGEXP."
   (interactive)
   (let ((default-directory (expand-file-name (counsel-locate-git-root)))
-        (command (format "git ls-files | egrep \"%s\"" regexp)))
+        (command (format "git ls-files | grep -E \"%s\"" regexp)))
     (split-string (shell-command-to-string command) "\n" t)))
 
 (defun spring-list-application-properties ()
