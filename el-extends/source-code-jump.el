@@ -36,11 +36,13 @@
 (defun scj-goto-with-regexp (regexp prompt empty-message)
   "REGEXP, PROMPT, EMPTY-MESSAGE."
   (scj-action-with-regexp regexp prompt empty-message
-                           #'(lambda (collections)
-                               (ivy-read prompt (reverse collections) :action
-                                         (lambda (candidate)
-                                           (let ((line-num (cadr candidate)))
-                                             (scj-goto-line-no-interactive line-num)))))))
+                          #'(lambda (collections)
+                              (cl-flet ((action (lambda (candidate)
+                                                  (let ((line-num (cadr candidate)))
+                                                    (scj-goto-line-no-interactive line-num)))))
+                                (if (= (length collections) 1)
+                                    (action (car collections))
+                                  (ivy-read prompt (reverse collections) :action action))))))
 
 (defun scj-collect-with-regexp (regexp prompt empty-message)
   "REGEXP, PROMPT, EMPTY-MESSAGE."
