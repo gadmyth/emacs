@@ -3,8 +3,8 @@
 ;; Copyright (C) 2024 Gadmyth
 
 ;; Author: mode-line+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20240814.001
+;; Version: 1.0.2
+;; Package-Version: 20240910.001
 ;; Package-Requires: q, network-util, weathers
 ;; Keywords: mode line
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -56,7 +56,10 @@
     " "
     mode-line-percent-position
     " "
-    "(%l,%c)"
+    "("
+    "%l,%c,"
+    (:eval (format "%d" (point)))
+    ")"
     vc-mode
     " | "
     ;; time info
