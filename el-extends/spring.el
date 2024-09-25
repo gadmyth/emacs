@@ -18,7 +18,7 @@
                 (let ((buffer (if noselect (find-file-noselect filename) (find-file filename))))
                   (if finish-block (funcall finish-block buffer)))))
       (if (equal 1 (length cands))
-          (candidate-action (car cands))
+          (action (car cands))
         (ivy-read "Select class: " (reverse cands) :action action)))))
 
 (defun java-goto-class-at-point ()
@@ -277,16 +277,17 @@
              (list (s-split ":" matcher))
              (type (java-parse-type (nth 1 list)))
              (property (nth 0 list))
+             (property (downcase (s-lower-camel-case property)))
              (comment (nth 2 list)))
-	(message "%S, %S" type comment)
-        (replace-match (format "private %s %s;" type property))
-	(indent-according-to-mode)
-	(when comment
-	  (beginning-of-line)
-	  (newline-and-indent)
-	  (previous-line)
-	  (insert (format "// %s" comment))
-	  (indent-according-to-mode))))))
+	    (message "%S, %S" type comment)
+        (replace-match (format "private %s %s;" type property) t)
+	    (indent-according-to-mode)
+	    (when comment
+	      (beginning-of-line)
+	      (newline-and-indent)
+	      (previous-line)
+	      (insert (format "// %s" comment))
+	      (indent-according-to-mode))))))
 
 (defun java-expand-property (line)
   "Expand java property from LINE like i:count."
@@ -304,6 +305,7 @@
     ("I" "Integer")
     ("s" "String")
     ("T" "Date")
+    ("BD" "BigDecimal")
     (_ (error "Unknown type: %S" type))))
 
 (defun spring-goto-mapper-xml-file (mapper &optional finish-block)
