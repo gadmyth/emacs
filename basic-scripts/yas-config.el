@@ -7,6 +7,9 @@
 (require 'dash)
 (require 'abbrev)
 
+
+(setq yas-triggers-in-field t)
+
 (advice-add 'yas-maybe-expand-abbrev-key-filter :filter-return #'yas-maybe-expand-compensate)
 
 (defun yas-maybe-expand-compensate (cmd)
