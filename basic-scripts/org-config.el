@@ -224,6 +224,7 @@
    (python . t)
    (gnuplot . t)
    (sql . t)
+   (js . t)
    (restclient . ,(featurep 'ob-restclient))
    (jq . ,(featurep 'ob-jq))
    ))
