@@ -157,18 +157,28 @@
              (save-buffer)
              (quit-window t)))))))
 
-(defun yas-expand-snippet-with-params (snippet-name &rest params)
-  "SNIPPET-NAME, PARAMS."
+(defmacro yas-expand-snippet-with-params (snippet-name &rest params)
+  `(yas-expand-snippet-with-callback-and-params ,snippet-name nil ,@params))
+
+(defun yas-expand-snippet-with-callback-and-params (snippet-name callback &rest params)
+  "SNIPPET-NAME, CALLBACK, PARAMS."
   (interactive)
   (when-let ((snippet (yas-lookup-snippet snippet-name)))
     (yas-expand-snippet snippet)
-    (dolist (p params)
-      (if (or (string-equal "__default__" p)
-              (string-equal "" p))
-          (yas-next-field)
-        (progn
-          (insert p)
-          (yas-next-field))))
+    (let ((index 1)
+          (length (length params))
+          (snippet))
+      (dolist (p params)
+        (unless (or (string-equal "__default__" p)
+                    (string-equal "" p))
+          (insert p))
+        ;; before last time yas-next-field (still having active snippets), call the callback function
+        (when (and (= index length) callback)
+          (setq snippet (car (yas-active-snippets))))
+        (yas-next-field)
+        (when snippet
+          (funcall callback snippet))
+        (setq index (1+ index))))
     (yas-exit-all-snippets)))
 
 (defun yas-expand-snippet-with-region ()
@@ -181,7 +191,7 @@
            (params (split-string content)))
       (select-snippet-for-mode major-mode
                                (lambda (snippet)
-                                 (eval `(yas-expand-snippet-with-params (yas--template-name snippet) ,@params)))))))
+                                 (eval `(yas-expand-snippet-with-params nil (yas--template-name snippet) ,@params)))))))
 
 (provide 'yas-config)
 ;;; yas-config.el ends here
