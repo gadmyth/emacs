@@ -134,9 +134,26 @@
       (insert lower-camel-string)))
    (t
     (let* ((string (read-string "Please input string: "))
-           (lower-camel-string (s-lower-camel-case string)))
-      (editors-debug-message lower-camel-string)
-      lower-camel-string))))
+           (camel-string (s-lower-camel-case string)))
+      (editors-debug-message camel-string)
+      camel-string))))
+
+(defun upper-camel-case ()
+  "Replace the string of region with upper camel case format."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (region-string (buffer-substring-no-properties start end))
+           (string (s-upper-camel-case region-string)))
+      (delete-region start end)
+      (insert string)))
+   (t
+    (let* ((string (read-string "Please input string: "))
+           (camel-string (s-upper-camel-case string)))
+      (editors-debug-message camel-string)
+      camel-string))))
 
 (defun s-lower-case (s)
   "Convert S to lowercase; copied from s.el and mofified."
@@ -194,6 +211,34 @@
       (message dash-case-string)
       dash-case-string))))
 
+(defun open-line-upward ()
+  (beginning-of-line)
+  (newline-and-indent)
+  (forward-line -1)
+  (indent-for-tab-command))
+
+(defun previous-line-blank-p ()
+  (save-excursion
+    (forward-line -1)
+    (looking-at-p "^[ \t]*$")))
+
+(defun remove-blank-lines-from-string (input-string)
+  "Remove all blank lines from INPUT-STRING and return the result."
+  (let ((output-string input-string))
+    (setq output-string (replace-regexp-in-string "^[ \t]*\n" "" output-string))
+    output-string))
+
+(defun remove-blank-lines-in-region (start end)
+  "Remove all blank lines in the region defined by START and END."
+  (interactive "r")
+  (save-excursion
+    (goto-char end)
+    (while (re-search-backward "^[ \t]*\n" start t)
+      (replace-match ""))))
+
+(defun blank-string-p (input-string)
+  "Check if INPUT-STRING is a blank string (only contains whitespace characters)."
+  (string-match-p "^[ \t\n]*$" input-string))
 
 (provide 'editors)
 ;;; editors.el ends here

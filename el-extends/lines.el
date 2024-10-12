@@ -124,6 +124,11 @@
        (lambda () (interactive) (join-the-line)))
      map)))
 
+(defun current-line-contains-regexp (regexp)
+  "Check if the current line contains a match for the specified REGEXP."
+  (save-excursion
+    (beginning-of-line)
+    (re-search-forward regexp (line-end-position) t)))
 
 ;; define the *global-join-map*
 (defvar *global-join-map* (make-sparse-keymap))

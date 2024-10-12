@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 gadmyth
 
 ;; Author: q.el <gadmyth@gmail.com>
-;; Version: 1.1
-;; Package-Version: 20240531.001
+;; Version: 1.1.1
+;; Package-Version: 20241012.001
 ;; Package-Requires:
 ;; Keywords: q.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -82,6 +82,17 @@
          `(if ,,debug-flag-sym
               (message ,format-string ,@ARGS)))
      )))
+
+(defun y-or-n-p-with-default (prompt &optional default)
+  "Ask user a 'y or n' question. Return t if answer is 'y'.
+If the user just presses Enter, return DEFAULT if provided, otherwise nil."
+  (let ((default (or default 'n)))
+    (if (eq (read-char (format "%s(%s): " prompt (if (eq default 'y) "Y/n" "N/y")))
+            ?\y)
+        t
+      (if (eq default 'y)
+          t
+        nil))))
 
 (provide 'q)
 ;;; q.el ends here

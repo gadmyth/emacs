@@ -53,6 +53,31 @@
           (setq buffer-offer-save t))
       (message (format "The buffer %s doesn't exist!" name)))))
 
+(defun guess-buffer-major-mode (buffer-name)
+  "Return the major mode associated with the given file SUFFIX from auto-mode-alist."
+  (let ((mode)
+        (case-fold-search))
+    (catch 'break
+      (dolist (entry auto-mode-alist mode)
+        (when (string-match (car entry) buffer-name)
+          (setq mode (cdr entry))
+          (throw 'break mode))))))
+
+(defmacro operate-on-file-buffer (filename &rest body)
+  "Check if FILENAME is already open. If it is, operate on its buffer.
+If it is not, prompt to open the file and then operate on its buffer."
+  `(let ((buffer (get-file-buffer ,filename)))
+     (unless buffer
+       (when (y-or-n-p (format "File %s is not open. Open it? " ,filename))
+         (setq buffer (find-file ,filename))))
+     (when buffer
+       (message "File is already open. Performing operations in its buffer.")
+       (with-current-buffer buffer
+         (let ((guess-major-mode (guess-buffer-major-mode (buffer-name buffer))))
+           (unless (eq major-mode guess-major-mode)
+             (revert-buffer))
+           ,@body)))))
+
 (global-set-key (kbd "s-<left>") #'previous-buffer)
 (global-set-key (kbd "s-<right>") #'next-buffer)
 
