@@ -157,9 +157,6 @@
              (save-buffer)
              (quit-window t)))))))
 
-(defmacro yas-expand-snippet-with-params (snippet-name &rest params)
-  `(yas-expand-snippet-with-callback-and-params ,snippet-name nil ,@params))
-
 (defun yas-expand-snippet-with-callback-and-params (snippet-name callback &rest params)
   "SNIPPET-NAME, CALLBACK, PARAMS."
   (interactive)
@@ -180,6 +177,20 @@
           (funcall callback snippet))
         (setq index (1+ index))))
     (yas-exit-all-snippets)))
+
+(defun indent-expanded-snippet (snippet)
+  "Get the start and end positions of the last expanded SNIPPET."
+  (when snippet
+    (let* ((overlay (yas--snippet-control-overlay snippet))
+           (start (overlay-start overlay))
+           (end (overlay-end overlay)))
+      (indent-region start end))))
+
+(defmacro yas-expand-snippet-with-params (snippet-name &rest params)
+  `(yas-expand-snippet-with-callback-and-params ,snippet-name nil ,@params))
+
+(defun yas-expand-and-indent-snippet-with-and-params (snippet-name &rest params)
+  `(yas-expand-snippet-with-callback-and-params ,snippet-name #'indent-expanded-snippet ,@params))
 
 (defun yas-expand-snippet-with-region ()
   "."
