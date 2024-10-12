@@ -19,7 +19,7 @@
                   (if finish-block (funcall finish-block buffer)))))
       (if (equal 1 (length cands))
           (action (car cands))
-        (ivy-read "Select class: " (reverse cands) :action action)))))
+        (ivy-read "Select class: " (reverse cands) :action #'action)))))
 
 (defun java-goto-class-at-point ()
   "."
@@ -308,6 +308,16 @@
     ("BD" "BigDecimal")
     (_ (error "Unknown type: %S" type))))
 
+(defun java-class-clean-body ()
+  (interactive)
+  (goto-char (point-min))
+  (when (re-search-forward "class \\([^\s]+\\) *{[^}]*}" nil t)
+    (let ((class-name (match-string 1)))
+      (replace-match (format "class %s {\n}" class-name) t t)
+      (re-search-backward "{" nil t)
+      (forward-char 1)
+      (newline-and-indent))))
+
 (defun spring-goto-mapper-xml-file (mapper &optional finish-block)
   "MAPPER, FINISH-BLOCK."
   (interactive "sMapper: \nsMethod: ")
@@ -421,7 +431,7 @@
                     (ivy-read "Select property: " (reverse collections) :action nil)))))
       (if (equal 1 (length cands))
           (action (car cands))
-        (ivy-read "Select class: " (reverse cands) :action action)))))
+        (ivy-read "Select class: " (reverse cands) :action #'action)))))
 
 
 (defun spring-git-grep-at-point ()

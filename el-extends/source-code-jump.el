@@ -42,7 +42,7 @@
                                                     (scj-goto-line-no-interactive line-num)))))
                                 (if (= (length collections) 1)
                                     (action (car collections))
-                                  (ivy-read prompt (reverse collections) :action action))))))
+                                  (ivy-read prompt (reverse collections) :action #'action))))))
 
 (defun scj-collect-with-regexp (regexp prompt empty-message)
   "REGEXP, PROMPT, EMPTY-MESSAGE."
