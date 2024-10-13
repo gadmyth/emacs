@@ -34,5 +34,7 @@
 
 (setq backup-directory-alist (quote (("." . "~/.backups"))))
 
+(add-to-list 'auto-mode-alist '("\\.xml\\'" . nxml-mode))
+
 (provide 'files-config)
 ;;; files-config.el ends here
