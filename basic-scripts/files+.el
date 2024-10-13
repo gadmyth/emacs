@@ -4,11 +4,17 @@
 
 
 (defmacro find-file-path (root-directory file-part-name file-hint &optional initial &rest body)
-  `(let* ((cmd (format "find %s -name '%s*' | xargs realpath" ,root-directory ,file-part-name))
+  `(let* ((file-path)
+          (cmd (format "find %s -name '%s*' | xargs realpath" ,root-directory ,file-part-name))
           (files (shell-command-to-string cmd))
           (files (string-split files))
-          (file-path (completing-read (format "Please select %s: " ,file-hint) files nil t ,initial)))
-     (when file-path
+          (filtered-files (cl-remove-if-not
+                           (lambda (file) (string-match-p (regexp-quote ,initial) file))
+                           files)))
+     (when-let ((file-path
+                 (if (= (length filtered-files) 1)
+                     (car filtered-files)
+                   (completing-read (format "Please select %s: " ,file-hint) files nil t ,initial))))
        ,@body)))
 
 (defmacro find-project-file-path (file-part-name file-hint &optional initial &rest body)
