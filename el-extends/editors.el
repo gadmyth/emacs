@@ -217,6 +217,11 @@
   (forward-line -1)
   (indent-for-tab-command))
 
+(defun open-line-downward ()
+  (open-line 1)
+  (forward-line 1)
+  (indent-for-tab-command))
+
 (defun previous-line-blank-p ()
   (save-excursion
     (forward-line -1)
@@ -239,6 +244,15 @@
 (defun blank-string-p (input-string)
   "Check if INPUT-STRING is a blank string (only contains whitespace characters)."
   (string-match-p "^[ \t\n]*$" input-string))
+
+(defmacro jump-to-buffer-appending-place (end-mark-regexp &rest body)
+  `(save-excursion
+     (goto-char (point-min))
+     (when (re-search-forward ,end-mark-regexp (point-max) t)
+       (open-line-upward))
+     (when (not (previous-line-blank-p))
+       (open-line-downward))
+     ,@body))
 
 (provide 'editors)
 ;;; editors.el ends here
