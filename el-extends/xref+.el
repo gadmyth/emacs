@@ -34,6 +34,8 @@
 ;;; Code:
 
 
+(require 'files+)
+
 (defvar *xref-action-list*
   (cl-remove-if
    #'null
@@ -42,6 +44,7 @@
         `("counsel-git" . counsel-git-with-word-at-point))
      ,(when (featurep 'counsel)
         `("counsel-git-grep" . counsel-git-grep-with-word-at-point))
+     ("find project file" . find-project-file-at-point)
      ("goto class method" . java-jump-to-class-method)
      ("goto class property" . java-jump-to-class-properties)
      )))
