@@ -8,9 +8,10 @@
           (cmd (format "find %s -name '%s*' | xargs realpath" ,root-directory ,file-part-name))
           (files (shell-command-to-string cmd))
           (files (string-split files))
-          (filtered-files (cl-remove-if-not
-                           (lambda (file) (string-match-p (regexp-quote ,initial) file))
-                           files)))
+          (filtered-files (if (not ,initial)
+                            (cl-remove-if-not
+                             (lambda (file) (string-match-p (regexp-quote ,initial) file))
+                             files))))
      (when-let ((file-path
                  (if (= (length filtered-files) 1)
                      (car filtered-files)
