@@ -43,11 +43,11 @@
      (defun dired-create-directory-or-file ()
        "."
        (interactive)
-       (let ((type (read-string "Make directory (d) or create file (f) ? ")))
+       (let ((type (read-key "Make directory (d) or create file (f) ? ")))
          (pcase type
-           ("d"
+           (?d
             (call-interactively 'dired-create-directory))
-           ("f"
+           (?f
             (call-interactively 'dired-create-new-file))
            (t
             (message "wrong action type")))))
