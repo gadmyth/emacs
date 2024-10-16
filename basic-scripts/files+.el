@@ -9,6 +9,7 @@
           (files (shell-command-to-string cmd))
           (files (string-split files))
           (filtered-files (if (not ,initial)
+                              files
                             (cl-remove-if-not
                              (lambda (file) (string-match-p (regexp-quote ,initial) file))
                              files))))
