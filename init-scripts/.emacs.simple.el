@@ -5,6 +5,9 @@
 ;; load path
 (emacs-load-path-initialize)
 
+;; load configs
+(require 'loading-config)
+
 (require 'package-tools)
 (require 'package-config)
 (require 'q)
@@ -16,8 +19,6 @@
 ;; init archives
 (packages-init-archives)
 
-;; load configs
-(require 'loading-config)
 (require 'basic-config)
 (require 'mode-bars)
 
