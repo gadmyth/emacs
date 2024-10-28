@@ -6,6 +6,7 @@
 (emacs-load-path-initialize)
 
 (require 'package-tools)
+(require 'package-config)
 (require 'q)
 
 ;; load script files at first
