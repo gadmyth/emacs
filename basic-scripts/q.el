@@ -86,13 +86,12 @@
 (defun y-or-n-p-with-default (prompt &optional default)
   "Ask user a 'y or n' question. Return t if answer is 'y'.
 If the user just presses Enter, return DEFAULT if provided, otherwise nil."
-  (let ((default (or default 'n)))
-    (if (eq (read-char (format "%s(%s): " prompt (if (eq default 'y) "Y/n" "N/y")))
-            ?\y)
-        t
-      (if (eq default 'y)
-          t
-        nil))))
+  (let* ((default (or default 'n))
+         (input-char (read-char (format "%s(%s): " prompt (if (eq default 'y) "Y/n" "N/y")))))
+    (pcase input-char
+      (?\C-m (eq default 'y))
+      (?\y t)
+      (_ nil))))
 
 (provide 'q)
 ;;; q.el ends here
