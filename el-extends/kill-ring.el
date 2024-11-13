@@ -37,7 +37,7 @@
          (text-beg (if region-active-p (region-beginning) (line-beginning-position)))
          (text-end (if region-active-p (region-end) (line-end-position)))
          (content (buffer-substring-no-properties text-beg text-end)))
-    (try-kill-to-system-clipboad content)
+    (try-kill-to-system-clipboard content)
     (cond
      (region-active-p
       (kill-ring-debug-message "*** region copied ***")

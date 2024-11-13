@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: clipboard+.el <gadmyth@gmail.com>
-;; Version: 1.0
-;; Package-Version: 20221121.001
+;; Version: 1.0.1
+;; Package-Version: 20241113.001
 ;; Package-Requires:
 ;; Keywords: clipboard
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -34,7 +34,7 @@
 ;;; Code:
 
 
-(defun try-kill-to-system-clipboad (content)
+(defun try-kill-to-system-clipboard-old (content)
   "CONTENT."
   (cond
    ((> (length content) 0)
@@ -55,6 +55,17 @@
       (kill-new content))))
    (t
     (message "Can't copy empty content!"))))
+
+(defun try-kill-to-system-clipboard (content)
+  "Copy CONTENT to the system clipboard using xclip."
+  (if (> (length content) 0)
+      (if (executable-find "xclip")
+          (let ((xclip-cmd (executable-find "xclip")))
+            (with-temp-buffer
+              (insert content)
+              (call-process-region (point-min) (point-max) xclip-cmd nil 0 nil "-sel" "c")))
+        (kill-new content))
+    (message "Can't copy empty content!")))
 
 (provide 'clipboard+)
 ;;; clipboard+.el ends here
