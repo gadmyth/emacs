@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: codec.el <gadmyth@gmail.com}>
-;; Version: 1.1
-;; Package-Version: 20211122.001
+;; Version: 1.2
+;; Package-Version: 20241213.001
 ;; Package-Requires:
 ;; Keywords: codec, md5, base64, encode, decode
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -107,6 +107,26 @@
          (uri (concat "data:" "image/png" ";base64," base64-content)))
     (message "encode-file-as-base-64-uri: %s" uri)
     uri))
+
+
+(defun base64url-encode-string (str)
+  "Encode STR using Base64 URL safe encoding."
+  (let ((base64-encoded (base64-encode-string str t)))
+    (setq base64-encoded (replace-regexp-in-string "=+$" "" base64-encoded))
+    (setq base64-encoded (replace-regexp-in-string "+" "-" base64-encoded))
+    (setq base64-encoded (replace-regexp-in-string "/" "_" base64-encoded))
+    base64-encoded))
+
+(defun base64url-decode-string (str)
+  "Decode Base64 URL safe encoded STR."
+  (setq str (replace-regexp-in-string "-" "+" str))
+  (setq str (replace-regexp-in-string "_" "/" str))
+  (let ((padding (mod (- (length str) 4) 4)))
+    (cond
+     ((= padding 2) (setq str (concat str "==")))
+     ((= padding 3) (setq str (concat str "=")))
+     ))  
+  (base64-decode-string str))
 
 (provide 'codec)
 ;;; codec.el ends here
