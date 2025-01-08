@@ -6,7 +6,15 @@
 
 (define-debug-message lines)
 
-(defvar *join-line-seperator* ?\s)
+(defvar *join-line-seperator* " ")
+
+(defun reset-join-line-seperator ()
+  (interactive)
+  (setq *join-line-seperator* ?\s))
+
+(defun set-join-line-seperator (seperator)
+  (interactive "sPlease input the seperator: ")
+  (setq *join-line-seperator* seperator))
 
 (defun split-string-of-region (start end)
   "Format and insert sql IN collection from START to END of region."
@@ -85,7 +93,7 @@
 (defun join-line-replace-seperator ()
   "."
   (cond
-   ((eq *join-line-seperator* ?\s)
+   ((eq *join-line-seperator* " ")
     ;; do nothing
     t)
    ((eq *join-line-seperator* "")
