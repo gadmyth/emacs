@@ -6,6 +6,8 @@
 (require 's)
 (require 'textmate)
 (require 'yasnippet)
+(require 'source-code-jump)
+(require 'spring)
 
 
 (defun mybatis-parse-result-line (prop)
