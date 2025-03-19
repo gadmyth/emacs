@@ -54,8 +54,8 @@
   "Print cookies for a given URL."
   (interactive)
   (let* ((url (read-string "Please input url: "))
-         (path (read-string "Please input path: "))
-         (secure-p (y-or-n-p "is https? "))
+         (path (read-string "Please input path: " "/"))
+         (secure-p (y-or-n-p-with-default "is https? " 'y))
          (cookies (url-cookie-retrieve url path secure-p)))
     (if cookies
         (dolist (cookie cookies)
