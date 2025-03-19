@@ -19,8 +19,8 @@
              (original-command (assoc-default string-key *original-key-bindings* #'string-equal))
              (original-command-str (command-or-anonymous-string original-command))
              (new-command (lookup-key (current-global-map) vector-key)))
-        (push `(,(format "%s: %s -> %s" string-key original-command-str new-command) ,string-key ,original-command ,new-command) list)
-        (completing-read "The re-binding keys: " list nil t)))))
+        (push `(,(format "%s: %s -> %s" string-key original-command-str new-command) ,string-key ,original-command ,new-command) list)))
+    (completing-read "The re-binding keys: " list nil t)))
 
 (defun bind-command (command)
   "Bind COMMAND to a key and save the original binding."
