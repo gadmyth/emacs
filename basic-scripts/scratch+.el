@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: scratch+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20220501.001
+;; Version: 1.0.2
+;; Package-Version: 20250426.001
 ;; Package-Requires: dates
 ;; Keywords: scratch, auto save
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -43,11 +43,15 @@
 
 (defvar *scratch-autosave-idle-timer* nil)
 
-(defvar *scratch-autosave-interval* (* 10 60))
+(defconst +scratch-autosave-min-interval+ (* 10 60))
+
+(defconst +scratch-autosave-max-interval+ (* 60 60))
 
 (defconst +scratch-autosave-interval-step+ (* 10 60))
 
-(defvar *scratch-autosave-idle-delay* (* 3 60))
+(defvar *scratch-autosave-interval* +scratch-autosave-min-interval+)
+
+(defconst +scratch-autosave-idle-delay+ (* 3 60))
 
 (defvar *scratch-next-check-time* nil)
 
@@ -142,8 +146,7 @@
        ((not (or (memq timer timer-list)
                  (memq timer timer-idle-list)))
         (message "*scratch-autosave-timer* is not activated, now re-activate it!")
-        (let* ((next-check-timestamp (+ *scratch-autosave-interval* (current-timestamp)))
-               (next-check-time (time-convert next-check-timestamp 'list)))
+        (let ((next-check-time (time-convert *scratch-next-check-time* 'list)))
           (timer-set-time timer next-check-time)
           (timer-activate timer)))
        ;; timer is activated
@@ -158,8 +161,8 @@
   (unless *scratch-autosave-idle-timer*
     (setq *scratch-autosave-idle-timer*
           (run-with-idle-timer
-           *scratch-autosave-idle-delay*
-           *scratch-autosave-idle-delay*
+           +scratch-autosave-idle-delay+
+           t
            #'idle-try-save-scratch-buffer))))
 
 (defun scratch-buffer-status-check ()
@@ -200,7 +203,7 @@
   "Try to save scratch buffer at Emacs's idle time."
   (let* ((current-timestamp (current-timestamp))
          (diff (- *scratch-next-check-time* current-timestamp)))
-    (when (> diff +scratch-autosave-interval-step+)
+    (when (> diff +scratch-autosave-min-interval+)
       (message "### %s try to save scratch buffer at idle time." (current-time-normal-string))
       (let ((now (current-time-normal-string))
             (last-saved-time *scratch-last-saved-time*)
@@ -229,8 +232,8 @@
      ;; check the buffer changed or not
      ((not (scratch-buffer-size-changed-p))
       ;; increase the auto save interval step by step
-      (when (< *scratch-autosave-interval* 3600)
-        (setq *scratch-autosave-interval* (+ *scratch-autosave-interval* 600)))
+      (when (< *scratch-autosave-interval* +scratch-autosave-max-interval+)
+        (setq *scratch-autosave-interval* (+ *scratch-autosave-interval* +scratch-autosave-interval-step+)))
       (setq *scratch-next-check-time* (+ *scratch-autosave-interval* (current-timestamp)))
       (let ((next-check-time-string (timestamp-to-normal-string *scratch-next-check-time*)))
         (message "**** %s *scatch* buffer size not changed, last changed time [%s], next check time: [%s]"
@@ -240,7 +243,7 @@
      (t
       (do-save-scratch-buffer)
       ;; revert the auto save interval
-      (setq *scratch-autosave-interval* 600)
+      (setq *scratch-autosave-interval* +scratch-autosave-min-interval+)
       (setq *scratch-next-check-time* (+ *scratch-autosave-interval* (current-timestamp)))
       (let ((next-check-time-string (timestamp-to-normal-string *scratch-next-check-time*)))
         (message "**** %s *scratch* buffer saved to file %s, last saved time: [%s], next check time: [%s]"
