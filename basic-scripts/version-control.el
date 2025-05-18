@@ -1,4 +1,4 @@
-;;; package --- version-controll.el
+;;; package --- version-control.el
 ;;; Commentary:
 ;;; Code:
 
@@ -27,35 +27,34 @@
                          (?L "porce[L]ain" "porcelain")))
  )
  
-(when window-system
-  (require-package
-   'diff-hl
-   (global-diff-hl-mode t)
+(require-package
+  'diff-hl
+  (global-diff-hl-mode t)
 
-   (defun diff-hl-sibling-hunk ()
-     "."
-     (interactive)
-     (let* ((ev last-command-event)
-            (base (event-basic-type ev)))
-       ;; (message "base: %S" base)
-       (pcase base
-         (?\[ (ignore-errors (diff-hl-previous-hunk)))
-         (?\] (ignore-errors (diff-hl-next-hunk)))
-         (_ nil)))
-     (set-transient-map
+  (defun diff-hl-sibling-hunk ()
+    "."
+    (interactive)
+    (let* ((ev last-command-event)
+           (base (event-basic-type ev)))
+      ;; (message "base: %S" base)
+      (pcase base
+             (?\[ (ignore-errors (diff-hl-previous-hunk)))
+             (?\] (ignore-errors (diff-hl-next-hunk)))
+             (_ nil)))
+    (set-transient-map
       (let ((map (make-sparse-keymap)))
         (define-key map (vector (append '() (list ?\[)))
                     (lambda () (interactive) (diff-hl-sibling-hunk)))
         (define-key map (vector (append '() (list ?\])))
                     (lambda () (interactive) (diff-hl-sibling-hunk)))
         map)))
-   
-   (let ((map diff-hl-command-map))
-     (define-key map "[" 'diff-hl-sibling-hunk)
-     (define-key map "]" 'diff-hl-sibling-hunk))
-   ))
+
+  (let ((map diff-hl-command-map))
+    (define-key map "[" 'diff-hl-sibling-hunk)
+    (define-key map "]" 'diff-hl-sibling-hunk))
+  )
 
 (setq mode-require-final-newline nil)
 
-(provide 'version-controll)
-;;; version-controll.el ends here
+(provide 'version-control)
+;;; version-control.el ends here

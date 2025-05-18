@@ -70,7 +70,7 @@
                  (global-set-key (kbd "<C-f2>") 'bookmarks-switch-to-last-bookmark))
 
 ;; vc
-(require 'version-controll)
+(require 'version-control)
 
 ;; buffer
 (require-package 'buffers
