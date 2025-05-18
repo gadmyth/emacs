@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.1
+;; Version: 1.5.2
 ;; Package-Version: 20250518.001
 ;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
@@ -497,8 +497,18 @@ COPY from eyebrowse--load-window-config."
     (mkdir +eyebrowse-dir+))
   (let* ((loading-success-p)
          (use-dialog-box nil)
-         (file-name (read-file-name "Please select the eyebrowse config file: " +eyebrowse-dir+ nil t nil nil)))
+         (file-name (read-file-name "Please select the eyebrowse config file: " +eyebrowse-dir+ nil nil nil nil)))
     (eyebrowse-init-original)
+    ;; choose to create non-exist config file or not
+    (when (and (not (file-exists-p file-name))
+               (y-or-n-p "The file doesn't exist, create a new one? "))
+      (let ((dir (directory-file-name (file-name-directory file-name))))
+        (when (not (file-exists-p dir))
+          (mkdir dir t)))
+      (with-temp-buffer
+        (write-file file-name))
+      (with-temp-file file-name
+        (print '() (current-buffer))))
     (cond
      ((not (file-exists-p file-name))
       (message "Can't load %s file, for it does not exist!" file-name)
