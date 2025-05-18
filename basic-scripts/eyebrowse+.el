@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.4.0
-;; Package-Version: 20240812.001
+;; Version: 1.5.0
+;; Package-Version: 20250518.001
 ;; Package-Requires: eyebrowse, s, dash
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -38,7 +38,9 @@
 (require 's)
 (require 'dash)
 
-(defvar +eyebrowse-file-name+ (expand-file-name "~/.eyebrowse_save"))
+(defvar +eyebrowse-dir+ (expand-file-name "~/.eyebrowse"))
+
+(defvar +eyebrowse-file-name+ (expand-file-name "eyebrowse_save" +eyebrowse-dir+))
 
 (defvar *eyebrowse-default-configs* nil)
 
@@ -486,10 +488,15 @@ COPY from eyebrowse--load-window-config."
 (defun load-eyebrowse-configs ()
   "Load eyebrowse workspace from file."
   (interactive)
-  (when (commit-editmsg-terminal-frame-p)
+  (when (or (commit-editmsg-terminal-frame-p)
+            (not (framep (selected-frame))))
     (cl-return-from load-eyebrowse-configs))
-  (let ((loading-success-p)
-        (file-name (eyebrowse-file-name)))
+  ;; ensure +eyebrowse-dir+
+  (when (not (file-exists-p +eyebrowse-dir+))
+    (mkdir +eyebrowse-dir+))
+  (let* ((loading-success-p)
+         (use-dialog-box nil)
+         (file-name (read-file-name "Please select the eyebrowse config file: " +eyebrowse-dir+ nil t nil nil)))
     (eyebrowse-init-original)
     (cond
      ((not (file-exists-p file-name))
@@ -498,6 +505,7 @@ COPY from eyebrowse--load-window-config."
       (setq loading-success-p t))
      (t
       (message "Loading eyebrowse config from file %S ..." file-name)
+      (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name)
       (with-temp-buffer
         (insert-file-contents file-name)
         (goto-char (point-min))
@@ -575,8 +583,11 @@ COPY from eyebrowse--load-window-config."
 (defun save-eyebrowse-configs (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
-  (let ((file-name (eyebrowse-file-name frame))
-        (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+  (when (or (commit-editmsg-terminal-frame-p)
+            (not (framep (selected-frame))))
+    (cl-return-from save-eyebrowse-configs))
+  (when-let ((file-name (frame-parameter (selected-frame) 'eyebrowse-config-file))
+             (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
     (message "%s Saving eyebrowse config to file %S ..." time-string file-name)
     (eyebrowse-update-window-config)
     (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
@@ -688,7 +699,7 @@ COPY from eyebrowse--load-window-config."
               (lambda ()
                 (add-hook 'delete-frame-functions #'save-eyebrowse-configs)
                 (add-hook 'kill-emacs-hook #'save-eyebrowse-configs)
-                (add-hook 'before-make-frame-hook #'load-frame-geometry)
+                ;; (add-hook 'before-make-frame-hook #'load-frame-geometry)
                 ))
     (start-eyebrowse-save-timer)
     (eyebrowse-mode 1))
