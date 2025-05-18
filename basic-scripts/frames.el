@@ -3,21 +3,36 @@
 ;;; Code:
 
 (require 'frame)
-(require 'eyebrowse+)
 
+(defun center-frame ()
+  "Center the current frame on the screen."
+  (interactive)
+  (let* ((frame (selected-frame))
+         (monitor (frame-monitor-attributes frame))
+         (geometry (nth 1 monitor))
+         (monitor-width (nth 3 geometry))
+         (monitor-height (nth 4 geometry))
+         (frame-width (frame-pixel-width frame))
+         (frame-height (frame-pixel-height frame))
+         (left (/ (- monitor-width frame-width) 2))
+         (top (/ (- monitor-height frame-height) 2)))
+    (set-frame-position frame left top)))
 
-(setq frame-title-format
-      '(:eval
-        (let* ((buffer (current-buffer))
-               (buffer-name (buffer-name buffer))
-               (file-name (buffer-file-name buffer))
-               (locked-conf (and (boundp '*eyebrowse-locked-config*)
-                                 (eyebrowse-config-string *eyebrowse-locked-config*)))
-               (eb-conf (eyebrowse-current-config-string))
-               (last-conf (eyebrowse-config-string (eyebrowse-get-last-config))))
-          ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
-          (format "%s - [%s, %s, %s]" (or file-name buffer-name)
-                  locked-conf eb-conf last-conf))))
+(defun default-center-frame ()
+  "."
+  (let* ((frame (selected-frame))
+         (monitor (frame-monitor-attributes frame))
+         (geometry (nth 1 monitor))
+         (monitor-width (nth 3 geometry))
+         (monitor-height (nth 4 geometry))
+         (default-width 80)
+         (default-height 40)
+         (frame-width (* default-width (frame-char-width)))
+         (frame-height (* default-height (frame-char-height)))
+         (left (/ (- monitor-width frame-width) 2))
+         (top (/ (- monitor-height frame-height) 2)))
+    (dolist (pair `((left . ,left) (top . ,top) (width . ,default-width) (height . ,default-height)))
+      (setf (alist-get (car pair) default-frame-alist nil t 'equal) (cdr pair)))))
 
 (defun set-suitable-frame-size-inner (frame)
   "FRAME: ."

@@ -3,9 +3,9 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.0
+;; Version: 1.5.1
 ;; Package-Version: 20250518.001
-;; Package-Requires: eyebrowse, s, dash
+;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL:  https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/eyebrowse+.el
@@ -37,6 +37,7 @@
 (require 'q)
 (require 's)
 (require 'dash)
+(require 'frames)
 
 (defvar +eyebrowse-dir+ (expand-file-name "~/.eyebrowse"))
 
@@ -534,20 +535,6 @@ COPY from eyebrowse--load-window-config."
                 (setq ret t)))))))
     ret))
 
-(defun load-frame-geometry ()
-  "."
-  (let ((file-name (eyebrowse-next-new-file-name)))
-    (when (file-exists-p file-name)
-      (with-temp-buffer
-        (insert-file-contents file-name)
-        (goto-char (point-min))
-        (let* ((rich-configs (read (current-buffer)))
-               (eyebrowse-configs (cdr (assq 'eyebrowse rich-configs)))
-               (frame-params (cdr (assq 'frame-params rich-configs))))
-          (message "*** load frame geometry from %s: %S" file-name frame-params)
-          (dolist (pair frame-params)
-            (setf (alist-get (car pair) default-frame-alist nil t 'equal) (cdr pair))))))))
-
 (defun frame-index (&optional frame buffer)
   "Get the frame index of FRAME, if FRAME is null, use BUFFER."
   (let* ((frames (frame-list))
@@ -681,6 +668,20 @@ COPY from eyebrowse--load-window-config."
                         'help-echo help-echo)
             )))
 
+;; unused
+(defun eyebrowse-set-frame-title-format ()
+  "."
+  (setq
+   frame-title-format
+   '(:eval
+     (let* ((buffer (current-buffer))
+            (buffer-name (buffer-name buffer))
+            (file-name (buffer-file-name buffer))
+            (locked-conf (eyebrowse-get-lock-buffer-config buffer))
+            (eb-conf (eyebrowse-current-config-string))
+            (last-conf (eyebrowse-config-string (eyebrowse-get-last-config))))
+       ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
+       (format "%s - [%s, %s, %s]" (or file-name buffer-name) locked-conf eb-conf last-conf)))))
 
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
@@ -699,7 +700,7 @@ COPY from eyebrowse--load-window-config."
               (lambda ()
                 (add-hook 'delete-frame-functions #'save-eyebrowse-configs)
                 (add-hook 'kill-emacs-hook #'save-eyebrowse-configs)
-                ;; (add-hook 'before-make-frame-hook #'load-frame-geometry)
+                (add-hook 'before-make-frame-hook #'default-center-frame)
                 ))
     (start-eyebrowse-save-timer)
     (eyebrowse-mode 1))
