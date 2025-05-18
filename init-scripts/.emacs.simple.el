@@ -2,9 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-;; load path
-(emacs-load-path-initialize)
-
 ;; load configs
 (require 'loading-config)
 

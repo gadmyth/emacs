@@ -2,8 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-;; load path
-(emacs-load-path-initialize)
 
 (require 'package-tools)
 (require 'package-config)
