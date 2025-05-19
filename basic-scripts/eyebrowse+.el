@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.2
-;; Package-Version: 20250518.001
+;; Version: 1.5.3
+;; Package-Version: 20250519.001
 ;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -44,6 +44,8 @@
 (defvar +eyebrowse-file-name+ (expand-file-name "eyebrowse_save" +eyebrowse-dir+))
 
 (defvar *eyebrowse-default-configs* nil)
+
+(defvar *eyebrowse-ignore-confirm-save-config-file* t)
 
 (defvar eyebrowse-lazy-load-hook nil)
 
@@ -250,7 +252,7 @@
     ("create config" . eyebrowse-create-window-config-with-tag)
     ("close config" . eyebrowse-close-window-config)
     ("load configs" . load-eyebrowse-configs)
-    ("save configs" . save-eyebrowse-configs)
+    ("save configs" . confirm-save-eyebrowse-configs)
     ("load single config" . eyebrowse-load-config-from-file)
     ("save single config" . eyebrowse-save-current-config-to-file)))
 
@@ -577,14 +579,23 @@ COPY from eyebrowse--load-window-config."
         (height (frame-parameter frame 'height)))
     `((top . ,top) (left . ,left) (width . ,width) (height . ,height))))
 
+(defun confirm-save-eyebrowse-configs (&optional frame)
+  "."
+  (interactive)
+  (let ((*eyebrowse-ignore-confirm-save-config-file* nil))
+    (save-eyebrowse-configs frame)))
+
 (defun save-eyebrowse-configs (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
   (when (or (commit-editmsg-terminal-frame-p)
             (not (framep (selected-frame))))
     (cl-return-from save-eyebrowse-configs))
-  (when-let ((file-name (frame-parameter (selected-frame) 'eyebrowse-config-file))
-             (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+  (when-let* ((binding-file-name (frame-parameter (selected-frame) 'eyebrowse-config-file))
+              (file-name (or (and *eyebrowse-ignore-confirm-save-config-file* binding-file-name)
+                             (read-file-name (format "Please select a config file to save (current binding file %s): " binding-file-name)
+                                             +eyebrowse-dir+ binding-file-name nil nil)))
+              (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
     (message "%s Saving eyebrowse config to file %S ..." time-string file-name)
     (eyebrowse-update-window-config)
     (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
@@ -593,7 +604,12 @@ COPY from eyebrowse--load-window-config."
       (with-temp-file file-name
         (let ((print-length nil)
               (print-level nil))
-          (print rich-configs (current-buffer)))))))
+          (print rich-configs (current-buffer)))))
+    ;; switch to bind the new config file, when exit, save current eyebrowe config to the new config file
+    ;; or just save a snapshot to the new config file
+    (when (and (not (string= binding-file-name file-name))
+               (y-or-n-p (format "change binding to %s? " file-name)))
+      (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name))))
 
 (defun eyebrowse-save-current-config-to-file (filename)
   "Save eyebrowse's current tag's config to FILENAME."
