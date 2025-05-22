@@ -1,11 +1,11 @@
 ;;; minibuffer+.el --- Package.  -*- lexical-binding: nil; -*-
 
-;; Copyright (C) 2021 gadmyth
+;; Copyright (C) 2021-2025 gadmyth
 
 ;; Author: minibuffer+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20240531.001
-;; Package-Requires: minibuffer
+;; Version: 1.0.2
+;; Package-Version: 20250522.001
+;; Package-Requires: 
 ;; Keywords: minibuffer+
 ;; Homepage: https://www.github.com/gadmyth/emacs
 ;; URL: https://www.github.com/gadmyth/emacs/blob/master/basic-scripts/minibuffer+.el
@@ -34,9 +34,6 @@
 ;;; Code:
 
 
-(require 'minibuffer)
-(require 'delsel)
-
 (defvar *minibuffer-func* nil)
 
 (defun minibuffer-func-p (func)
@@ -50,23 +47,40 @@
 
 (defun quit-minibuffer-and-unmark-func ()
   "Quit minibuffer and unmark *minibuffer-func*."
-  (minibuffer-keyboard-quit)
-  (setq *minibuffer-func* nil))
+  (ensure-minibuffer-keyboard-quit
+    (setq *minibuffer-func* nil)))
 
 (defmacro toggle-minibuffer (func)
   "When in a minibuffer, exit the minibuffer, or call the FUNC."
   "ATTENION: this can't pass the args."
   `(lambda (&rest args)
      (interactive)
-     (if (window-minibuffer-p)
+     (if (active-minibuffer-window)
          (if (minibuffer-func-p ,func)
              (quit-minibuffer-and-unmark-func)
            (progn
              (run-with-timer
               0 nil
               (lambda (f &rest args) (call-and-mark-func f args)) ,func args))
-           (minibuffer-keyboard-quit))
+           (ensure-minibuffer-keyboard-quit))
        (call-and-mark-func ,func args))))
+
+(defmacro ensure-minibuffer-keyboard-quit (&rest body)
+  "."
+  `(when-let ((window (active-minibuffer-window)))
+     (with-current-buffer (window-buffer window)
+       (minibuffer-keyboard-quit))
+     ,@body))
+
+(defun global-keyboard-quit ()
+  "."
+  (interactive)
+  (when-let ((window (active-minibuffer-window)))
+    (with-current-buffer (window-buffer window)
+      (minibuffer-keyboard-quit)))
+  (keyboard-quit))
+
+(global-set-key (kbd "C-g") #'global-keyboard-quit)
 
 (provide 'minibuffer+)
 ;;; minibuffer+.el ends here
