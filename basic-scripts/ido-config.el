@@ -3,6 +3,8 @@
 ;;; Code:
 
 (ido-mode t)
+;; origin is raise-frame: if buffer is in another frame, just raise the frame
+(setq ido-default-buffer-method nil)
 ;; (ido-everywhere t)
 ;; (setq ido-enable-flex-matching t)
 
