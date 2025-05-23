@@ -10,7 +10,7 @@
 
 (defun reset-join-line-seperator ()
   (interactive)
-  (setq *join-line-seperator* ?\s))
+  (setq *join-line-seperator* " "))
 
 (defun set-join-line-seperator (seperator)
   (interactive "sPlease input the seperator: ")
@@ -93,13 +93,17 @@
 (defun join-line-replace-seperator ()
   "."
   (cond
-   ((eq *join-line-seperator* " ")
+   ((string= *join-line-seperator* " ")
     ;; do nothing
     t)
-   ((eq *join-line-seperator* "")
-    (delete-char 1))
+   ((string= *join-line-seperator* "")
+    ;; current point is space
+    (when (eq (char-after (point)) ?\s)
+      (delete-char 1)))
    (t
-    (delete-char 1)
+    ;; current point is space
+    (when (eq (char-after (point)) ?\s)
+      (delete-char 1))
     (insert *join-line-seperator*))))
 
 (defun join-the-line ()
