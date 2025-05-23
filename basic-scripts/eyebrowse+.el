@@ -1,10 +1,10 @@
 ;;; eyebrowse+.el --- Package.  -*- lexical-binding: nil; -*-
 
-;; Copyright (C) 2020 gadmyth
+;; Copyright (C) 2020-2025 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.4
-;; Package-Version: 20250520.001
+;; Version: 1.5.5
+;; Package-Version: 20250523.001
 ;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -45,7 +45,7 @@
 
 (defvar *eyebrowse-default-configs* nil)
 
-(defvar *eyebrowse-ignore-confirm-save-config-file* t)
+(defvar *eyebrowse-confirm-save-or-load* nil)
 
 (defvar eyebrowse-lazy-load-hook nil)
 
@@ -251,7 +251,7 @@
     ("restore default config" . eyebrowse-restore-default-config)
     ("create config" . eyebrowse-create-window-config-with-tag)
     ("close config" . eyebrowse-close-window-config)
-    ("load configs" . load-eyebrowse-configs)
+    ("load configs" . confirm-load-eyebrowse-configs)
     ("save configs" . confirm-save-eyebrowse-configs)
     ("load single config" . eyebrowse-load-config-from-file)
     ("save single config" . eyebrowse-save-current-config-to-file)))
@@ -488,52 +488,60 @@ COPY from eyebrowse--load-window-config."
     (eyebrowse--fixup-window-config window-config)
     (window-state-put window-config (frame-root-window) 'safe)))
 
+(defun confirm-load-eyebrowse-configs ()
+  "."
+  (interactive)
+  (let ((*eyebrowse-confirm-save-or-load* t))
+    (load-eyebrowse-configs)))
+
 (defun load-eyebrowse-configs ()
   "Load eyebrowse workspace from file."
   (interactive)
-  (when (or (commit-editmsg-terminal-frame-p)
-            (not (framep (selected-frame))))
-    (cl-return-from load-eyebrowse-configs))
-  ;; ensure +eyebrowse-dir+
-  (when (not (file-exists-p +eyebrowse-dir+))
-    (mkdir +eyebrowse-dir+))
-  (let* ((loading-success-p)
-         (use-dialog-box nil)
-         (file-name (read-file-name "Please select the eyebrowse config file: " +eyebrowse-dir+ nil nil nil nil)))
-    (eyebrowse-init-original)
-    ;; choose to create non-exist config file or not
-    (when (and (not (file-exists-p file-name))
-               (y-or-n-p "The file doesn't exist, create a new one? "))
-      (let ((dir (directory-file-name (file-name-directory file-name))))
-        (when (not (file-exists-p dir))
-          (mkdir dir t)))
-      (with-temp-buffer
-        (write-file file-name))
-      (with-temp-file file-name
-        (print '() (current-buffer))))
-    (cond
-     ((not (file-exists-p file-name))
-      (message "Can't load %s file, for it does not exist!" file-name)
-      ;; set loading-success-p to t, for the reason of it's at the very beginnig
-      (setq loading-success-p t))
-     (t
-      (message "Loading eyebrowse config from file %S ..." file-name)
-      (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name)
-      (with-temp-buffer
-        (insert-file-contents file-name)
-        (goto-char (point-min))
-        (let* ((rich-configs (read (current-buffer)))
-               (eyebrowse-configs (cdr (assq 'eyebrowse rich-configs)))
-               (frame-params (cdr (assq 'frame-params rich-configs))))
-          (when (> (length eyebrowse-configs) 0)
-            (eyebrowse--set 'window-configs eyebrowse-configs)
-            (eyebrowse--load-window-config (eyebrowse--get 'current-slot))
-            (modify-frame-parameters (window-frame) frame-params))))
-      (setq loading-success-p t)))
-    ;; set the only config's tag
-    (eyebrowse-config-the-only-config)
-    ;; return the loading result
-    loading-success-p))
+  (catch 'load-eyebrowse-configs
+    (when (or (commit-editmsg-terminal-frame-p)
+              (not (framep (selected-frame)))
+              (not *eyebrowse-confirm-save-or-load*))
+      (throw 'load-eyebrowse-configs nil))
+    ;; ensure +eyebrowse-dir+
+    (when (not (file-exists-p +eyebrowse-dir+))
+      (mkdir +eyebrowse-dir+))
+    (let* ((loading-success-p)
+           (use-dialog-box nil)
+           (file-name (read-file-name "Please select the eyebrowse config file: " +eyebrowse-dir+ nil nil nil nil)))
+      (eyebrowse-init-original)
+      ;; choose to create non-exist config file or not
+      (when (and (not (file-exists-p file-name))
+                 (y-or-n-p "The file doesn't exist, create a new one? "))
+        (let ((dir (directory-file-name (file-name-directory file-name))))
+          (when (not (file-exists-p dir))
+            (mkdir dir t)))
+        (with-temp-buffer
+          (write-file file-name))
+        (with-temp-file file-name
+          (print '() (current-buffer))))
+      (cond
+       ((not (file-exists-p file-name))
+        (message "Can't load %s file, for it does not exist!" file-name)
+        ;; set loading-success-p to t, for the reason of it's at the very beginnig
+        (setq loading-success-p t))
+       (t
+        (message "Loading eyebrowse config from file %S ..." file-name)
+        (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name)
+        (with-temp-buffer
+          (insert-file-contents file-name)
+          (goto-char (point-min))
+          (let* ((rich-configs (read (current-buffer)))
+                 (eyebrowse-configs (cdr (assq 'eyebrowse rich-configs)))
+                 (frame-params (cdr (assq 'frame-params rich-configs))))
+            (when (> (length eyebrowse-configs) 0)
+              (eyebrowse--set 'window-configs eyebrowse-configs)
+              (eyebrowse--load-window-config (eyebrowse--get 'current-slot))
+              (modify-frame-parameters (window-frame) frame-params))))
+        (setq loading-success-p t)))
+      ;; set the only config's tag
+      (eyebrowse-config-the-only-config)
+      ;; return the loading result
+      loading-success-p)))
 
 (defun commit-editmsg-terminal-frame-p ()
   "."
@@ -582,34 +590,35 @@ COPY from eyebrowse--load-window-config."
 (defun confirm-save-eyebrowse-configs (&optional frame)
   "."
   (interactive)
-  (let ((*eyebrowse-ignore-confirm-save-config-file* nil))
+  (let ((*eyebrowse-confirm-save-or-load* t))
     (save-eyebrowse-configs frame)))
 
 (defun save-eyebrowse-configs (&optional frame)
   "Save eyebrowse workspace to file of FRAME."
   (interactive)
-  (when (or (commit-editmsg-terminal-frame-p)
-            (not (framep (selected-frame))))
-    (cl-return-from save-eyebrowse-configs))
-  (when-let* ((binding-file-name (frame-parameter (selected-frame) 'eyebrowse-config-file))
-              (file-name (or (and *eyebrowse-ignore-confirm-save-config-file* binding-file-name)
-                             (read-file-name (format "Please select a config file to save (current binding file %s): " binding-file-name)
-                                             +eyebrowse-dir+ binding-file-name nil nil)))
-              (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
-    (message "%s Saving eyebrowse config to file %S ..." time-string file-name)
-    (eyebrowse-update-window-config)
-    (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
-           (frame-params (eyebrowse-frame-parameters frame))
-           (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs))))
-      (with-temp-file file-name
-        (let ((print-length nil)
-              (print-level nil))
-          (print rich-configs (current-buffer)))))
-    ;; switch to bind the new config file, when exit, save current eyebrowe config to the new config file
-    ;; or just save a snapshot to the new config file
-    (when (and (not (string= binding-file-name file-name))
-               (y-or-n-p (format "change binding to %s? " file-name)))
-      (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name))))
+  (catch 'load-eyebrowse-configs
+    (when (or (commit-editmsg-terminal-frame-p)
+              (not (framep (selected-frame))))
+      (throw 'save-eyebrowse-configs nil))
+    (when-let* ((binding-file-name (frame-parameter (selected-frame) 'eyebrowse-config-file))
+                (file-name (or (and (not *eyebrowse-confirm-save-or-load*) binding-file-name)
+                               (read-file-name (format "Please select a config file to save (current binding file %s): " binding-file-name)
+                                               +eyebrowse-dir+ binding-file-name nil nil)))
+                (time-string (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+      (message "%s Saving eyebrowse config to file %S ..." time-string file-name)
+      (eyebrowse-update-window-config)
+      (let* ((eyebrowse-configs (eyebrowse--get 'window-configs frame))
+             (frame-params (eyebrowse-frame-parameters frame))
+             (rich-configs `((frame-params . ,frame-params) (eyebrowse . ,eyebrowse-configs))))
+        (with-temp-file file-name
+          (let ((print-length nil)
+                (print-level nil))
+            (print rich-configs (current-buffer)))))
+      ;; switch to bind the new config file, when exit, save current eyebrowe config to the new config file
+      ;; or just save a snapshot to the new config file
+      (when (and (not (string= binding-file-name file-name))
+                 (y-or-n-p (format "change binding to %s? " file-name)))
+        (set-frame-parameter (selected-frame) 'eyebrowse-config-file file-name)))))
 
 (defun eyebrowse-save-current-config-to-file ()
   "Save eyebrowse's current tag's config to FILENAME."
