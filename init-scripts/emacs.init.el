@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+(setq debug-on-error t)
+
 (defun emacs-load-path-initialize ()
   "."
   (dolist (path '("basic-scripts"
@@ -16,6 +18,8 @@
        (default-file ".emacs.simple.el")
        (selected (completing-read "Please select the init file: " init-files nil t nil nil default-file)))
   (load-file (expand-file-name selected +emacs-init-script-directory+)))
+
+(setq debug-on-error nil)
 
 (provide 'emacs.init)
 ;;; emacs.init.el ends here
