@@ -49,7 +49,7 @@
             (call-interactively 'dired-create-directory))
            (?f
             (call-interactively 'dired-create-new-file))
-           (t
+           (_
             (message "wrong action type")))))
 
      (defvar dired-zip-compress-command-template "zip {} %o -r --filesync %i")
