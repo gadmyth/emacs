@@ -12,13 +12,14 @@
      ;; check package in load-path
      (unless could-require-p
        (if (not (ignore-errors (find-library-name (symbol-name ,package))))
-	       (message "require-package [%S]: package is not found in load-path!" ,package)
+	   (message "require-package [%S]: package is not found in load-path!" ,package)
          (setq could-require-p t)))
      ;; check package installed
      (unless could-require-p
-	   (unless (package-installed-p ,package)
-	     (message "require-package [%S]: package is not installed, try to install..." ,package)
-         (call-safely (package-install ,package))
+       (unless (package-installed-p ,package)
+	 (message "require-package [%S]: package is not installed, try to install..." ,package)
+	 (when (y-or-n-p (format "Install %s or not? " ,package))
+           (call-safely (package-install ,package)))
          ;; check package installed again
          (setq could-require-p (package-installed-p ,package))))
      ;; parse and require dependencies
