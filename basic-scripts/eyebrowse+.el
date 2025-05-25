@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020-2025 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.5
-;; Package-Version: 20250523.001
+;; Version: 1.5.6
+;; Package-Version: 20250525.001
 ;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -358,7 +358,7 @@
          (config-string (eyebrowse-config-string locked-config))
          (info (if (null config-string) "" (format " (%s)" config-string)))
          (buffer-list (mapcar #'eyebrowse-buffer-name-with-config (buffer-list)))
-         (buffer-list (remove-if #'temporary-buffer-p buffer-list))
+         (buffer-list (cl-remove-if #'temporary-buffer-p buffer-list))
          (current (car buffer-list)))
     ;; propertize the current buffer
     (when (equal current-buffer-name current)
