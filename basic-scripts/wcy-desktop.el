@@ -1,13 +1,13 @@
 ;;; wcy-desktop.el --- faster than desktop.el and less features.
 
-;; Copyright (C) 2020 gadmyth
+;; Copyright (C) 2020-2025 gadmyth
 
 ;; Author:  <chunye.wang@nsn.com>
 ;; Modified by: <gadmyth@gmail.com>
 ;; Keywords: convenience
 
-;; Version: 2.0.5
-;; Package-Version: 20221224.001
+;; Version: 2.0.6
+;; Package-Version: 20250525.001
 
 ;; This file is not part of GNU Emacs.
 
@@ -108,7 +108,7 @@
                     (require-package 'multi-term))
                   (when (featurep 'multi-term)
                     (multi-term)))
-                 ((string= "*ielm*")
+                 ((string-equal "*ielm*" buffer-name)
                   (message "wcy new create ielm...")
                   (ielm))
                  (t
