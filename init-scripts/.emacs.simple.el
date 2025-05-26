@@ -76,6 +76,9 @@
 
 (global-set-key (kbd "<f3>") (toggle-minibuffer 'ido-switch-buffer))
 
+;; servers
+(require 'servers)
+
 ;; customized dir
 (require-package 'customized-dir
                  (customized-dir-init)

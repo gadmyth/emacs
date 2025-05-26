@@ -4,7 +4,8 @@
 
 (require 'server)
 
-(unless (server-running-p)
+(unless (or (daemonp)
+            (server-running-p))
   (ignore-errors
     (server-start)))
 
