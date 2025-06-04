@@ -71,7 +71,7 @@ If it is not, prompt to open the file and then operate on its buffer."
        (when (y-or-n-p (format "File %s is not open. Open it? " ,filename))
          (setq buffer (find-file ,filename))))
      (when buffer
-       (message "File is already open. Performing operations in its buffer.")
+       (message "File %s is already open. Performing operations in its buffer." ,filename)
        (with-current-buffer buffer
          (let ((guess-major-mode (guess-buffer-major-mode (buffer-name buffer))))
            (unless (eq major-mode guess-major-mode)
