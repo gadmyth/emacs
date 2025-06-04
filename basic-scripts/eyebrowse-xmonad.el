@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: eyebrowse-xmonad.el <gadmyth@gmail.com>
-;; Version: 1.1.0
-;; Package-Version: 20240812.001
+;; Version: 1.1.1
+;; Package-Version: 20250604.001
 ;; Package-Requires: eyebrowse+, s, windows
 ;; Keywords: eyebrowse-xmonad
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -46,35 +46,32 @@
 
 (defmacro define-eyebrowse-extend-switch-config-function (slot)
   "SLOT."
-  `(defun ,(intern (format "eyebrowse-switch-to-window-config-%d-with-tag" slot)) ()
+  ``(defun ,(intern (format "eyebrowse-switch-to-window-config-%d-with-tag" ,slot)) ()
      (interactive)
-     (if (not (eyebrowse--window-config-present-p ,slot))
-         (let ((tag (read-string (format "Set tag for the new eyebrowse config of slot %d: " ,slot))))
-           (eyebrowse-switch-to-window-config ,slot)
-           (eyebrowse-rename-window-config ,slot tag))
-       (eyebrowse-switch-to-window-config ,slot))))
+     (if (not (eyebrowse--window-config-present-p ,,slot))
+         (let ((tag (read-string (format "Set tag for the new eyebrowse config of slot %d: " ,,slot))))
+           (eyebrowse-switch-to-window-config ,,slot)
+           (eyebrowse-rename-window-config ,,slot tag))
+       (eyebrowse-switch-to-window-config ,,slot))))
 
 (defvar eyebrowse-xmonad-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "H-`") #'eyebrowse-switch-to-last-config)
-    (define-key map (kbd "H-~") #'switch-to-last-eyebrowse-bookmark)
-    (define-key map (kbd "H-1") (define-eyebrowse-extend-switch-config-function 1))
-    (define-key map (kbd "H-2") (define-eyebrowse-extend-switch-config-function 2))
-    (define-key map (kbd "H-3") (define-eyebrowse-extend-switch-config-function 3))
-    (define-key map (kbd "H-4") (define-eyebrowse-extend-switch-config-function 4))
-    (define-key map (kbd "H-5") (define-eyebrowse-extend-switch-config-function 5))
-    (define-key map (kbd "H-6") (define-eyebrowse-extend-switch-config-function 6))
-    (define-key map (kbd "H-7") (define-eyebrowse-extend-switch-config-function 7))
-    (define-key map (kbd "H-8") (define-eyebrowse-extend-switch-config-function 8))
-    (define-key map (kbd "H-9") (define-eyebrowse-extend-switch-config-function 9))
-    (define-key map (kbd "<H-f1>") #'switch-to-scratch-buffer)
-    (define-key map (kbd "<H-f2>") #'switch-to-message-buffer)
+    (cl-loop
+     for w in (number-sequence 1 22)
+     for k in (seq-concatenate
+               'list
+               (number-sequence 1 9)
+               '(0)
+               (mapcar (lambda (i) (format "f%d" i)) (number-sequence 1 12)))
+     do
+     (define-key map (kbd (format "<H-%S>" k)) (define-eyebrowse-extend-switch-config-function w)))
     (define-key map (kbd "<H-S-return>") #'run-or-raise-next-terminal)
     (define-key map (kbd "<H-tab>") #'goto-next-window)
     (define-key map (kbd "<H-iso-lefttab>") #'goto-previous-window)
     (define-key map (kbd "<H-return>") #'swap-to-main-window)
     (define-key map (kbd "<H-backspace>") #'goto-last-window)
-    ;; (define-key map (kbd "H-m") #'goto-main-window)
+    (define-key map (kbd "H-m") #'goto-main-window)
     (define-key map (kbd "H-M-s") #'swap-window-in-current-frame)
     (define-key map (kbd "H-M-c") #'delete-window)
     ;; (define-key map (kbd "H-c") #'copy-window-in-current-frame)
