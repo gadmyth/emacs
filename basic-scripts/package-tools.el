@@ -125,7 +125,8 @@
   "."
   (when (bound-and-true-p *customize-package-archives*)
     (seq-doseq (archive *customize-package-archives*)
-      (set-pair-to-alist 'package-archives (car archive) (cdr archive)))))
+      (set-pair-to-alist 'package-archives (car archive) (cdr archive)))
+    (package-initialize)))
 
 (provide 'package-tools)
 ;;; package-tools.el ends here
