@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: password-generator+.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20211230.001
+;; Version: 1.1.0
+;; Package-Version: 20250604.001
 ;; Package-Requires: password-generator
 ;; Keywords: password-generator
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -76,6 +76,23 @@
              (password (shuffle password)))
         (cond ((equal nil return) (insert password)) (t password))))))
 
+
+(defun password-generator-simple (&optional pre-len return)
+  "Minimal viable password for most of web systems.  It is not secure but allow to register.  PRE-LEN is prefix arg that defines password lenght.  RETURN specifies if password should be returned or inserted."
+  (interactive)
+  (let* (
+         (password "")
+         (pass-length (or pre-len current-prefix-arg password-generator-simple-length))
+         (symbols-for-pass "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+    (setq password (password-generator-generate-internal symbols-for-pass pass-length))
+    (cond ((equal nil return) (insert password)) (t password))))
+
+(defun generate-random-java-class-name ()
+  "."
+  (interactive)
+  (let ((head (password-generator-get-random-string-char "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+        (other (password-generator-simple (+ 10 (random 11)) t)))
+    (concat head other)))
 
 (provide 'password-generator+)
 ;;; password-generator+.el ends here
