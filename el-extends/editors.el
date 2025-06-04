@@ -254,5 +254,11 @@
        (open-line-downward))
      ,@body))
 
+(defmacro jump-to-regexp (regexp &rest body)
+  `(save-excursion
+     (goto-char (bound-or-default start-point (point-min)))
+     (when (re-search-forward ,regexp (point-max) t)
+       ,@body)))
+
 (provide 'editors)
 ;;; editors.el ends here
