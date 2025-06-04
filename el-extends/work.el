@@ -38,11 +38,12 @@
   "."
   (interactive)
   (let* ((buffer (current-buffer))
-         (file-name (buffer-file-name buffer)))
-    (if (and (not (null file-name)) (file-exists-p file-name))
+         (file-name (buffer-file-name buffer))
+         (command (pcase system-type ('darwin "open") ('gnu/linux "exo-open"))))
+    (if (and (not (null file-name)) (file-exists-p file-name) command)
         (progn
-          (shell-command-to-string (format "open %s" file-name))
-          (message "Open succeed: %s" file-name))
+          (shell-command (format "%s %s" command file-name))
+          (message "Open succeed: %s %s" command file-name))
       (message "File doesn't not exists!"))))
 
 (defun show-buffer-in-another-window (buffer)
@@ -90,16 +91,18 @@ Version 2017-05-24"
     (message base-name)
     base-name))
 
+
+(require 'uuid)
 (defun insert-short-uuid ()
   "Insert lowercase uuid without dash."
   (interactive)
-  (let ((uuid (replace-regexp-in-string "-" "" (org-id-uuid))))
+  (let ((uuid (replace-regexp-in-string "-" "" (uuid-string))))
     (insert uuid)))
 
 (defun insert-normal-uuid ()
   "Insert uppercase uuid with dash."
   (interactive)
-  (let ((uuid (upcase (org-id-uuid))))
+  (let ((uuid (upcase (uuid-string))))
     (insert uuid)))
 
 (defun prepend-major-mode-language ()
@@ -112,10 +115,20 @@ Version 2017-05-24"
 
 (defvar +scriptlets-directory+ (expand-file-name "scriptlets" +emacs-context-directory+))
 
+(defvar *intellij-command-list*
+  `((intellij-community . "open-file-in-intellij-idea")
+    (intellij-ultimate . "open-file-in-intellij-idea-ultimate")))
+
 (defun open-current-file-in-intellij-idea ()
-   (interactive)
-   (when-let ((path (buffer-file-name (current-buffer))))
-     (shell-command-to-string (format "source %s; open-file-in-intellij-idea %d %s" (expand-file-name "idea.sh" +scriptlets-directory+) (line-number-at-pos) path))))
+  (interactive)
+  (when-let ((path (buffer-file-name (current-buffer))))
+    (let ((app (completing-read "Select the intellij idea app: "
+                                *intellij-command-list* nil t)))
+      (shell-command-to-string (format "source %s; %s %d %s"
+                                       (expand-file-name "idea.sh" +scriptlets-directory+)
+                                       (alist-get app *intellij-command-list* nil nil #'string=)
+                                       (line-number-at-pos)
+                                       path)))))
 
 (global-set-key (kbd "<f11>") #'open-current-file-in-intellij-idea)
 
