@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+
+(require-package 'request)
 (require 'dates)
 (require 'q)
 

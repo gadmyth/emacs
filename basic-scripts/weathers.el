@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021 gadmyth
 
 ;; Author: weathers.el <gadmyth@gmail.com>
-;; Version: 1.0.8
-;; Package-Version: 20240812.001
+;; Version: 1.0.9
+;; Package-Version: 20250920.001
 ;; Package-Requires: request, hmac-sha1, dates
 ;; Keywords: weathers.el
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -33,7 +33,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(require 'request)
+(require-package 'request)
 (require 'dates)
 (require 'hmac-sha1)
 (require 'q)
