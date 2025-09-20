@@ -70,7 +70,7 @@
 (defun public-ip ()
   "."
   (interactive)
-  (let ((request-backend 'url-retrieve))
+  (let ((request-backend 'curl))
     (request
       "http://ifconfig.cc"
       :parser 'buffer-string
