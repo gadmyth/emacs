@@ -31,14 +31,17 @@
   "."
   (interactive)
   (let* ((sym (symbol-at-region-or-at-point)))
-    (let* ((type (completing-read "Please select the value type: " '(string number bool)))
+    (let* ((type (completing-read "Please select the value type: " '(string number bool symbol value)))
            (value
             (pcase type
-              ("string" (read-string (format "Please input value for [%s]: " (symbol-name sym))))
-              ("number" (read-number (format "Please input value for [%s]: " (symbol-name sym))))
-          ("bool" (y-or-n-p (format "Please input value for [%s]: " (symbol-name sym))))
+              ("string" (read-string (format "Please input string value for [%s]: " (symbol-name sym))))
+              ("number" (read-number (format "Please input number value for [%s]: " (symbol-name sym))))
+              ("bool" (y-or-n-p (format "Please input bool value for [%s]: " (symbol-name sym))))
+              ("symbol" (intern (read-string (format "Please input symbol for [%s]: " (symbol-name sym)))))
+              ("value" (eval (car (read-from-string (read-string (format "Please input the expression for [%s]: " (symbol-name sym)))))))
               (_ (message (format "not support value type: %S" type))))))
-      (when (or value (string-equal type "bool"))
+      (when (or value (or (string-equal type "bool")
+                          (string-equal type "value")))
         (setf (symbol-value sym) value)))))
 
 (defun execute-function-at-point ()
