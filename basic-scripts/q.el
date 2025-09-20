@@ -67,7 +67,7 @@
 (defmacro define-debug-message (module)
   (let ((debug-message-sym (intern (format "%S-debug-message" module)))
         (debug-flag-sym (intern (format "%s-debug-flag" module)))
-        (toggle-debug-sym (intern (format "%S-toggle-debug" module))))
+        (toggle-debug-sym (intern (format "toggle-%S-debug" module))))
     `(progn
        (defvar ,debug-flag-sym nil "debug message flag var")
        
