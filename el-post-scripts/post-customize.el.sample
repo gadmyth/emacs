@@ -12,8 +12,6 @@
 (setq erc-default-port 6667)
 (setq erc-nick "雷少")
 
-(add-to-list 'yas-snippet-dirs (expand-file-name "~/snippets"))
-
 ;; eyebrowse
 (require-package 'eyebrowse+
                  (eyebrowse-plus-mode 1)
