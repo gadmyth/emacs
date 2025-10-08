@@ -9,6 +9,7 @@
 (defmacro require-package (package &rest args)
   "Require PACKAGE if all dependencies can be required, then execute body in ARGS."
   `(let ((could-require-p))
+     (message "require-package: %S..." ,package)
      ;; check package in load-path
      (unless could-require-p
        (if (not (ignore-errors (find-library-name (symbol-name ,package))))
