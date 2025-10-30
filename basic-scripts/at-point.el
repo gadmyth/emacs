@@ -68,5 +68,27 @@
                (executable-find program))
       (start-process program nil program path))))
 
+(defun isearch-forward-region-or-symbol-at-point (&optional arg)
+  "Copied from isearch-forward-symbol-at-point, support isearch region text."
+  (interactive "P")
+  (cond
+   ((region-active-p)
+    (isearch-forward nil 1)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (deactivate-mark)
+      (when (< beg (point))
+	    (goto-char beg))
+      (isearch-yank-string
+       (buffer-substring-no-properties beg end))
+      (let ((count (and arg (prefix-numeric-value arg))))
+        (when count
+          (isearch-repeat-forward count)))
+      ))
+   (t
+    (isearch-forward-symbol-at-point arg))))
+
+(global-set-key (kbd "M-s .") #'isearch-forward-region-or-symbol-at-point)
+
 (provide 'at-point)
 ;;; anythings.el ends here
