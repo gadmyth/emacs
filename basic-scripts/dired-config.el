@@ -108,6 +108,13 @@
        (lambda ()
          (interactive)
          (dired-compress-maybe-encrypt 'dired-do-compress)))
+
+     (define-key dired-mode-map (kbd "C-k")
+       (lambda ()
+         (interactive)
+         (if current-prefix-arg
+             (when-let ((subdir (dired-get-subdir)))
+               (dired-kill-tree subdir nil t)))))
      
      ;; require dirtree
      (require-package 'dirtree)
