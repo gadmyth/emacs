@@ -181,6 +181,8 @@
 
 (setq org-export-preserve-breaks "<br>")
 
+(setq org-export-with-broken-links 'mark)
+
 (eval-after-load "org"
   '(progn
      (setq org-startup-indented t)
