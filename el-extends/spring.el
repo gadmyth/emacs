@@ -277,7 +277,7 @@
              (list (s-split ":" matcher))
              (type (java-parse-type (nth 1 list)))
              (property (nth 0 list))
-             (property (downcase (s-lower-camel-case property)))
+             (property (s-lower-camel-case property))
              (comment (nth 2 list)))
 	    (message "%S, %S" type comment)
         (replace-match (format "private %s %s;" type property) t)
