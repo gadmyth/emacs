@@ -41,6 +41,7 @@
              (?\[ (ignore-errors (diff-hl-previous-hunk)))
              (?\] (ignore-errors (diff-hl-next-hunk)))
              (_ nil)))
+    (message "previous hunk: [,  next hunk: ]")
     (set-transient-map
       (let ((map (make-sparse-keymap)))
         (define-key map (vector (append '() (list ?\[)))
