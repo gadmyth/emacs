@@ -124,36 +124,12 @@
 (defun lower-camel-case ()
   "Replace the string of region with lower camel case format."
   (interactive)
-  (cond
-   ((region-active-p)
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (region-string (buffer-substring-no-properties start end))
-           (lower-camel-string (s-lower-camel-case region-string)))
-      (delete-region start end)
-      (insert lower-camel-string)))
-   (t
-    (let* ((string (read-string "Please input string: "))
-           (camel-string (s-lower-camel-case string)))
-      (editors-debug-message camel-string)
-      camel-string))))
+  (change-region-case #'s-lower-camel-case))
 
 (defun upper-camel-case ()
   "Replace the string of region with upper camel case format."
   (interactive)
-  (cond
-   ((region-active-p)
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (region-string (buffer-substring-no-properties start end))
-           (string (s-upper-camel-case region-string)))
-      (delete-region start end)
-      (insert string)))
-   (t
-    (let* ((string (read-string "Please input string: "))
-           (camel-string (s-upper-camel-case string)))
-      (editors-debug-message camel-string)
-      camel-string))))
+  (change-region-case #'s-upper-camel-case))
 
 (defun s-lower-case (s)
   "Convert S to lowercase; copied from s.el and mofified."
@@ -163,53 +139,33 @@
 (defun lower-case ()
   "Replace the string of region with lower camel case format."
   (interactive)
-  (cond
-   ((region-active-p)
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (region-string (buffer-substring-no-properties start end))
-           (lower-string (s-lower-case region-string)))
-      (delete-region start end)
-      (insert lower-string)))
-   (t
-    (let* ((string (read-string "Please input string: "))
-           (lower-string (s-lower-case string)))
-      (editors-debug-message lower-string)
-      lower-string))))
+  (change-region-case #'s-lower-case))
 
 (defun snake-case ()
   "Replace the string of region with snake case format."
-  (interactive "r")
-  (cond
-   ((region-active-p)
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (region-string (buffer-substring-no-properties start end))
-           (snake-case-string (s-snake-case region-string)))
-      (delete-region start end)
-      (insert snake-case-string)))
-   (t
-    (let* ((string (read-string "Please input string: "))
-           (snake-case-string (s-snake-case string)))
-      (editors-debug-message snake-case-string)
-      snake-case-string))))
+  (interactive)
+  (change-region-case #'s-snake-case))
 
 (defun dash-case ()
   "Replace the string of region with snake case format."
-  (interactive "r")
+  (interactive)
+  (change-region-case #'s-dashed-words))
+
+(defun change-region-case (func)
+  "Replace the string of region with FUNC."
   (cond
    ((region-active-p)
     (let* ((start (region-beginning))
            (end (region-end))
            (region-string (buffer-substring-no-properties start end))
-           (dash-case-string (s-dashed-words region-string)))
+           (result-string (funcall func region-string)))
       (delete-region start end)
-      (insert dash-case-string)))
+      (insert result-string)))
    (t
     (let* ((string (read-string "Please input string: "))
-           (dash-case-string (s-dashed-words string)))
-      (message dash-case-string)
-      dash-case-string))))
+           (result-string (funcall func string)))
+      (editors-debug-message result-string)
+      result-string))))
 
 (defun open-line-upward ()
   (beginning-of-line)
