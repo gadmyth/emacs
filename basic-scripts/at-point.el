@@ -90,5 +90,29 @@
 
 (global-set-key (kbd "M-s .") #'isearch-forward-region-or-symbol-at-point)
 
+(defun confirm-to-downcase-region ()
+  "Call the downcase-region, but when region is not active, it won't downcase the text between
+point and the mark is operated on like downcase-region."
+  (interactive)
+  (cond
+   ((and (region-active-p)
+         (y-or-n-p "Do you want to downcase the region? "))
+    (downcase-region (region-beginning) (region-end)))
+   (t (message "You should activate a region first, then downcase the region"))))
+
+(global-set-key (kbd "C-x C-l") #'confirm-to-downcase-region)
+
+(defun confirm-to-upcase-region ()
+  "Call the upcase-region, but when region is not active, it won't upcase the text between
+point and the mark is operated on like upcase-region."
+  (interactive)
+  (cond
+   ((and (region-active-p)
+         (y-or-n-p "Do you want to upcase the region? "))
+    (upcase-region (region-beginning) (region-end)))
+   (t (message "You should activate a region first, then upcase the region"))))
+
+(global-set-key (kbd "C-x C-u") #'confirm-to-upcase-region)
+
 (provide 'at-point)
 ;;; anythings.el ends here
