@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'q)
+(require 'clipboard+)
 
 (define-debug-message kill-ring)
 

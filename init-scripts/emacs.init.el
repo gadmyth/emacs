@@ -14,7 +14,7 @@
 
 (emacs-load-path-initialize)
 
-(let* ((init-files '(".emacs.frame.el" ".emacs.shell.el" ".emacs.simple.el"))
+(let* ((init-files '(".emacs.frame.el" ".emacs.shell.el" ".emacs.simple.el" ".emacs.quick.el"))
        (default-file ".emacs.simple.el")
        (selected (completing-read "Please select the init file: " init-files nil t nil nil default-file)))
   (load-file (expand-file-name selected +emacs-init-script-directory+)))

@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'q)
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
