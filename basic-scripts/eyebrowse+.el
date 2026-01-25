@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020-2025 gadmyth
 
 ;; Author: eyebrowse+.el <gadmyth@gmail.com>
-;; Version: 1.5.6
-;; Package-Version: 20250525.001
+;; Version: 1.5.7
+;; Package-Version: 20260125.001
 ;; Package-Requires: eyebrowse, s, dash, frames
 ;; Keywords: eyebrowse, eyebrowse+
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -130,7 +130,7 @@
 
 (defun eyebrowse--config-string (slot tag)
   "SLOT, TAG."
-  (let* ((slot-string (int-to-string slot))
+  (let* ((slot-string (slot-to-command-key slot))
          (ret slot-string))
     (if (> (length tag) 0)
         (setq ret (format "%s: %s" slot-string tag))
@@ -139,8 +139,8 @@
 (defun eyebrowse-config-slot (config-string)
   "CONFIG-STRING."
   (if (s-contains? ":" config-string)
-      (string-to-number (cl-first (split-string config-string ":")))
-    (string-to-number config-string)))
+      (command-key-to-slot (cl-first (split-string config-string ":")))
+    (command-key-to-slot config-string)))
 
 (defun eyebrowse-list-configs (&rest _)
   "."
@@ -718,6 +718,19 @@ COPY from eyebrowse--load-window-config."
             (last-conf (eyebrowse-config-string (eyebrowse-get-last-config))))
        ;; show file name first, if nil show buffer name; and also show the buffer-locked and current eyebrowse config
        (format "%s - [%s, %s, %s]" (or file-name buffer-name) locked-conf eb-conf last-conf)))))
+
+(defun slot-to-command-key (slot)
+  (cond
+   ((< slot 10) slot)
+   ((= slot 10) 0)
+   ((<= slot 22) (format "F%d" (- slot 10)))
+   (t nil)))
+
+(defun command-key-to-slot (key)
+  (cond
+   ((s-prefix-p "F" key) (+ 10 (string-to-number (substring key 1))))
+   ((string= "0" key) 10)
+   (t (string-to-number key))))
 
 (defvar eyebrowse-plus-mode-map
   (let ((map (make-sparse-keymap)))
