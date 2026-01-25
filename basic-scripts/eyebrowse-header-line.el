@@ -3,8 +3,8 @@
 ;; Copyright (C) 2024 Gadmyth
 
 ;; Author: eyebrowse-header-line.el <gadmyth@gmail.com>
-;; Version: 1.0.1
-;; Package-Version: 20240814.001
+;; Version: 1.0.2
+;; Package-Version: 20250125.001
 ;; Package-Requires: eyebrowse, eyebrowse+, q
 ;; Keywords: eyebrowse, header-line
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -78,7 +78,7 @@
                                      (eyebrowse-switch-to-window-config ,slot)))
                       map))
                    (help-echo "mouse-1: Switch to indicated workspace")
-                   (caption (eyebrowse-format-slot window-config)))
+                   (caption (eyebrowse-format-slot-to-key window-config)))
               (propertize caption 'face face 'slot slot
                           'mouse-face 'mode-line-highlight
                           'local-map keymap
@@ -87,6 +87,26 @@
          right-delimiter)
       "")))
 
+(defun eyebrowse-format-slot-to-key (window-config)
+  (let* ((slot (car window-config))
+         (tag (nth 2 window-config))
+         (format-string (if (and tag (> (length tag) 0))
+                            eyebrowse-tagged-slot-format
+                          eyebrowse-slot-format))
+         ;; NOTE: `format-spec' sets `deactivate-mark' to t which
+         ;; makes `eyebrowse-format-slot' usage in
+         ;; `eyebrowse-mode-line-indicator' always deactivate the mark
+         ;; after activating it as this triggers mode line updates...
+         deactivate-mark)
+    (format-spec format-string
+                 (format-spec-make ?s (slot-to-command-key slot) ?t tag))))
+
+(defun slot-to-command-key (slot)
+  (cond
+   ((< slot 10) slot)
+   ((= slot 10) 0)
+   ((<= slot 22) (format "F%d" (- slot 10)))
+   (t nil)))
 
 (defun set-eyebrowse-header-line-format ()
   "."
