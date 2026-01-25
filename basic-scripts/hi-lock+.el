@@ -3,8 +3,8 @@
 ;; Copyright (C) 2022 Gadmyth
 
 ;; Author: hi-lock+.el <gadmyth@gmail.com>
-;; Version: 1.0.3
-;; Package-Version: 20221128.001
+;; Version: 1.0.4
+;; Package-Version: 20260125.001
 ;; Package-Requires:
 ;; Keywords: hi-lock, highlight
 ;; Homepage: https://www.github.com/gadmyth/emacs
@@ -51,53 +51,6 @@
   `(if *hi-lock-debug*
        (message ,format-string ,@ARGS)))
 
-(defun hi-lock/toggle-highlight-at-point ()
-  "."
-  (interactive)
-  (let* ((ev last-command-event)
-         (base (event-basic-type ev)))
-    (hi-lock-message "base: %S" base)
-    (pcase base
-      (?. (hi-lock/do-highlight-at-point))
-      (?s (hi-lock/redo-highlight-at-point))
-      (?w (hi-lock/redo-highlight-at-point))
-      (?u (hi-lock/clear-current-highlight))
-      (?c (hi-lock/clear-all-highlight))
-      (?n (hi-lock/next-heighlight-at-point))
-      (?p (hi-lock/previous-heighlight-at-point))
-      (_ nil)))
-  (message "toggle-superword-p: %S, word bound: %S; s: toggle superword, w: toggle word bound, c: clear all, n: next, p: previous"
-                      *hi-lock-toggle-superword-p* *hi-lock-word-bound-p*)
-  (set-transient-map
-   (let ((map (make-sparse-keymap)))
-     (define-key map (vector (list ?.))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?s))
-                 (lambda () (interactive)
-                   (setq *hi-lock-toggle-superword-p* (not *hi-lock-toggle-superword-p*))
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?w))
-                 (lambda () (interactive)
-                   (setq *hi-lock-word-bound-p* (not *hi-lock-word-bound-p*))
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?u))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?u))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?\c))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?n))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     (define-key map (vector (list ?p))
-                 (lambda () (interactive)
-                   (hi-lock/toggle-highlight-at-point)))
-     map)))
-
 (defun hi-lock/do-highlight-at-point ()
   "Toggle highlight at point."
   (interactive)
@@ -117,6 +70,18 @@
       (unhighlight-regexp regexp)
       (highlight-phrase (region-or-word-at-point *hi-lock-toggle-superword-p* *hi-lock-word-bound-p*) (hi-lock-read-face-name)))
     (deactivate-mark)))
+
+(defun hi-lock/toggle-superword-at-point ()
+  "Toggle superword at point."
+  (interactive)
+  (setq *hi-lock-toggle-superword-p* (not *hi-lock-toggle-superword-p*))
+  (hi-lock/redo-highlight-at-point))
+
+(defun hi-lock/toggle-word-bound-at-point ()
+  "Toggle word bound at point."
+  (interactive)
+  (setq *hi-lock-word-bound-p* (not *hi-lock-word-bound-p*))
+  (hi-lock/redo-highlight-at-point))
 
 (defun hi-lock/clear-current-highlight ()
   "Clear all highlight."
@@ -150,12 +115,33 @@
         (when (re-search-backward regexp nil t)
           (goto-char (match-beginning 0)))))))
 
-(global-set-key (kbd "C-S-h .") 'hi-lock/toggle-highlight-at-point)
-(global-set-key (kbd "C-S-h u") 'hi-lock/toggle-highlight-at-point)
-(global-set-key (kbd "C-S-h s") 'hi-lock/toggle-highlight-at-point)
-(global-set-key (kbd "C-S-h n") 'hi-lock/toggle-highlight-at-point)
-(global-set-key (kbd "C-S-h p") 'hi-lock/toggle-highlight-at-point)
-(global-set-key (kbd "C-S-h c") 'hi-lock/clear-all-highlight)
+(defvar hi-lock-plus-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [(?.)] 'hi-lock/do-highlight-at-point)
+    (define-key map [(?c)] 'hi-lock/clear-all-highlight)
+    (define-key map [(?n)] 'hi-lock/next-heighlight-at-point)
+    (define-key map [(?p)] 'hi-lock/previous-heighlight-at-point)
+    (define-key map [(?s)] 'hi-lock/toggle-superword-at-point)
+    (define-key map [(?w)] 'hi-lock/toggle-word-bound-at-point)
+    (define-key map [(?u)] 'hi-lock/clear-current-highlight)
+    map))
+
+(defvar hi-lock-plus-mode-map (make-sparse-keymap))
+  
+(define-key hi-lock-plus-mode-map (kbd "C-H") hi-lock-plus-command-map)
+(map-keymap (lambda (_key cmd)
+              (put cmd 'repeat-map 'hi-lock-plus-command-map))
+            hi-lock-plus-command-map)
+
+(define-minor-mode hi-lock-plus-mode
+  "Toggle hi-lock-plus-mode."
+  :keymap hi-lock-plus-mode-map
+  :global t
+  (cond
+   (hi-lock-plus-mode
+    (message "turn on the hi-lock-plus-mode"))
+   (t
+    (message "turn off the hi-lock-plus-mode"))))
 
 (provide 'hi-lock+)
 ;;; hi-lock+.el ends here
