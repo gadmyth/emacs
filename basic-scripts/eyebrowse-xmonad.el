@@ -44,28 +44,32 @@
   (when-let ((last-slot (eyebrowse--get 'last-slot)))
     (eyebrowse-switch-to-window-config last-slot)))
 
-(defmacro define-eyebrowse-extend-switch-config-function (slot)
-  "SLOT."
-  ``(defun ,(intern (format "eyebrowse-switch-to-window-config-%d-with-tag" ,slot)) ()
-     (interactive)
-     (if (not (eyebrowse--window-config-present-p ,,slot))
-         (let ((tag (read-string (format "Set tag for the new eyebrowse config of slot %d: " ,,slot))))
-           (eyebrowse-switch-to-window-config ,,slot)
-           (eyebrowse-rename-window-config ,,slot tag))
-       (eyebrowse-switch-to-window-config ,,slot))))
+(defun eyebrowse-switch-to-window-config-with-slot (slot)
+  "."
+  (interactive)
+  (if (not (eyebrowse--window-config-present-p slot))
+      (let ((tag (read-string (format "Set tag for the new eyebrowse config of slot %d (%s): " slot (slot-to-key slot)))))
+        (eyebrowse-switch-to-window-config slot)
+        (eyebrowse-rename-window-config slot tag))
+    (eyebrowse-switch-to-window-config slot)))
 
+(defun slot-to-key (slot)
+  (cond
+   ((< slot 10) slot)
+   ((= slot 10) 0)
+   ((<= slot 22) (format "<f%d>" (- slot 10)))
+   (t nil)))
+  
 (defvar eyebrowse-xmonad-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "H-`") #'eyebrowse-switch-to-last-config)
     (cl-loop
-     for w in (number-sequence 1 22)
-     for k in (seq-concatenate
-               'list
-               (number-sequence 1 9)
-               '(0)
-               (mapcar (lambda (i) (format "f%d" i)) (number-sequence 1 12)))
+     for slot in (number-sequence 1 22)
      do
-     (define-key map (kbd (format "<H-%S>" k)) (define-eyebrowse-extend-switch-config-function w)))
+     (define-key map (kbd (format "H-%s" (slot-to-key slot)))
+                 `(lambda ()
+                    (interactive)
+                    (eyebrowse-switch-to-window-config-with-slot ,slot))))
     (define-key map (kbd "<H-S-return>") #'run-or-raise-next-terminal)
     (define-key map (kbd "<H-tab>") #'goto-next-window)
     (define-key map (kbd "<H-iso-lefttab>") #'goto-previous-window)
