@@ -96,7 +96,7 @@
 ;; depend on goto-last-point
 (require-package 'goto-last-point+ :dependencies '(goto-last-point))
 (require-package 'notifications :dependencies '(uuid))
-(require-package 'customized-dir (customized-dir-init))
+(require-package 'customized-dir :dependencies '(textmate) (customized-dir-init))
 (require-package 'stopwatch :dependencies '(switch-buffer-functions) (stopwatch-mode 1))
 (require-package 'eyebrowse+ :dependencies '(eyebrowse) (eyebrowse-plus-mode 1))
 (require-package 'eyebrowse-xmonad :dependencies '(eyebrowse s) (eyebrowse-xmonad-mode 1))

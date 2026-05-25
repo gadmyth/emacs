@@ -61,6 +61,7 @@
 
 ;; bookmarks
 (require-package 'bookmarks
+                 :dependencies '(s)
                  (bookmarks-mode)
                  (global-set-key (kbd "<f2>") (toggle-minibuffer 'bookmarks-list-bookmarks))
                  (global-set-key (kbd "<M-f2>") (toggle-minibuffer 'bookmarks-modify-bookmark))
@@ -81,6 +82,7 @@
 
 ;; customized dir
 (require-package 'customized-dir
+                 :dependencies '(textmate)
                  (customized-dir-init)
                  (global-set-key (kbd "<f4>") (toggle-minibuffer 'switch-to-customized-dir)))
 

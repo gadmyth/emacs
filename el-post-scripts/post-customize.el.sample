@@ -14,6 +14,7 @@
 
 ;; eyebrowse
 (require-package 'eyebrowse+
+                 :dependencies '(s dash)
                  (eyebrowse-plus-mode 1)
                  (global-set-key (kbd "<f5>") (toggle-minibuffer 'eyebrowse-list-configs))
                  (global-set-key (kbd "<M-f5>") (toggle-minibuffer 'eyebrowse-modify-config))
