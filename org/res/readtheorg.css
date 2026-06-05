@@ -61,7 +61,7 @@ body{
     overflow-x:hidden;
     -webkit-font-smoothing: antialiased;
     letter-spacing: .3px;
-    line-height: 2.2;
+    line-height: 1;
 }
 
 #content{
@@ -76,7 +76,7 @@ body{
 
 p{
     font-size:16px;
-    line-height:2.2;
+    line-height:1.5;
     margin:0px 0px 9px 0px;
 }
 
@@ -87,14 +87,14 @@ blockquote{
     background-color: #F0F0F0;
     border-left:5px solid #CCCCCC;
     font-style:italic;
-    line-height:2.2;
+    line-height:1;
     margin:0px 0px 24px 0px;
     /* margin-left:24px; */
     padding: 6px 20px;
 }
 
 ul,ol,dl{
-    line-height:2.2;
+    line-height:1.5;
     list-style-image:none;
     /* list-style:none; */
     margin:0px 0px 24px 0px;
@@ -111,7 +111,7 @@ dd{
 
 #content .section ul,#content .toctree-wrapper ul,article ul{
     list-style:disc;
-    line-height:2.2;
+    line-height:1.5;
     margin-bottom:24px}
 
 #content .section ul li,#content .toctree-wrapper ul li,article ul li{
@@ -135,7 +135,7 @@ dd{
 
 #content .section ol,#content ol,article ol{
     list-style:decimal;
-    line-height:2.2;
+    line-height:1.5;
     margin-bottom:24px}
 
 #content .section ol li,#content ol li,article ol li{
@@ -365,7 +365,7 @@ td{
     vertical-align:top}
 
 table td,table th{
-    font-size:90%;
+    font-size:12px;
     margin:0;
     overflow:visible;
     padding:8px 16px;
@@ -537,7 +537,7 @@ a .fa,a #content .admonition-title,#content a .admonition-title{
 
 .wy-alert,#content .note,#content .attention,#content .caution,#content .danger,#content .error,#content .hint,#content .important,#content .tip,#content .warning,#content .seealso,#content .admonitiontodo{
     padding:12px;
-    line-height:2.2;
+    line-height:1;
     margin-bottom:24px;
     /* background:#e7f2fa; */
 }
@@ -1093,4 +1093,24 @@ h2.footnotes{
 
 p.email a {
     color: #fff;
+}
+
+/* Table of Contents Toggle Button */
+#toc-toggle {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+    z-index: 1001;
+    background-color: #2980B9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#toc-toggle:hover {
+    background-color: #3498db;
 }

@@ -31,9 +31,43 @@ $( document ).ready(function() {
 });
 
 $( document ).ready(function() {
+    // Inject toggle button for table of contents
+    var tocToggle = $('<button id="toc-toggle" class="btn btn-default btn-sm">&#9776;</button>');
+    $('body').append(tocToggle);
+    
+    // Toggle table of contents visibility
+    var isExpanded = true;
+    
+    // 根据 isExpanded 更新布局（显示/隐藏 TOC 并调整内容区边距）
+    function updateLayout() {
+        if (isExpanded) {
+            $('#table-of-contents, #postamble').show();
+            // Center content in remaining space after subtracting 300px
+            var remainingWidth = $(window).width() - 300;
+            var leftMargin = (remainingWidth - 1000) / 2;
+            if (leftMargin < 0) leftMargin = 0;
+            $('#content').css({'margin-left': (300 + leftMargin) + 'px'});
+        } else {
+            $('#table-of-contents, #postamble').hide();
+            $('#content').css({'margin-left': 'auto', 'margin-right': 'auto'});
+        }
+    }
+    
+    // 窗口大小改变时重新计算居中位置
+    $(window).on('resize', updateLayout);
+    
+    // 点击按钮时切换状态并更新布局
+    $('#toc-toggle').click(function() {
+        isExpanded = !isExpanded;
+        updateLayout();
+    });
+    
+    // 页面首次加载时执行一次，确保初始状态居中
+    updateLayout();
+    
     $('#text-table-of-contents ul').first().addClass('nav');
-                                        // ScrollSpy also requires that we use
-                                        // a Bootstrap nav component.
+    // ScrollSpy also requires that we use
+    // a Bootstrap nav component.
     $('body').scrollspy({target: '#text-table-of-contents'});
 });
 
