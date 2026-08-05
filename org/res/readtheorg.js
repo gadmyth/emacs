@@ -34,37 +34,101 @@ $( document ).ready(function() {
     // Inject toggle button for table of contents
     var tocToggle = $('<button id="toc-toggle" class="btn btn-default btn-sm">&#9776;</button>');
     $('body').append(tocToggle);
-    
-    // Toggle table of contents visibility
-    var isExpanded = true;
-    
-    // 根据 isExpanded 更新布局（显示/隐藏 TOC 并调整内容区边距）
+
+    // Toggle table of contents visibility (persisted across reloads)
+    var savedExpanded = localStorage.getItem('sidebar-expanded');
+    var isExpanded = (savedExpanded === null) ? true : (savedExpanded === 'true');
+
+    // Sidebar width: toc-toggle button width + its padding-left + padding-right is the minimum,
+    // default 300px is the maximum
+    var SIDEBAR_MIN = 50;
+    var SIDEBAR_MAX = 300;
+    // Below this window width the sidebar auto-hides (responsive) regardless of toggle state
+    var SIDEBAR_VISIBLE_THRESHOLD = 757;
+    var savedWidth = parseInt(localStorage.getItem('sidebar-width'), 10);
+    var currentWidth = (savedWidth >= SIDEBAR_MIN && savedWidth <= SIDEBAR_MAX)
+        ? savedWidth : SIDEBAR_MAX;
+    var docEl = document.documentElement;
+    var $body = $('body');
+    docEl.style.setProperty('--sidebar-width', currentWidth + 'px');
+
+    // Content centering is handled in CSS via max() + calc(); this only toggles visibility.
+    // Sidebar is visible only when BOTH the user wants it expanded AND the window is wide enough.
     function updateLayout() {
-        if (isExpanded) {
-            $('#table-of-contents, #postamble').show();
-            // Center content in remaining space after subtracting 300px
-            var remainingWidth = $(window).width() - 300;
-            var leftMargin = (remainingWidth - 1000) / 2;
-            if (leftMargin < 0) leftMargin = 0;
-            $('#content').css({'margin-left': (300 + leftMargin) + 'px'});
-        } else {
-            $('#table-of-contents, #postamble').hide();
-            $('#content').css({'margin-left': 'auto', 'margin-right': 'auto'});
-        }
+        var isNarrow = window.innerWidth <= SIDEBAR_VISIBLE_THRESHOLD;
+        var shouldShow = isExpanded && !isNarrow;
+        $body.toggleClass('toc-collapsed', !shouldShow);
+        $body.toggleClass('toc-narrow', isNarrow);
+        $('#table-of-contents, #postamble').toggle(shouldShow);
     }
-    
+
+    // Resize handle: drag the right edge of the sidebar to adjust its width.
+    // Hot path uses rAF + native events to keep drag smooth on high-Hz mice.
+    var resizeHandle = document.createElement('div');
+    resizeHandle.id = 'resize-handle';
+    resizeHandle.title = 'Drag to resize sidebar';
+    document.body.appendChild(resizeHandle);
+
+    resizeHandle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        $body.addClass('resizing');
+        resizeHandle.classList.add('dragging');
+
+        var pendingWidth = null;
+        var rafScheduled = false;
+
+        function applyPendingWidth() {
+            rafScheduled = false;
+            if (pendingWidth === null) return;
+            docEl.style.setProperty('--sidebar-width', pendingWidth + 'px');
+            pendingWidth = null;
+        }
+
+        function onMouseMove(e) {
+            var w = e.clientX;
+            if (w < SIDEBAR_MIN) w = SIDEBAR_MIN;
+            else if (w > SIDEBAR_MAX) w = SIDEBAR_MAX;
+            currentWidth = w;
+            pendingWidth = w;
+            if (!rafScheduled) {
+                rafScheduled = true;
+                requestAnimationFrame(applyPendingWidth);
+            }
+        }
+
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            $body.removeClass('resizing');
+            resizeHandle.classList.remove('dragging');
+            localStorage.setItem('sidebar-width', currentWidth);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    // Double-click handle: snap to opposite end of the midpoint
+    resizeHandle.addEventListener('dblclick', function() {
+        currentWidth = (currentWidth < SIDEBAR_MAX / 2) ? SIDEBAR_MAX : SIDEBAR_MIN;
+        docEl.style.setProperty('--sidebar-width', currentWidth + 'px');
+        localStorage.setItem('sidebar-width', currentWidth);
+        updateLayout();
+    });
+
     // 窗口大小改变时重新计算居中位置
     $(window).on('resize', updateLayout);
-    
+
     // 点击按钮时切换状态并更新布局
     $('#toc-toggle').click(function() {
         isExpanded = !isExpanded;
+        localStorage.setItem('sidebar-expanded', String(isExpanded));
         updateLayout();
     });
-    
+
     // 页面首次加载时执行一次，确保初始状态居中
     updateLayout();
-    
+
     $('#text-table-of-contents ul').first().addClass('nav');
     // ScrollSpy also requires that we use
     // a Bootstrap nav component.

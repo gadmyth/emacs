@@ -1,6 +1,10 @@
 /*@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700);*/
 /*@import url(http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css);*/
 
+:root {
+    --sidebar-width: 300px;
+}
+
 * {
     text-align: justify;
 }
@@ -66,11 +70,16 @@ body{
 #content{
     background:#fcfcfc;
     height:100%;
-    margin-left:300px;
+    margin-left:max(var(--sidebar-width), calc((100vw + var(--sidebar-width) - 1000px) / 2));
     /* margin:auto; */
     max-width:1000px;
     min-height:100%;
     padding:1.618em 3.236em;
+}
+
+body.toc-collapsed #content {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 p{
@@ -720,6 +729,7 @@ hr{
     font-size:90%;
     color:#808080;
     direction: ltr;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -736,16 +746,18 @@ hr{
     position:fixed;
     top:0;
     left:0;
-    width:300px;
+    width:var(--sidebar-width);
     overflow-x:hidden;
     overflow-y:scroll;
     height:85%;
     background:#fafafa;
     z-index:200;
-    scrollbar-base-color: #1F1D1D;
-    scrollbar-arrow-color: #b3b3b3;
-    scrollbar-shadow-color: #1F1D1D;
-    scrollbar-track-color : #343131;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#table-of-contents::-webkit-scrollbar {
+    display: none;
 }
 
 #table-of-contents h2{
@@ -757,7 +769,13 @@ hr{
     color:#fcfcfc;
     font-size: 100%;
     margin-top:0;
-    margin-bottom:0.809em}
+    margin-bottom:0.809em;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 table {
     margin-left: auto;
@@ -773,11 +791,11 @@ ul.nav li ul li ul li {
 }
 
 ul.nav li.active ul li {
-    display: inline;
+    display: block;
 }
 
 ul.nav li.active ul li ul li {
-    display: inline;
+    display: block;
 }
 
 
@@ -853,7 +871,7 @@ footer p{
     position:fixed;
     bottom:0;
     left:0;
-    width:300px;
+    width:var(--sidebar-width);
     height: 15%;
     color:#fcfcfc;
     background:#2980B9;
@@ -868,6 +886,9 @@ footer p{
 #postamble .author {
     font-size: 100%;
     margin-bottom: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #postamble .date {
@@ -875,6 +896,9 @@ footer p{
     margin-bottom: 0px;
     color:#fcfcfc;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #postamble .creator,#postamble .validation {
@@ -1112,4 +1136,43 @@ p.email a {
 
 #toc-toggle:hover {
     background-color: #3498db;
+}
+
+body.toc-collapsed #toc-toggle {
+    background-color: #fff;
+    color: #2980B9;
+    border: 1px solid #2980B9;
+}
+
+body.toc-collapsed #toc-toggle:hover {
+    background-color: #ecf0f1;
+}
+
+/* Resizable sidebar handle */
+#resize-handle {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    width: 6px;
+    height: 100%;
+    margin-left: -3px;
+    cursor: col-resize;
+    z-index: 300;
+    user-select: none;
+}
+
+#resize-handle:hover,
+#resize-handle.dragging {
+    background-color: rgba(41, 128, 185, 0.45);
+}
+
+body.resizing {
+    cursor: col-resize !important;
+    user-select: none;
+}
+
+body.toc-collapsed #resize-handle,
+body.toc-narrow #resize-handle,
+body.toc-narrow #toc-toggle {
+    display: none;
 }

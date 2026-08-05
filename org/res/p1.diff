@@ -1,0 +1,38 @@
+--- readtheorg.js
++++ readtheorg.js
+@@ -32,24 +32,33 @@
+ $( document ).ready(function() {
+     // Inject toggle button for table of contents
+     var tocToggle = $('<button id="toc-toggle" class="btn btn-default btn-sm">&#9776;</button>');
+     $('body').append(tocToggle);
+     
+     // Toggle table of contents visibility
+     var isExpanded = true;
+-    $('#toc-toggle').click(function() {
+-        isExpanded = !isExpanded;
++    function updateLayout() {
+         if (isExpanded) {
+             $('#table-of-contents, #postamble').show();
+             // Center content in remaining space after subtracting 300px
+             var remainingWidth = $(window).width() - 300;
+             var leftMargin = (remainingWidth - 1000) / 2;
+             if (leftMargin < 0) leftMargin = 0;
+             $('#content').css({'margin-left': (300 + leftMargin) + 'px'});
+         } else {
+             $('#table-of-contents, #postamble').hide();
+             $('#content').css({'margin-left': 'auto', 'margin-right': 'auto'});
+         }
++    }
++    
++    $(window).on('resize', updateLayout);
++    
++    $('#toc-toggle').click(function() {
++        isExpanded = !isExpanded;
++        updateLayout();
+     });
+     
++    updateLayout();
++    
+     $('#text-table-of-contents ul').first().addClass('nav');
+     // ScrollSpy also requires that we use
+     // a Bootstrap nav component.
