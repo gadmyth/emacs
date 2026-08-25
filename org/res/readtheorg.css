@@ -70,16 +70,23 @@ body{
 #content{
     background:#fcfcfc;
     height:100%;
-    margin-left:max(var(--sidebar-width), calc((100vw + var(--sidebar-width) - 1000px) / 2));
-    /* margin:auto; */
+    /* Center in body when there's room; if that would overlap the sidebar,
+       push left edge to the sidebar's right edge and let width shrink to fit. */
+    margin-left:max(var(--sidebar-width), calc((100vw - 1000px) / 2));
+    margin-right:auto;
     max-width:1000px;
     min-height:100%;
     padding:1.618em 3.236em;
 }
 
-body.toc-collapsed #content {
-    margin-left: auto;
+body.toc-collapsed #content,
+body.toc-narrow #content {
+    /* Same 100vw reference frame as the shown case to avoid the
+       half-scrollbar-width shift, but clamped at 0 so a narrow
+       viewport doesn't push the content off the left edge. */
+    margin-left: max(0px, calc((100vw - 1000px) / 2));
     margin-right: auto;
+    max-width: min(1000px, 100vw);
 }
 
 p{
@@ -778,7 +785,7 @@ hr{
 }
 
 table {
-    margin-left: auto;
+    margin-left: 0;
     margin-right: auto;
 }
 

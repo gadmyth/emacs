@@ -35,8 +35,14 @@ $( document ).ready(function() {
     var tocToggle = $('<button id="toc-toggle" class="btn btn-default btn-sm">&#9776;</button>');
     $('body').append(tocToggle);
 
-    // Toggle table of contents visibility (persisted across reloads)
-    var savedExpanded = localStorage.getItem('sidebar-expanded');
+    // Per-page storage keys: pathname already excludes query string and hash,
+    // so the same page with different URL params shares the same state.
+    var storagePrefix = window.location.pathname + ':';
+    var keyExpanded = storagePrefix + 'sidebar-expanded';
+    var keyWidth = storagePrefix + 'sidebar-width';
+
+    // Toggle table of contents visibility (persisted across reloads, per page)
+    var savedExpanded = localStorage.getItem(keyExpanded);
     var isExpanded = (savedExpanded === null) ? true : (savedExpanded === 'true');
 
     // Sidebar width: toc-toggle button width + its padding-left + padding-right is the minimum,
@@ -45,7 +51,7 @@ $( document ).ready(function() {
     var SIDEBAR_MAX = 300;
     // Below this window width the sidebar auto-hides (responsive) regardless of toggle state
     var SIDEBAR_VISIBLE_THRESHOLD = 757;
-    var savedWidth = parseInt(localStorage.getItem('sidebar-width'), 10);
+    var savedWidth = parseInt(localStorage.getItem(keyWidth), 10);
     var currentWidth = (savedWidth >= SIDEBAR_MIN && savedWidth <= SIDEBAR_MAX)
         ? savedWidth : SIDEBAR_MAX;
     var docEl = document.documentElement;
@@ -101,7 +107,7 @@ $( document ).ready(function() {
             document.removeEventListener('mouseup', onMouseUp);
             $body.removeClass('resizing');
             resizeHandle.classList.remove('dragging');
-            localStorage.setItem('sidebar-width', currentWidth);
+            localStorage.setItem(keyWidth, currentWidth);
         }
 
         document.addEventListener('mousemove', onMouseMove);
@@ -112,7 +118,7 @@ $( document ).ready(function() {
     resizeHandle.addEventListener('dblclick', function() {
         currentWidth = (currentWidth < SIDEBAR_MAX / 2) ? SIDEBAR_MAX : SIDEBAR_MIN;
         docEl.style.setProperty('--sidebar-width', currentWidth + 'px');
-        localStorage.setItem('sidebar-width', currentWidth);
+        localStorage.setItem(keyWidth, currentWidth);
         updateLayout();
     });
 
@@ -122,7 +128,7 @@ $( document ).ready(function() {
     // 点击按钮时切换状态并更新布局
     $('#toc-toggle').click(function() {
         isExpanded = !isExpanded;
-        localStorage.setItem('sidebar-expanded', String(isExpanded));
+        localStorage.setItem(keyExpanded, String(isExpanded));
         updateLayout();
     });
 
