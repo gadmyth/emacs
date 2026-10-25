@@ -3,6 +3,7 @@
 
 :root {
     --sidebar-width: 300px;
+    --postamble-height: 110px;
 }
 
 * {
@@ -10,7 +11,8 @@
 }
 
 h1,h2,h3,h4,h5,h6,legend{
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-weight:700;
 }
 
@@ -59,9 +61,10 @@ html{
 }
 
 body{
-    background:#fcfcfc;
-    color:#333;
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    background:#f7f6f3;
+    color:#21201c;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-weight:normal;
     margin:0;
     min-height:100%;
@@ -72,7 +75,7 @@ body{
 }
 
 #content{
-    background:#fcfcfc;
+    background:#f7f6f3;
     height:100%;
     /* Center in body when there's room; if that would overlap the sidebar,
        push left edge to the sidebar's right edge and let width shrink to fit. */
@@ -95,7 +98,7 @@ body.toc-narrow #content {
 
 p{
     font-size:16px;
-    line-height:1.5;
+    line-height:1.7;
     margin:0px 0px 9px 0px;
 }
 
@@ -113,7 +116,7 @@ blockquote{
 }
 
 ul,ol,dl{
-    line-height:1.5;
+    line-height:1.7;
     list-style-image:none;
     /* list-style:none; */
     margin:0px 0px 24px 0px;
@@ -130,7 +133,7 @@ dd{
 
 #content .section ul,#content .toctree-wrapper ul,article ul{
     list-style:disc;
-    line-height:1.5;
+    line-height:1.7;
     margin-bottom:24px}
 
 #content .section ul li,#content .toctree-wrapper ul li,article ul li{
@@ -154,7 +157,7 @@ dd{
 
 #content .section ol,#content ol,article ol{
     list-style:decimal;
-    line-height:1.5;
+    line-height:1.7;
     margin-bottom:24px}
 
 #content .section ol li,#content ol li,article ol li{
@@ -283,7 +286,7 @@ dl dd{
         background:rgba(0,0,0,0.05)}
 
     #content{
-        background:#fcfcfc}
+        background:#f7f6f3}
 }
 
 @media screen and (max-width: 768px){
@@ -346,7 +349,7 @@ code{
     margin:1px 0 24px 0}
 
 pre {
-    border-radius: 4px !important;
+    border-radius: 12px !important;
     box-shadow: 0px 0px 0px #eee !important;
 }
 
@@ -354,8 +357,8 @@ pre.src{
     /* color:#404040; */
     display:block;
     font-family:Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
-    font-size:12px;
-    line-height:1.5;
+    font-size:14px;
+    line-height:1.7;
     margin:1px 0px 24px 0px;
     overflow:auto;
     padding:12px;
@@ -366,8 +369,8 @@ pre.src{
     background:#f3f6f6;
     border:1px solid #e1e4e5;
     color:#404040;
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.7;
     margin-bottom:24px;
     padding:12px;
 }
@@ -584,7 +587,7 @@ a .fa,a #content .admonition-title,#content a .admonition-title{
 #content .admonition-title.important:before,
 #content .admonition-title.error:before, #content .admonition-title.danger:before{
     font-family:FontAwesome;
-    content: "";}
+    content: "";}
 
 #content .note,#content .seealso{
     background:#e7f2fa}
@@ -624,7 +627,7 @@ legend{
 label{
     display:block;
     margin:0 0 0.3125em 0;
-    color:#333;
+    color:#21201c;
     font-size:90%}
 
 a{
@@ -760,7 +763,7 @@ hr{
     width:var(--sidebar-width);
     overflow-x:hidden;
     overflow-y:scroll;
-    height:85%;
+    height: calc(100vh - var(--postamble-height));
     background:#fafafa;
     z-index:200;
     scrollbar-width: none;
@@ -793,84 +796,29 @@ table {
     margin-right: auto;
 }
 
-ul.nav li ul li {
+/* ===== TOC expand / highlight =====
+   All nested <ul> are collapsed by default; the top-level <ul> is unaffected.
+   Expansion is controlled solely by .toc-expanded, per level, independently.
+   Highlight is controlled by .toc-current which marks ONLY the exact target,
+   so ancestor <li> never get tinted. */
+ul.nav ul {
     display: none;
 }
 
-ul.nav li ul li ul li {
-    display: none;
-}
-
-ul.nav li.active ul li {
+ul.nav li.toc-expanded > ul {
     display: block;
 }
 
-ul.nav li.active ul li ul li {
-    display: block;
-}
-
-
-
-ul.nav li.active ul li.active a {
-    /*background-color: #C9C9C9;*/
-    color: #008cff !important;
-    /*font-weight: bold !important;*/
-}
-
-ul.nav li.active ul li a {
-    /*background-color: #E3E3E3;*/
-    color: #8099B0;
-    /*border-right:solid 1px #c9c9c9 !important;*/
-}
-
-ul.nav li.active ul li.active ul li.active a {
-    /*color: black !important;*/
-    /*font-weight: bold !important;*/
-    color: #008cff !important;
-    display: block !important;
-}
-
-ul.nav li.active ul li.active ul li a {
-    color: #808080 !important;
-    font-weight: normal !important;
-    display: block !important;
-}
-
-ul.nav li.active ul li ul li a {
-    display: none !important;
-}
-
-/* ul.nav li ul li ul li { */
-/*     display: none !important; /\* as long as nav is on multiple levels of ul *\/ */
-/*     /\* display: none; /\* as long as nav is on multiple levels of ul *\\/ *\/ */
-/* } */
-
-ul.nav li ul li ul li ul li {
-    display: none !important; /* as long as nav is on multiple levels of ul */
-    /* display: none; /* as long as nav is on multiple levels of ul *\/ */
-}
-
-ul.nav li.active > a {
-    border-bottom:solid 0px #c9c9c9 !important; /* XXX Restrict it to 2nd level */
-    border-right:solid 0px #c9c9c9 !important;
-}
 ul.nav li a {
-    /*font-weight:bold;*/
-    /*background-color: white;*/
-    border-right:solid 0px white !important;
+    color: #808080;
+    border-right: solid 0px white !important;
 }
 
-ul.nav li.active > a {
+ul.nav li.toc-current > a {
     color: #008cff !important;
-    /*font-weight:bold;*/
-    /*background-color: white;*/
-    border-right:solid 0px white !important;
+    border-bottom: solid 0px #c9c9c9 !important;
+    border-right: solid 0px white !important;
 }
-
-
-/*ul.nav > li.active > a {*/
-    /*color: #008cff !important;*/
-/*}*/
 
 footer{
     color:#999}
@@ -883,11 +831,12 @@ footer p{
     bottom:0;
     left:0;
     width:var(--sidebar-width);
-    height: 15%;
+    height: var(--postamble-height);
     color:#fcfcfc;
     background:#2980B9;
     /*border-top:solid 10px #343131;*/
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-weight: bold;
     font-size: 90%;
     z-index:400;
@@ -966,7 +915,7 @@ footer p{
 
 #content h1 .headerlink:after,#content h2 .headerlink:after,#content h3 .headerlink:after,#content h4 .headerlink:after,#content h5 .headerlink:after,#content h6 .headerlink:after,#content dl dt .headerlink:after{
     visibility:visible;
-    content:"";
+    content:"";
     font-family:FontAwesome;
     display:inline-block}
 
@@ -1026,7 +975,8 @@ h2.footnotes{
 .footnum, .footref{
     color: #2980b9;
     /*font-size: 170%;*/
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 .footnum:before, .footref:before{
@@ -1040,7 +990,8 @@ h2.footnotes{
 .footpara {
     color: #999;
     font-size: 90%;
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     padding-bottom: 8px;
     padding-left: 16px;
     padding-right: 16px;
@@ -1087,7 +1038,8 @@ h2.footnotes{
 }
 
 .timestamp {
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-size: 90%;
     color: navy;
 }
@@ -1104,7 +1056,8 @@ h2.footnotes{
     /* padding: 10px 20px 10px 60px; */
     padding: 9px 12px;
     margin-bottom: 24px;
-    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;*/
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 .info-icon {

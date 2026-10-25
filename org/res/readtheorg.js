@@ -348,6 +348,108 @@ $( document ).ready(function() {
     // ScrollSpy also requires that we use
     // a Bootstrap nav component.
     $('body').scrollspy({target: '#text-table-of-contents'});
+
+    // ===== TOC expand / collapse / highlight =====
+    (function () {
+        var toc = document.getElementById('text-table-of-contents');
+        if (!toc) return;
+        var $toc = $(toc);
+
+        // Mark ancestor <li> of the active node as expanded (add only, never remove).
+        // This keeps every already-expanded branch open, and additionally opens
+        // the ancestor chain of the section currently highlighted by scrollspy.
+        function expandActiveChain() {
+            $toc.find('li.active').each(function () {
+                $(this).parents('li').add(this).addClass('toc-expanded');
+            });
+        }
+
+        // Highlight ONLY the exact target, so ancestor <li> stay default-colored.
+        function markCurrent(target) {
+            if (!target) return;
+            $toc.find('li.toc-current').removeClass('toc-current');
+            $toc.find('.nav li > a').filter(function () {
+                return $(this).attr('href') === target;
+            }).first().parent().addClass('toc-current');
+        }
+
+        // Scroll the highlighted TOC entry into the sidebar's visible area.
+        // #table-of-contents is its own scroll container (overflow-y: scroll),
+        // so scrolling window won't help. The sticky <h2> header is accounted
+        // for by the top margin.
+        function scrollCurrentIntoView() {
+            requestAnimationFrame(function () {
+                var cur = $toc.find('li.toc-current').first()[0];
+                if (!cur) return;
+                var container = document.getElementById('table-of-contents');
+                if (!container) return;
+                var cRect = container.getBoundingClientRect();
+                var curRect = cur.getBoundingClientRect();
+                if (curRect.height === 0) return;   // hidden, nothing to scroll to
+                var topMargin = 80;                 // clears the sticky <h2>
+                var botMargin = 130;                // clears the fixed #postamble
+                if (curRect.top < cRect.top + topMargin) {
+                    container.scrollTop += curRect.top - cRect.top - topMargin;
+                } else if (curRect.bottom > cRect.bottom - botMargin) {
+                    container.scrollTop += curRect.bottom - cRect.bottom + botMargin;
+                }
+            });
+        }
+
+        // Initial state + every scrollspy highlight change.
+        expandActiveChain();
+        $(document).on('activate.bs.scrollspy', function () {
+            var spy = $('body').data('bs.scrollspy');
+            expandActiveChain();
+            if (spy) {
+                markCurrent(spy.activeTarget);
+                scrollCurrentIntoView();
+            }
+        });
+
+        // Click on a TOC entry.
+        //  - Branch nodes: toggle only their own .toc-expanded, never collapse others.
+        //  - Leaf nodes: navigate as usual, then wipe stale .active markers in the
+        //    TOC (including off-screen ones) and re-seat them on the clicked branch
+        //    so scrollspy's next process() doesn't resurrect a wrong highlight.
+        $toc.on('click', 'li > a', function () {
+            var $li = $(this).parent();
+            var href = $(this).attr('href');
+
+            if ($li.children('ul').length > 0) {
+                $li.toggleClass('toc-expanded');
+            }
+
+            if (href && href.charAt(0) === '#') {
+                $toc.find('li.active').removeClass('active');
+                $li.parents('li').add($li).addClass('active');
+                $li.parents('li').addClass('toc-expanded');
+                markCurrent(href);
+
+                var spy = $('body').data('bs.scrollspy');
+                if (spy) {
+                    spy.refresh();
+                    spy.activeTarget = href;
+                }
+            }
+        });
+
+        // Refresh scrollspy offsets after images/fonts load and whenever #content
+        // reflows; stale offsets make the highlight land on a wrong (often already
+        // scrolled-out) section.
+        function refreshScrollspy() {
+            var spy = $('body').data('bs.scrollspy');
+            if (spy) spy.refresh();
+        }
+        $(window).on('load', refreshScrollspy);
+        if (contentEl && typeof ResizeObserver !== 'undefined') {
+            var refreshTimer = null;
+            new ResizeObserver(function () {
+                clearTimeout(refreshTimer);
+                refreshTimer = setTimeout(refreshScrollspy, 100);
+            }).observe(contentEl);
+        }
+    })();
 });
 
 window.SphinxRtdTheme = (function (jquery) {
