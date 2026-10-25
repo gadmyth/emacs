@@ -450,6 +450,98 @@ $( document ).ready(function() {
             }).observe(contentEl);
         }
     })();
+
+    // ===== TOC tooltip for truncated entries =====
+    // Anchors in the TOC use text-overflow: ellipsis; when the full label
+    // doesn't fit, show a hover tooltip with the complete text.
+    (function () {
+        var toc = document.getElementById('text-table-of-contents');
+        if (!toc) return;
+
+        var tip = document.createElement('div');
+        tip.id = 'toc-tooltip';
+        tip.style.cssText = [
+            'position: fixed',
+            'z-index: 1200',
+            'max-width: 480px',
+            'padding: 6px 10px',
+            'background: rgba(33,32,28,0.95)',
+            'color: #fff',
+            'font-size: 12px',
+            'line-height: 1.4',
+            'border-radius: 4px',
+            'pointer-events: none',
+            'white-space: normal',
+            'word-break: break-word',
+            'box-shadow: 0 2px 8px rgba(0,0,0,0.25)',
+            'display: none',
+            'text-align: left'
+        ].join(';');
+        document.body.appendChild(tip);
+
+        var currentAnchor = null;
+
+        // A label is truncated when its rendered content is wider than its box.
+        function isTruncated(el) {
+            return el.scrollWidth > el.clientWidth + 1;
+        }
+
+        // Place the tooltip near the cursor, flipping to the other side when
+        // it would overflow the viewport.
+        function positionTip(x, y) {
+            var pad = 12;
+            var tw = tip.offsetWidth;
+            var th = tip.offsetHeight;
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+            var left = x + pad;
+            var top = y + pad;
+            if (left + tw > vw - 8) left = x - tw - pad;
+            if (top + th > vh - 8) top = y - th - pad;
+            if (left < 8) left = 8;
+            if (top < 8) top = 8;
+            tip.style.left = left + 'px';
+            tip.style.top = top + 'px';
+        }
+
+        function hideTip() {
+            tip.style.display = 'none';
+            currentAnchor = null;
+        }
+
+        // Show only for truncated entries; use the anchor's raw text (unaffected
+        // by ellipsis) so the full label is displayed.
+        toc.addEventListener('mouseover', function (e) {
+            var a = e.target.closest && e.target.closest('a');
+            if (!a || !toc.contains(a)) return;
+            if (!isTruncated(a)) return;
+            currentAnchor = a;
+            tip.textContent = a.textContent.trim();
+            tip.style.display = 'block';
+            positionTip(e.clientX, e.clientY);
+        });
+
+        toc.addEventListener('mousemove', function (e) {
+            if (!currentAnchor) return;
+            positionTip(e.clientX, e.clientY);
+        });
+
+        toc.addEventListener('mouseout', function (e) {
+            var a = e.target.closest && e.target.closest('a');
+            if (!a || a !== currentAnchor) return;
+            hideTip();
+        });
+
+        // Hide when the sidebar scrolls, since the anchor may slide out from
+        // under the cursor and leave a stale tooltip behind.
+        var tocScroller = document.getElementById('table-of-contents');
+        if (tocScroller) {
+            tocScroller.addEventListener('scroll', hideTip, { passive: true });
+        }
+
+        // Re-truncation may change after resizing; just hide to be safe.
+        window.addEventListener('resize', hideTip, { passive: true });
+    })();
 });
 
 window.SphinxRtdTheme = (function (jquery) {
