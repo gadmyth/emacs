@@ -253,6 +253,13 @@
              )))
 
 
+(setq org-html-postamble t)
+
+(setq org-html-postamble-format
+      '(("en" "<p class=\"author\">Author: %a</p>
+               <p class=\"date\">Created: %d</p>
+               <p class=\"updated\">Updated: %C</p>")))
+
 (require 'ox-publish)
 (setq org-publish-project-alist
       '(("blog-notes"
